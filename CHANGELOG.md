@@ -2,7 +2,26 @@
 
 All notable changes to RTE — Rich Text Editor will be documented in this file.
 
-## [1.0.8] - 2026-02-16
+## rte-rich-text-editor-bundle
+
+### [1.0.0] - 2026-02-16
+- Initial release — RTE editor + WebSocket connector bundled in a single file
+- Available at `https://rte.whitneys.co/rte-bundle.js`
+
+## rte-rich-text-editor-ws
+
+### [1.0.0] - 2026-02-16
+- Initial release — standalone WebSocket connector for RTE
+- Auto-save with configurable debounce
+- Real-time collaboration with cursor preservation
+- Auto-reconnect with exponential backoff
+- Heartbeat keep-alive
+- UMD wrapper (script tag, CommonJS, AMD)
+- Available at `https://rte.whitneys.co/rte-ws.js`
+
+## rte-rich-text-editor
+
+### [1.0.8] - 2026-02-16
 - Added repository URL, author, and bugs URL to package metadata
 - Added MIT LICENSE file
 
