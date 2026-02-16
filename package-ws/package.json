@@ -1,0 +1,38 @@
+{
+  "name": "rte-rich-text-editor-ws",
+  "version": "1.0.0",
+  "description": "WebSocket connector for RTE Rich Text Editor. Auto-save and real-time collaboration. Zero dependencies.",
+  "main": "rte-ws.js",
+  "browser": "rte-ws.js",
+  "unpkg": "rte-ws.js",
+  "jsdelivr": "rte-ws.js",
+  "files": [
+    "rte-ws.js",
+    "README.md"
+  ],
+  "keywords": [
+    "rte",
+    "rich-text-editor",
+    "websocket",
+    "real-time",
+    "collaboration",
+    "auto-save",
+    "wysiwyg",
+    "editor",
+    "standalone",
+    "no-dependencies"
+  ],
+  "author": "phpMyDEV, LLC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MIR-2025/rte.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MIR-2025/rte/issues"
+  },
+  "homepage": "https://rte.whitneys.co/websocket",
+  "peerDependencies": {
+    "rte-rich-text-editor": ">=1.0.0"
+  }
+}
