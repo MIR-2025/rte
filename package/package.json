@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A standalone, embeddable rich text editor. One script tag. Zero dependencies. Works everywhere.",
   "main": "rte.js",
   "module": "rte.esm.js",

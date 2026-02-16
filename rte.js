@@ -933,22 +933,18 @@
           .then(() => showToast("\u2705 Text copied to clipboard"));
       }),
 
-      exportBtn("\u2709\ufe0f", "Email", "Copy content to clipboard & open email client", () => {
+      exportBtn("\u2709\ufe0f", "Email", "Copy rich HTML to clipboard for pasting into email", () => {
         const htmlStr = content.innerHTML;
         const textStr = content.innerText;
-        const copyDone = () => {
-          const subject = encodeURIComponent("Document");
-          window.location.href = "mailto:?subject=" + subject;
-          showToast("\ud83d\udce8 Content copied — paste into your email with Ctrl+V");
-        };
         if (navigator.clipboard && navigator.clipboard.write) {
           const blob = new Blob([htmlStr], { type: "text/html" });
           const textBlob = new Blob([textStr], { type: "text/plain" });
           navigator.clipboard.write([
             new ClipboardItem({ "text/html": blob, "text/plain": textBlob })
-          ]).then(copyDone);
+          ]).then(() => showToast("\u2705 Content copied — paste into your email with Ctrl+V"));
         } else {
-          navigator.clipboard.writeText(textStr).then(copyDone);
+          navigator.clipboard.writeText(textStr)
+            .then(() => showToast("\u2705 Text copied — paste into your email with Ctrl+V"));
         }
       }),
 
@@ -1108,21 +1104,18 @@
       },
       /** Copy plain text to clipboard */
       copyText: () => navigator.clipboard.writeText(content.innerText),
-      /** Copy content to clipboard and open mailto: */
-      email: (to, subject) => {
-        const s = encodeURIComponent(subject || "Document");
+      /** Copy rich HTML content to clipboard for pasting into email */
+      email: () => {
         const htmlStr = content.innerHTML;
         const textStr = content.innerText;
-        const open = () => { window.location.href = "mailto:" + (to || "") + "?subject=" + s; };
         if (navigator.clipboard && navigator.clipboard.write) {
           const blob = new Blob([htmlStr], { type: "text/html" });
           const textBlob = new Blob([textStr], { type: "text/plain" });
-          navigator.clipboard.write([
+          return navigator.clipboard.write([
             new ClipboardItem({ "text/html": blob, "text/plain": textBlob })
-          ]).then(open);
-        } else {
-          navigator.clipboard.writeText(textStr).then(open);
+          ]);
         }
+        return navigator.clipboard.writeText(textStr);
       },
       /** Print content */
       print: () => {
