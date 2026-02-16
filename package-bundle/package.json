@@ -1,0 +1,37 @@
+{
+  "name": "rte-rich-text-editor-bundle",
+  "version": "1.0.0",
+  "description": "RTE Rich Text Editor + WebSocket connector bundled in a single file. One script tag. Zero dependencies.",
+  "main": "rte-bundle.js",
+  "browser": "rte-bundle.js",
+  "unpkg": "rte-bundle.js",
+  "jsdelivr": "rte-bundle.js",
+  "files": [
+    "rte-bundle.js",
+    "README.md"
+  ],
+  "keywords": [
+    "rte",
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "websocket",
+    "real-time",
+    "collaboration",
+    "auto-save",
+    "embeddable",
+    "standalone",
+    "no-dependencies",
+    "bundle"
+  ],
+  "author": "phpMyDEV, LLC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MIR-2025/rte.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MIR-2025/rte/issues"
+  },
+  "homepage": "https://rte.whitneys.co"
+}
