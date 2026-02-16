@@ -1,0 +1,397 @@
+<% const pageTitle = 'WebSocket Integration'; %>
+<%- include('partials/header') %>
+
+  <div class="container py-5">
+    <div class="row">
+
+      <!-- Sidebar nav -->
+      <div class="col-lg-3 mb-4">
+        <div class="sticky-top" style="top:80px">
+          <h6 class="text-uppercase text-muted mb-3" style="font-size:11px;letter-spacing:1px">WebSocket</h6>
+          <nav class="nav flex-column">
+            <a class="nav-link px-0 py-1" href="#overview">Overview</a>
+            <a class="nav-link px-0 py-1" href="#installation">Installation</a>
+            <a class="nav-link px-0 py-1" href="#quick-start">Quick Start</a>
+            <a class="nav-link px-0 py-1" href="#configuration">Configuration</a>
+            <a class="nav-link px-0 py-1" href="#protocol">Message Protocol</a>
+            <a class="nav-link px-0 py-1" href="#api">API Reference</a>
+            <a class="nav-link px-0 py-1" href="#auto-save">Auto-Save</a>
+            <a class="nav-link px-0 py-1" href="#collaboration">Real-Time Collaboration</a>
+            <a class="nav-link px-0 py-1" href="#reconnect">Reconnection</a>
+            <a class="nav-link px-0 py-1" href="#backend-examples">Backend Examples</a>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="col-lg-9">
+
+        <!-- Overview -->
+        <section id="overview" class="mb-5">
+          <h2>WebSocket Integration</h2>
+          <p class="lead text-muted">Add real-time auto-save and multi-user collaboration to RTE with a single script tag.</p>
+          <p><code class="inline">rte-ws.js</code> is a standalone companion file for RTE that connects to any WebSocket backend. It provides debounced auto-save, real-time content syncing between users, automatic reconnection with exponential backoff, and heartbeat keep-alive.</p>
+          <div class="row g-3 mt-3">
+            <div class="col-md-4">
+              <div class="feature-card" style="height:auto">
+                <div class="icon">&#x1F4BE;</div>
+                <h5>Auto-Save</h5>
+                <p class="text-muted mb-0">Debounced content sync to your backend on every change.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="feature-card" style="height:auto">
+                <div class="icon">&#x1F465;</div>
+                <h5>Collaboration</h5>
+                <p class="text-muted mb-0">Broadcast and receive changes between multiple users in real time.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="feature-card" style="height:auto">
+                <div class="icon">&#x1F504;</div>
+                <h5>Auto-Reconnect</h5>
+                <p class="text-muted mb-0">Exponential backoff reconnection with heartbeat keep-alive.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Installation -->
+        <section id="installation" class="mb-5">
+          <h2>Installation</h2>
+
+          <h5 class="mt-4">Script Tag (CDN)</h5>
+          <pre class="code-block"><code>&lt;script src="https://rte.whitneys.co/rte.js"&gt;&lt;/script&gt;
+&lt;script src="https://rte.whitneys.co/rte-ws.js"&gt;&lt;/script&gt;</code></pre>
+
+          <h5 class="mt-4">Self-Hosted</h5>
+          <pre class="code-block"><code>&lt;script src="rte.js"&gt;&lt;/script&gt;
+&lt;script src="rte-ws.js"&gt;&lt;/script&gt;</code></pre>
+
+          <h5 class="mt-4">CommonJS / Node</h5>
+          <pre class="code-block"><code>const RTE = require('rte-rich-text-editor');
+const RTEWS = require('./rte-ws.js');</code></pre>
+
+          <div class="alert alert-info mt-3">
+            <i class="bi bi-info-circle"></i> <strong>Zero dependencies.</strong> rte-ws.js only requires a browser with native WebSocket support (all modern browsers).
+          </div>
+        </section>
+
+        <!-- Quick Start -->
+        <section id="quick-start" class="mb-5">
+          <h2>Quick Start</h2>
+          <pre class="code-block"><code>&lt;div id="editor"&gt;&lt;/div&gt;
+
+&lt;script src="https://rte.whitneys.co/rte.js"&gt;&lt;/script&gt;
+&lt;script src="https://rte.whitneys.co/rte-ws.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const editor = RTE.init('#editor');
+
+  const ws = RTEWS.connect(editor, 'wss://yourserver.com/ws', {
+    docId: 'doc-123',
+    userId: 'user-abc',
+    onOpen: () =&gt; console.log('Connected'),
+    onSaved: (msg) =&gt; console.log('Saved, version:', msg.version),
+    onRemoteUpdate: (msg) =&gt; console.log('Update from:', msg.userId),
+  });
+&lt;/script&gt;</code></pre>
+          <p class="mt-3">That's it. The editor will auto-save content to your backend and receive real-time updates from other users.</p>
+        </section>
+
+        <!-- Configuration -->
+        <section id="configuration" class="mb-5">
+          <h2>Configuration</h2>
+          <p>Pass an options object as the third argument to <code class="inline">RTEWS.connect()</code>:</p>
+
+          <table class="table api-table mt-3">
+            <thead>
+              <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>docId</code></td><td>String</td><td><code>null</code></td><td>Document identifier sent with all messages</td></tr>
+              <tr><td><code>userId</code></td><td>String</td><td><code>null</code></td><td>User identifier for collaboration</td></tr>
+              <tr><td><code>debounceMs</code></td><td>Number</td><td><code>1000</code></td><td>Milliseconds to debounce before sending changes</td></tr>
+              <tr><td><code>autoSave</code></td><td>Boolean</td><td><code>true</code></td><td>Automatically send changes on editor input</td></tr>
+              <tr><td><code>reconnect</code></td><td>Boolean</td><td><code>true</code></td><td>Auto-reconnect on disconnect</td></tr>
+              <tr><td><code>reconnectBaseMs</code></td><td>Number</td><td><code>1000</code></td><td>Initial reconnect delay (doubles each attempt)</td></tr>
+              <tr><td><code>reconnectMaxMs</code></td><td>Number</td><td><code>30000</code></td><td>Maximum reconnect delay</td></tr>
+              <tr><td><code>heartbeatMs</code></td><td>Number</td><td><code>30000</code></td><td>Ping interval in ms (0 to disable)</td></tr>
+              <tr><td><code>onOpen</code></td><td>Function</td><td><code>null</code></td><td>Called when WebSocket connects. Receives <code>ws</code> instance.</td></tr>
+              <tr><td><code>onClose</code></td><td>Function</td><td><code>null</code></td><td>Called when WebSocket closes. Receives close event.</td></tr>
+              <tr><td><code>onError</code></td><td>Function</td><td><code>null</code></td><td>Called on WebSocket error or server error message.</td></tr>
+              <tr><td><code>onSaved</code></td><td>Function</td><td><code>null</code></td><td>Called when server confirms a save. Receives message.</td></tr>
+              <tr><td><code>onRemoteUpdate</code></td><td>Function</td><td><code>null</code></td><td>Called when a remote user's change is applied.</td></tr>
+              <tr><td><code>onMessage</code></td><td>Function</td><td><code>null</code></td><td>Called for every incoming message (raw handler).</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Protocol -->
+        <section id="protocol" class="mb-5">
+          <h2>Message Protocol</h2>
+          <p>All messages are JSON. Your backend should handle these message types:</p>
+
+          <h5 class="mt-4">Outgoing (Client &rarr; Server)</h5>
+          <table class="table api-table">
+            <thead><tr><th>Type</th><th>Fields</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><code>"join"</code></td>
+                <td><code>docId</code>, <code>userId</code></td>
+                <td>Sent on connect. Server should respond with a <code>"load"</code> message.</td>
+              </tr>
+              <tr>
+                <td><code>"change"</code></td>
+                <td><code>docId</code>, <code>userId</code>, <code>html</code>, <code>text</code>, <code>words</code>, <code>chars</code></td>
+                <td>Sent on editor change (debounced). Server should broadcast to other users and optionally persist.</td>
+              </tr>
+              <tr>
+                <td><code>"save"</code></td>
+                <td><code>docId</code>, <code>userId</code>, <code>html</code>, <code>text</code>, <code>words</code>, <code>chars</code></td>
+                <td>Explicit save request via <code>ws.save()</code>. Server should persist and respond with <code>"saved"</code>.</td>
+              </tr>
+              <tr>
+                <td><code>"ping"</code></td>
+                <td><em>(none)</em></td>
+                <td>Heartbeat keep-alive. Server can respond with <code>"pong"</code> or ignore.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h5 class="mt-4">Incoming (Server &rarr; Client)</h5>
+          <table class="table api-table">
+            <thead><tr><th>Type</th><th>Fields</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><code>"load"</code></td>
+                <td><code>html</code></td>
+                <td>Load initial document content into the editor.</td>
+              </tr>
+              <tr>
+                <td><code>"update"</code></td>
+                <td><code>html</code>, <code>userId</code></td>
+                <td>Remote user change. Applied only if <code>userId</code> differs from local user.</td>
+              </tr>
+              <tr>
+                <td><code>"saved"</code></td>
+                <td><code>version</code> <em>(optional)</em></td>
+                <td>Server confirms save. Triggers <code>onSaved</code> callback.</td>
+              </tr>
+              <tr>
+                <td><code>"error"</code></td>
+                <td><code>message</code></td>
+                <td>Server error. Triggers <code>onError</code> callback.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- API -->
+        <section id="api" class="mb-5">
+          <h2>API Reference</h2>
+          <p><code class="inline">RTEWS.connect()</code> returns a connection object with the following methods and properties:</p>
+
+          <table class="table api-table mt-3">
+            <thead><tr><th>Method / Property</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>ws.save()</code></td><td>Send an explicit save request to the server. Returns <code>true</code> if sent.</td></tr>
+              <tr><td><code>ws.send(data)</code></td><td>Send a custom JSON message. Returns <code>true</code> if sent.</td></tr>
+              <tr><td><code>ws.disconnect()</code></td><td>Close the connection and stop auto-reconnecting.</td></tr>
+              <tr><td><code>ws.reconnect()</code></td><td>Manually reconnect (re-enables auto-reconnect).</td></tr>
+              <tr><td><code>ws.state</code></td><td>Connection state: <code>"connecting"</code>, <code>"open"</code>, <code>"closing"</code>, or <code>"closed"</code>.</td></tr>
+              <tr><td><code>ws.socket</code></td><td>The raw <code>WebSocket</code> instance.</td></tr>
+            </tbody>
+          </table>
+
+          <h5 class="mt-4">Example</h5>
+          <pre class="code-block"><code>const ws = RTEWS.connect(editor, 'wss://api.example.com/ws', {
+  docId: 'doc-123',
+  userId: 'user-abc',
+  debounceMs: 500,
+  onSaved: (msg) =&gt; console.log('Version:', msg.version),
+});
+
+// Explicit save
+document.getElementById('save-btn').addEventListener('click', () =&gt; {
+  ws.save();
+});
+
+// Check state
+console.log(ws.state); // "open"
+
+// Disconnect when done
+ws.disconnect();</code></pre>
+        </section>
+
+        <!-- Auto-Save -->
+        <section id="auto-save" class="mb-5">
+          <h2>Auto-Save</h2>
+          <p>With <code class="inline">autoSave: true</code> (the default), every editor change is debounced and sent to the server automatically:</p>
+          <pre class="code-block"><code>const ws = RTEWS.connect(editor, 'wss://api.example.com/ws', {
+  docId: 'my-doc',
+  userId: 'user-1',
+  debounceMs: 2000,  // wait 2 seconds of inactivity before sending
+  onSaved: () =&gt; showStatus('Saved'),
+});</code></pre>
+
+          <p class="mt-3">The server receives a <code class="inline">"change"</code> message with the full HTML, plain text, word count, and character count. To disable auto-save and only send on explicit <code class="inline">ws.save()</code> calls:</p>
+          <pre class="code-block"><code>const ws = RTEWS.connect(editor, url, {
+  autoSave: false,  // only send when ws.save() is called
+});</code></pre>
+        </section>
+
+        <!-- Collaboration -->
+        <section id="collaboration" class="mb-5">
+          <h2>Real-Time Collaboration</h2>
+          <p>When your server broadcasts <code class="inline">"update"</code> messages from one user to others, rte-ws automatically applies the changes while preserving the local user's cursor position.</p>
+          <pre class="code-block"><code>// User A and User B both connect to the same document
+const ws = RTEWS.connect(editor, 'wss://api.example.com/ws', {
+  docId: 'shared-doc',
+  userId: currentUser.id,
+  onRemoteUpdate: (msg) =&gt; {
+    showNotification(msg.userId + ' made a change');
+  },
+});</code></pre>
+
+          <h5 class="mt-4">How It Works</h5>
+          <ol>
+            <li>User A types &mdash; a debounced <code class="inline">"change"</code> is sent to the server.</li>
+            <li>Server broadcasts an <code class="inline">"update"</code> with <code class="inline">userId: "A"</code> to all other clients.</li>
+            <li>User B receives the update. Since <code class="inline">msg.userId !== cfg.userId</code>, the HTML is applied.</li>
+            <li>User B's cursor position is saved and restored after the update.</li>
+          </ol>
+
+          <div class="alert alert-warning mt-3">
+            <i class="bi bi-exclamation-triangle"></i> <strong>Note:</strong> This is full-HTML replacement collaboration. For production use with many concurrent editors, consider implementing operational transforms (OT) or CRDTs on the server to handle conflicts.
+          </div>
+        </section>
+
+        <!-- Reconnection -->
+        <section id="reconnect" class="mb-5">
+          <h2>Reconnection</h2>
+          <p>rte-ws uses exponential backoff for reconnection:</p>
+          <ul>
+            <li>1st attempt: 1 second</li>
+            <li>2nd attempt: 2 seconds</li>
+            <li>3rd attempt: 4 seconds</li>
+            <li>4th attempt: 8 seconds</li>
+            <li>...up to <code class="inline">reconnectMaxMs</code> (default 30s)</li>
+          </ul>
+          <p>On successful reconnect, a <code class="inline">"join"</code> message is sent again so the server can re-associate the client with the document.</p>
+          <pre class="code-block"><code>const ws = RTEWS.connect(editor, url, {
+  reconnect: true,
+  reconnectBaseMs: 500,   // start at 500ms
+  reconnectMaxMs: 15000,  // cap at 15 seconds
+  onOpen: () =&gt; console.log('Connected / reconnected'),
+  onClose: () =&gt; console.log('Disconnected, retrying...'),
+});</code></pre>
+        </section>
+
+        <!-- Backend Examples -->
+        <section id="backend-examples" class="mb-5">
+          <h2>Backend Examples</h2>
+
+          <h5 class="mt-4">Node.js (ws)</h5>
+          <pre class="code-block"><code>import { WebSocketServer } from 'ws';
+
+const wss = new WebSocketServer({ port: 8080 });
+const docs = new Map(); // docId -&gt; { html, clients: Set }
+
+wss.on('connection', (socket) =&gt; {
+  let clientDoc = null;
+  let clientUser = null;
+
+  socket.on('message', (raw) =&gt; {
+    const msg = JSON.parse(raw);
+
+    switch (msg.type) {
+      case 'join':
+        clientDoc = msg.docId;
+        clientUser = msg.userId;
+        if (!docs.has(clientDoc)) {
+          docs.set(clientDoc, { html: '', clients: new Set() });
+        }
+        const doc = docs.get(clientDoc);
+        doc.clients.add(socket);
+        // Send current content
+        socket.send(JSON.stringify({ type: 'load', html: doc.html }));
+        break;
+
+      case 'change':
+        if (clientDoc &amp;&amp; docs.has(clientDoc)) {
+          const doc = docs.get(clientDoc);
+          doc.html = msg.html;
+          // Broadcast to other clients
+          doc.clients.forEach((client) =&gt; {
+            if (client !== socket &amp;&amp; client.readyState === 1) {
+              client.send(JSON.stringify({
+                type: 'update',
+                html: msg.html,
+                userId: msg.userId,
+              }));
+            }
+          });
+        }
+        break;
+
+      case 'save':
+        // Persist to database here...
+        socket.send(JSON.stringify({ type: 'saved', version: Date.now() }));
+        break;
+
+      case 'ping':
+        socket.send(JSON.stringify({ type: 'pong' }));
+        break;
+    }
+  });
+
+  socket.on('close', () =&gt; {
+    if (clientDoc &amp;&amp; docs.has(clientDoc)) {
+      docs.get(clientDoc).clients.delete(socket);
+    }
+  });
+});</code></pre>
+
+          <h5 class="mt-4">Python (websockets)</h5>
+          <pre class="code-block"><code>import asyncio, json, websockets
+
+docs = {}  # docId -&gt; { "html": str, "clients": set }
+
+async def handler(ws):
+    doc_id = user_id = None
+
+    async for raw in ws:
+        msg = json.loads(raw)
+
+        if msg["type"] == "join":
+            doc_id = msg["docId"]
+            user_id = msg["userId"]
+            if doc_id not in docs:
+                docs[doc_id] = {"html": "", "clients": set()}
+            docs[doc_id]["clients"].add(ws)
+            await ws.send(json.dumps({"type": "load", "html": docs[doc_id]["html"]}))
+
+        elif msg["type"] == "change" and doc_id:
+            docs[doc_id]["html"] = msg["html"]
+            for client in docs[doc_id]["clients"]:
+                if client != ws:
+                    await client.send(json.dumps({
+                        "type": "update", "html": msg["html"], "userId": user_id
+                    }))
+
+        elif msg["type"] == "save":
+            # Persist to database here...
+            await ws.send(json.dumps({"type": "saved"}))
+
+    if doc_id and doc_id in docs:
+        docs[doc_id]["clients"].discard(ws)
+
+asyncio.run(websockets.serve(handler, "0.0.0.0", 8080))</code></pre>
+
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+<%- include('partials/footer') %>

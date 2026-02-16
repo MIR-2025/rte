@@ -82,6 +82,10 @@ app.get('/examples', (req, res) => {
   res.render('examples', { page: 'examples' });
 });
 
+app.get('/websocket', (req, res) => {
+  res.render('websocket', { page: 'websocket' });
+});
+
 app.get('/contact', (req, res) => {
   res.render('contact', { page: 'contact', sent: false, error: null });
 });
