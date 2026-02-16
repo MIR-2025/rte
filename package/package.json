@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A standalone, embeddable rich text editor. One script tag. Zero dependencies. Works everywhere.",
   "main": "rte.js",
   "module": "rte.esm.js",
@@ -33,11 +33,14 @@
     "no-dependencies",
     "rte"
   ],
-  "author": "",
+  "author": "phpMyDEV, LLC",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "git+https://github.com/MIR-2025/rte.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MIR-2025/rte/issues"
   },
   "homepage": "https://rte.whitneys.co"
 }
