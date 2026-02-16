@@ -1,0 +1,346 @@
+<% const pageTitle = 'API Reference'; %>
+<%- include('partials/header') %>
+
+  <div class="container py-5">
+    <div class="row">
+
+      <!-- Sidebar -->
+      <div class="col-lg-3 mb-4">
+        <div class="sticky-top" style="top:80px">
+          <h6 class="text-uppercase text-muted mb-3" style="font-size:11px;letter-spacing:1px">API Reference</h6>
+          <nav class="nav flex-column">
+            <a class="nav-link px-0 py-1" href="#initialization">Initialization</a>
+            <a class="nav-link px-0 py-1" href="#methods">Methods</a>
+            <a class="nav-link px-0 py-1" href="#content-methods">Content Methods</a>
+            <a class="nav-link px-0 py-1" href="#export-methods">Export Methods</a>
+            <a class="nav-link px-0 py-1" href="#clipboard-methods">Clipboard Methods</a>
+            <a class="nav-link px-0 py-1" href="#action-methods">Action Methods</a>
+            <a class="nav-link px-0 py-1" href="#properties">Properties</a>
+            <a class="nav-link px-0 py-1" href="#events">Events</a>
+            <a class="nav-link px-0 py-1" href="#return-formats">Return Formats</a>
+            <a class="nav-link px-0 py-1" href="#full-example">Full Example</a>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="col-lg-9">
+
+        <h2 class="mb-4">API Reference</h2>
+        <p class="lead text-muted mb-5">Complete reference for the RTE JavaScript API. All methods are available on the object returned by <code class="inline">RTE.init()</code>.</p>
+
+        <!-- Initialization -->
+        <section id="initialization" class="mb-5">
+          <h3>Initialization</h3>
+          <pre class="code-block"><code>RTE.init(selector, options)</code></pre>
+
+          <table class="table api-table mt-3">
+            <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>selector</code></td><td>String | Element</td><td>CSS selector string (e.g. <code>'#editor'</code>) or a DOM element</td></tr>
+              <tr><td><code>options</code></td><td>Object</td><td>Optional configuration object</td></tr>
+              <tr><td><code>options.placeholder</code></td><td>String</td><td>Placeholder text when editor is empty</td></tr>
+              <tr><td><code>options.height</code></td><td>String</td><td>Minimum height CSS value (e.g. <code>'400px'</code>)</td></tr>
+            </tbody>
+          </table>
+
+          <p><strong>Returns:</strong> An editor instance object with the methods and properties listed below, or <code class="inline">null</code> if the target element is not found.</p>
+        </section>
+
+        <hr class="my-5">
+
+        <!-- Methods overview -->
+        <section id="methods" class="mb-5">
+          <h3>Methods Overview</h3>
+          <table class="table api-table">
+            <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>getHTML()</code></td><td>String</td><td>Get the editor's inner HTML content</td></tr>
+              <tr><td><code>setHTML(html)</code></td><td>void</td><td>Set the editor's HTML content</td></tr>
+              <tr><td><code>getText()</code></td><td>String</td><td>Get plain text content</td></tr>
+              <tr><td><code>getFullHTML()</code></td><td>String</td><td>Get a complete standalone HTML document</td></tr>
+              <tr><td><code>getJSON()</code></td><td>Object</td><td>Get content as a structured JSON object</td></tr>
+              <tr><td><code>saveHTML(filename)</code></td><td>void</td><td>Trigger a file download of the HTML document</td></tr>
+              <tr><td><code>saveText(filename)</code></td><td>void</td><td>Trigger a file download of plain text</td></tr>
+              <tr><td><code>copyHTML()</code></td><td>Promise</td><td>Copy rich HTML to clipboard</td></tr>
+              <tr><td><code>copyText()</code></td><td>Promise</td><td>Copy plain text to clipboard</td></tr>
+              <tr><td><code>email(to, subject)</code></td><td>void</td><td>Open email client with content</td></tr>
+              <tr><td><code>print()</code></td><td>void</td><td>Open print preview</td></tr>
+              <tr><td><code>focus()</code></td><td>void</td><td>Focus the editor</td></tr>
+              <tr><td><code>destroy()</code></td><td>void</td><td>Remove the editor from the DOM</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <hr class="my-5">
+
+        <!-- Content Methods -->
+        <section id="content-methods" class="mb-5">
+          <h3>Content Methods</h3>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.getHTML()</code></h5>
+              <p>Returns the inner HTML of the editor content area.</p>
+              <pre class="code-block"><code>const html = editor.getHTML();
+// "&lt;p&gt;&lt;strong&gt;Hello&lt;/strong&gt; world&lt;/p&gt;"</code></pre>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.setHTML(html)</code></h5>
+              <p>Sets the editor content. Replaces all existing content and updates the word/char counts.</p>
+              <pre class="code-block"><code>editor.setHTML('&lt;h1&gt;Welcome&lt;/h1&gt;&lt;p&gt;Start editing...&lt;/p&gt;');</code></pre>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.getText()</code></h5>
+              <p>Returns the plain text content of the editor (no HTML tags).</p>
+              <pre class="code-block"><code>const text = editor.getText();
+// "Hello world"</code></pre>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.getFullHTML()</code></h5>
+              <p>Returns a complete, standalone HTML document with embedded styles. The output can be saved as a <code class="inline">.html</code> file and opened in any browser with full formatting preserved.</p>
+              <pre class="code-block"><code>const doc = editor.getFullHTML();
+// "&lt;!DOCTYPE html&gt;&lt;html&gt;...&lt;body&gt;...content...&lt;/body&gt;&lt;/html&gt;"</code></pre>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.getJSON()</code></h5>
+              <p>Returns a structured object with content and metadata. Ideal for sending to APIs or storing in databases.</p>
+              <pre class="code-block"><code>const data = editor.getJSON();
+// {
+//   html: "&lt;p&gt;Hello&lt;/p&gt;",
+//   text: "Hello",
+//   wordCount: 1,
+//   charCount: 5,
+//   createdAt: "2026-02-16T12:00:00.000Z"
+// }</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <hr class="my-5">
+
+        <!-- Export Methods -->
+        <section id="export-methods" class="mb-5">
+          <h3>Export Methods</h3>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.saveHTML(filename?)</code></h5>
+              <p>Triggers a browser download of the editor content as a standalone HTML file.</p>
+              <pre class="code-block"><code>editor.saveHTML();                  // downloads "document.html"
+editor.saveHTML('my-article.html'); // custom filename</code></pre>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.saveText(filename?)</code></h5>
+              <p>Triggers a browser download of the plain text content.</p>
+              <pre class="code-block"><code>editor.saveText();                 // downloads "document.txt"
+editor.saveText('notes.txt');      // custom filename</code></pre>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.print()</code></h5>
+              <p>Opens the content in a new window with a styled print preview. Users can print or use "Save as PDF".</p>
+              <pre class="code-block"><code>editor.print();</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <hr class="my-5">
+
+        <!-- Clipboard Methods -->
+        <section id="clipboard-methods" class="mb-5">
+          <h3>Clipboard Methods</h3>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.copyHTML()</code></h5>
+              <p>Copies rich HTML to the clipboard. When pasted into Gmail, Google Docs, Word, etc., formatting is preserved. Returns a Promise.</p>
+              <pre class="code-block"><code>await editor.copyHTML();
+alert('Copied! Paste into your email.');</code></pre>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.copyText()</code></h5>
+              <p>Copies plain text to the clipboard. Returns a Promise.</p>
+              <pre class="code-block"><code>await editor.copyText();</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <hr class="my-5">
+
+        <!-- Action Methods -->
+        <section id="action-methods" class="mb-5">
+          <h3>Action Methods</h3>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.email(to?, subject?)</code></h5>
+              <p>Opens the user's default email client with the editor content in the email body.</p>
+              <pre class="code-block"><code>editor.email();                              // blank recipient
+editor.email('team@example.com', 'Meeting Notes'); // pre-filled</code></pre>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.focus()</code></h5>
+              <p>Sets focus to the editor content area.</p>
+              <pre class="code-block"><code>editor.focus();</code></pre>
+            </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.destroy()</code></h5>
+              <p>Completely removes the editor from the DOM.</p>
+              <pre class="code-block"><code>editor.destroy();</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <hr class="my-5">
+
+        <!-- Properties -->
+        <section id="properties" class="mb-5">
+          <h3>Properties</h3>
+          <table class="table api-table">
+            <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>editor.element</code></td><td>HTMLElement</td><td>The contenteditable <code class="inline">div</code> (editor area)</td></tr>
+              <tr><td><code>editor.wrapper</code></td><td>HTMLElement</td><td>The outer <code class="inline">.rte-wrap</code> container</td></tr>
+              <tr><td><code>editor.onChange</code></td><td>Function | null</td><td>Callback fired on every content change (see Events)</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <hr class="my-5">
+
+        <!-- Events -->
+        <section id="events" class="mb-5">
+          <h3>Events</h3>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5><code>editor.onChange</code></h5>
+              <p>Assign a function to receive live updates on every content change. The callback receives an object with:</p>
+              <table class="table api-table mt-2">
+                <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><code>html</code></td><td>String</td><td>Current HTML content</td></tr>
+                  <tr><td><code>text</code></td><td>String</td><td>Current plain text</td></tr>
+                  <tr><td><code>words</code></td><td>Number</td><td>Word count</td></tr>
+                  <tr><td><code>chars</code></td><td>Number</td><td>Character count</td></tr>
+                </tbody>
+              </table>
+              <pre class="code-block mt-3"><code>editor.onChange = (data) => {
+  console.log(`${data.words} words, ${data.chars} characters`);
+  document.getElementById('preview').innerHTML = data.html;
+
+  // Auto-save with debounce
+  clearTimeout(window._saveTimer);
+  window._saveTimer = setTimeout(() => {
+    fetch('/api/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html: data.html })
+    });
+  }, 1000);
+};</code></pre>
+            </div>
+          </div>
+
+          <p>You can also listen for native DOM events on <code class="inline">editor.element</code>:</p>
+          <pre class="code-block"><code>editor.element.addEventListener('focus', () => console.log('Editor focused'));
+editor.element.addEventListener('blur', () => console.log('Editor blurred'));</code></pre>
+        </section>
+
+        <hr class="my-5">
+
+        <!-- Return Formats -->
+        <section id="return-formats" class="mb-5">
+          <h3>Return Formats</h3>
+
+          <h5 class="mt-4">getHTML()</h5>
+          <p>Returns the raw inner HTML of the editor. This is the content between the editor's root element, including all formatting tags.</p>
+          <pre class="code-block"><code>"&lt;h2&gt;Title&lt;/h2&gt;&lt;p&gt;Some &lt;strong&gt;bold&lt;/strong&gt; text with &lt;a href=\"...\"&gt;a link&lt;/a&gt;.&lt;/p&gt;"</code></pre>
+
+          <h5 class="mt-4">getFullHTML()</h5>
+          <p>Returns a complete HTML5 document with UTF-8 meta tag, viewport meta, and embedded CSS that styles headings, tables, blockquotes, code blocks, images, and more. Ready to save as a file or send as an email body.</p>
+
+          <h5 class="mt-4">getJSON()</h5>
+          <pre class="code-block"><code>{
+  "html": "&lt;p&gt;Hello world&lt;/p&gt;",
+  "text": "Hello world",
+  "wordCount": 2,
+  "charCount": 11,
+  "createdAt": "2026-02-16T15:30:00.000Z"
+}</code></pre>
+        </section>
+
+        <hr class="my-5">
+
+        <!-- Full Example -->
+        <section id="full-example" class="mb-5">
+          <h3>Full Example</h3>
+          <pre class="code-block"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;My Editor&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="editor"&gt;&lt;/div&gt;
+  &lt;button id="save"&gt;Save&lt;/button&gt;
+  &lt;button id="email"&gt;Email&lt;/button&gt;
+
+  &lt;script src="rte.js"&gt;&lt;/script&gt;
+  &lt;script&gt;
+    const editor = RTE.init('#editor', {
+      placeholder: 'Write your article...',
+      height: '400px'
+    });
+
+    // Live word count
+    editor.onChange = (data) =&gt; {
+      document.title = data.words + ' words';
+    };
+
+    // Save button
+    document.getElementById('save').addEventListener('click', () =&gt; {
+      editor.saveHTML('my-article.html');
+    });
+
+    // Email button
+    document.getElementById('email').addEventListener('click', () =&gt; {
+      editor.email('editor@example.com', 'New Article');
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+<%- include('partials/footer') %>

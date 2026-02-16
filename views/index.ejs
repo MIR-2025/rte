@@ -1,0 +1,195 @@
+<% const pageTitle = 'Embeddable Rich Text Editor'; %>
+<%- include('partials/header') %>
+
+  <!-- Hero -->
+  <section class="hero text-center">
+    <div class="container">
+      <h1>Rich Text Editor</h1>
+      <p class="lead mb-4">A powerful, standalone editor you can embed into any website.<br>One script tag. Zero dependencies. Full-featured.</p>
+      <a href="/docs#getting-started" class="btn btn-light btn-lg me-2"><i class="bi bi-rocket-takeoff"></i> Get Started</a>
+      <a href="/examples" class="btn btn-outline-light btn-lg"><i class="bi bi-play-circle"></i> Live Demo</a>
+      <div class="mt-5">
+        <img src="/hero.png" alt="RTE Rich Text Editor" class="img-fluid" style="max-width:700px;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.25)">
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2>Everything You Need</h2>
+        <p class="lead">A complete editing experience in a single JavaScript file</p>
+      </div>
+      <div class="row g-4">
+
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="icon">&#x270F;&#xFE0F;</div>
+            <h5>Full Text Formatting</h5>
+            <p class="text-muted mb-0">Bold, italic, underline, strikethrough, superscript, subscript. All with keyboard shortcuts and active state tracking.</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="icon">&#x1F3A8;</div>
+            <h5>Colors & Highlighting</h5>
+            <p class="text-muted mb-0">40-swatch color picker for text and background highlighting. Custom hex input. Visual palette with instant preview.</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="icon">&#x1F5BC;&#xFE0F;</div>
+            <h5>Media Embedding</h5>
+            <p class="text-muted mb-0">Insert images, video, and audio via URL or file upload. Drag & drop support. Paste images from clipboard.</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="icon">&#x1F4CA;</div>
+            <h5>Tables</h5>
+            <p class="text-muted mb-0">Visual grid selector for inserting tables. Auto-styled with headers, borders, and proper padding.</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="icon">&#x1F4BE;</div>
+            <h5>Save & Export</h5>
+            <p class="text-muted mb-0">Save as HTML or text file. Copy rich HTML to clipboard. Email content. Export as JSON for APIs. Print to PDF.</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="icon">&#x26A1;</div>
+            <h5>Zero Dependencies</h5>
+            <p class="text-muted mb-0">One JavaScript file. No build step, no CSS file, no frameworks. Just include the script and go.</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="icon">&#x1F4F1;</div>
+            <h5>Responsive</h5>
+            <p class="text-muted mb-0">Fully responsive toolbar that wraps on small screens. Touch-friendly buttons. Works on mobile and desktop.</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="icon">&#x1F600;</div>
+            <h5>Emoji Picker</h5>
+            <p class="text-muted mb-0">Built-in emoji popup with 56 popular emojis across categories. Quick insert with a single click.</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="icon">&#x1F527;</div>
+            <h5>Full API</h5>
+            <p class="text-muted mb-0">Complete JavaScript API for reading, writing, exporting, and listening to changes. Easy integration with any backend.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Demo -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="text-center mb-4">
+        <h2>Try It Now</h2>
+        <p class="lead">This is a live, fully functional editor</p>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-lg-10">
+          <div id="demo-editor"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2>Simple Integration</h2>
+        <p class="lead">Three steps to a rich text editor on your site</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="text-center mb-3"><span class="badge bg-primary rounded-pill fs-5 px-3">1</span></div>
+          <h5 class="text-center">Include the Script</h5>
+          <pre class="code-block"><code>&lt;script src="rte.js"&gt;&lt;/script&gt;</code></pre>
+        </div>
+        <div class="col-md-4">
+          <div class="text-center mb-3"><span class="badge bg-primary rounded-pill fs-5 px-3">2</span></div>
+          <h5 class="text-center">Add a Container</h5>
+          <pre class="code-block"><code>&lt;div id="editor"&gt;&lt;/div&gt;</code></pre>
+        </div>
+        <div class="col-md-4">
+          <div class="text-center mb-3"><span class="badge bg-primary rounded-pill fs-5 px-3">3</span></div>
+          <h5 class="text-center">Initialize</h5>
+          <pre class="code-block"><code>const editor = RTE.init('#editor');</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toolbar overview -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2>Toolbar at a Glance</h2>
+        <p class="lead">Every tool your users need, organized and intuitive</p>
+      </div>
+      <div class="row g-3">
+        <div class="col-sm-6 col-lg-3"><div class="p-3 bg-white rounded-3 border h-100"><strong>Formatting</strong><br><small class="text-muted"><strong>B</strong> <em>I</em> <u>U</u> <del>S</del> X&#xB2; X&#x2082;</small></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="p-3 bg-white rounded-3 border h-100"><strong>Block Styles</strong><br><small class="text-muted">Headings H1&#x2013;H4, Paragraph, Blockquote, Code</small></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="p-3 bg-white rounded-3 border h-100"><strong>Typography</strong><br><small class="text-muted">9 Font families, 7 Size levels</small></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="p-3 bg-white rounded-3 border h-100"><strong>Colors</strong><br><small class="text-muted">&#x1F3A8; Text color, &#x1F58D;&#xFE0F; Background highlight, 40 swatches + custom</small></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="p-3 bg-white rounded-3 border h-100"><strong>Alignment</strong><br><small class="text-muted">Left, Center, Right, Justify (SVG icons)</small></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="p-3 bg-white rounded-3 border h-100"><strong>Lists</strong><br><small class="text-muted">&#x1F4DD; Bullet, &#x1F522; Numbered, Indent, Outdent</small></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="p-3 bg-white rounded-3 border h-100"><strong>Media</strong><br><small class="text-muted">&#x1F5BC;&#xFE0F; Image, &#x1F3AC; Video, &#x1F50A; Audio (URL or upload)</small></div></div>
+        <div class="col-sm-6 col-lg-3"><div class="p-3 bg-white rounded-3 border h-100"><strong>Insert</strong><br><small class="text-muted">&#x1F517; Links, &#x1F600; Emojis, &#x1F4CA; Tables, &#x2796; Rules</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Export bar -->
+  <section class="section">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2>Built-in Export Bar</h2>
+        <p class="lead">Save, copy, email, and print without writing a line of code</p>
+      </div>
+      <div class="row g-3 justify-content-center">
+        <div class="col-auto"><div class="p-3 bg-light rounded-3 border text-center"><div class="fs-3">&#x1F4BE;</div><strong>Save HTML</strong><br><small class="text-muted">Download .html file</small></div></div>
+        <div class="col-auto"><div class="p-3 bg-light rounded-3 border text-center"><div class="fs-3">&#x1F4C4;</div><strong>Save Text</strong><br><small class="text-muted">Download .txt file</small></div></div>
+        <div class="col-auto"><div class="p-3 bg-light rounded-3 border text-center"><div class="fs-3">&#x1F4CB;</div><strong>Copy HTML</strong><br><small class="text-muted">Rich clipboard copy</small></div></div>
+        <div class="col-auto"><div class="p-3 bg-light rounded-3 border text-center"><div class="fs-3">&#x1F4DD;</div><strong>Copy Text</strong><br><small class="text-muted">Plain text clipboard</small></div></div>
+        <div class="col-auto"><div class="p-3 bg-light rounded-3 border text-center"><div class="fs-3">&#x2709;&#xFE0F;</div><strong>Email</strong><br><small class="text-muted">Open email client</small></div></div>
+        <div class="col-auto"><div class="p-3 bg-light rounded-3 border text-center"><div class="fs-3">&#x1F5A8;&#xFE0F;</div><strong>Print</strong><br><small class="text-muted">Print or save PDF</small></div></div>
+        <div class="col-auto"><div class="p-3 bg-light rounded-3 border text-center"><div class="fs-3">&#x1F4BE;</div><strong>JSON</strong><br><small class="text-muted">For APIs & databases</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="hero text-center" style="padding:50px 0">
+    <div class="container">
+      <h2 class="mb-3">Ready to Add a Rich Text Editor?</h2>
+      <p class="mb-4 opacity-75">Just one script tag. Drop it into any website.</p>
+      <a href="/docs#getting-started" class="btn btn-light btn-lg"><i class="bi bi-code-slash"></i> Read the Docs</a>
+    </div>
+  </section>
+
+  <script src="/rte.js"></script>
+  <script>RTE.init('#demo-editor');</script>
+
+<%- include('partials/footer') %>

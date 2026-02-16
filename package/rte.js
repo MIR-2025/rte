@@ -1,0 +1,1150 @@
+(function (root, factory) {
+  "use strict";
+  /* ═══════════════════════════════════════════════════════════
+     RTE — Rich Text Editor  •  Single-file embeddable editor
+     UMD: works as <script>, CommonJS (require), or ESM (import)
+     ═══════════════════════════════════════════════════════════ */
+  if (typeof define === "function" && define.amd) {
+    // AMD (RequireJS)
+    define([], factory);
+  } else if (typeof module === "object" && module.exports) {
+    // CommonJS / Node
+    module.exports = factory();
+  } else {
+    // Browser global
+    root.RTE = factory();
+  }
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  // ── Inject Styles ────────────────────────────────────────
+  const CSS = `
+/* RTE Embedded Styles */
+.rte-wrap {
+  --rte-radius: 10px;
+  --rte-border: #d0d5dd;
+  --rte-bg: #ffffff;
+  --rte-toolbar-bg: #f8f9fb;
+  --rte-hover: #e8ecf1;
+  --rte-active: #d4dae3;
+  --rte-shadow: 0 2px 12px rgba(0,0,0,.08);
+  --rte-accent: #6366f1;
+  --rte-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--rte-font);
+  border: 1px solid var(--rte-border);
+  border-radius: var(--rte-radius);
+  box-shadow: var(--rte-shadow);
+  overflow: hidden;
+  background: var(--rte-bg);
+  position: relative;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.rte-wrap *, .rte-wrap *::before, .rte-wrap *::after { box-sizing: border-box; }
+
+/* Toolbar */
+.rte-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 6px 8px;
+  background: var(--rte-toolbar-bg);
+  border-bottom: 1px solid var(--rte-border);
+  align-items: center;
+  user-select: none;
+}
+.rte-toolbar .rte-sep {
+  width: 1px;
+  height: 26px;
+  background: var(--rte-border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* Buttons */
+.rte-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 5px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: background .15s, transform .1s;
+  position: relative;
+  color: #334155;
+}
+.rte-btn:hover { background: var(--rte-hover); transform: scale(1.08); }
+.rte-btn:active { background: var(--rte-active); transform: scale(.96); }
+.rte-btn.active {
+  background: var(--rte-accent);
+  color: #fff;
+  transform: scale(.96);
+  box-shadow: 0 1px 4px rgba(99,102,241,.35);
+}
+
+/* SVG icon buttons */
+.rte-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.rte-btn.active svg { stroke: #fff; }
+
+/* Styled text format buttons (B, I, U, S, etc.) */
+.rte-btn-text {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: Georgia, "Times New Roman", serif;
+  min-width: 30px;
+}
+.rte-btn-text.fmt-bold { font-weight: 900; }
+.rte-btn-text.fmt-italic { font-style: italic; }
+.rte-btn-text.fmt-underline { text-decoration: underline; text-underline-offset: 2px; }
+.rte-btn-text.fmt-strike { text-decoration: line-through; }
+.rte-btn-text.fmt-sub { font-size: 13px; }
+.rte-btn-text.fmt-sup { font-size: 13px; }
+
+/* Tooltips — works on .rte-btn AND .rte-tip wrappers */
+/* Shown BELOW the button so they stay inside the editor viewport */
+.rte-btn[data-tip]::after,
+.rte-tip[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) scale(.9);
+  background: #1e293b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 400;
+  font-style: normal;
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .18s, transform .18s;
+  z-index: 100;
+  font-family: var(--rte-font);
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+.rte-btn:hover[data-tip]::after,
+.rte-tip:hover[data-tip]::after { opacity: 1; transform: translateX(-50%) scale(1); }
+.rte-tip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Select */
+.rte-select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--rte-border);
+  border-radius: 6px;
+  background: var(--rte-bg);
+  font-family: var(--rte-font);
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+}
+.rte-select:hover { border-color: #94a3b8; }
+
+/* Color picker wrapper */
+.rte-color-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.rte-color-wrap input[type="color"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+/* Editor area */
+.rte-content {
+  min-height: 260px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 16px 20px;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #1e293b;
+  caret-color: var(--rte-accent);
+}
+.rte-content:empty::before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+  pointer-events: none;
+  display: block;
+}
+.rte-content h1 { font-size: 2em; margin: .4em 0; }
+.rte-content h2 { font-size: 1.5em; margin: .35em 0; }
+.rte-content h3 { font-size: 1.25em; margin: .3em 0; }
+.rte-content h4 { font-size: 1.1em; margin: .25em 0; }
+.rte-content p { margin: .3em 0; }
+.rte-content blockquote {
+  border-left: 4px solid var(--rte-accent);
+  margin: .6em 0;
+  padding: .4em .8em;
+  background: #f1f5f9;
+  border-radius: 0 6px 6px 0;
+}
+.rte-content pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: "Fira Code", Consolas, monospace;
+  font-size: 13px;
+}
+.rte-content img, .rte-content video, .rte-content audio {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 8px 0;
+  display: block;
+}
+.rte-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+}
+.rte-content table td, .rte-content table th {
+  border: 1px solid var(--rte-border);
+  padding: 8px 12px;
+  text-align: left;
+  min-width: 60px;
+}
+.rte-content table th {
+  background: var(--rte-toolbar-bg);
+  font-weight: 600;
+}
+.rte-content a { color: var(--rte-accent); text-decoration: underline; }
+.rte-content hr { border: none; border-top: 2px dashed var(--rte-border); margin: 1em 0; }
+.rte-content ul, .rte-content ol { padding-left: 1.6em; margin: .4em 0; }
+
+/* Popup panels */
+.rte-popup {
+  position: absolute;
+  z-index: 50;
+  background: var(--rte-bg);
+  border: 1px solid var(--rte-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.13);
+  padding: 12px 14px;
+  display: none;
+  min-width: 220px;
+}
+.rte-popup.show { display: block; animation: rtePopIn .2s ease; }
+@keyframes rtePopIn {
+  from { opacity: 0; transform: translateY(6px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.rte-popup label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
+.rte-popup input[type="text"], .rte-popup input[type="url"] {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--rte-border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: var(--rte-font);
+  outline: none;
+  margin-bottom: 8px;
+}
+.rte-popup input:focus { border-color: var(--rte-accent); box-shadow: 0 0 0 2px rgba(99,102,241,.18); }
+.rte-popup-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.rte-popup-btn {
+  padding: 5px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: var(--rte-font);
+  cursor: pointer;
+  font-weight: 500;
+}
+.rte-popup-btn.primary { background: var(--rte-accent); color: #fff; }
+.rte-popup-btn.primary:hover { background: #4f46e5; }
+.rte-popup-btn.secondary { background: #e2e8f0; color: #334155; }
+.rte-popup-btn.secondary:hover { background: #cbd5e1; }
+
+/* Color swatches */
+.rte-swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-top: 6px; }
+.rte-swatch {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform .12s, border-color .12s;
+}
+.rte-swatch:hover { transform: scale(1.22); border-color: var(--rte-accent); }
+.rte-swatch.active-swatch { border-color: var(--rte-accent); transform: scale(1.15); }
+
+/* Emoji picker grid */
+.rte-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 6px;
+}
+.rte-emoji-item {
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .12s, transform .12s;
+}
+.rte-emoji-item:hover { background: var(--rte-hover); transform: scale(1.15); }
+
+/* Table popup grid selector */
+.rte-table-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 24px);
+  gap: 3px;
+  margin-top: 6px;
+}
+.rte-table-cell {
+  width: 24px; height: 24px;
+  border: 1px solid var(--rte-border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background .1s;
+}
+.rte-table-cell:hover, .rte-table-cell.highlight { background: #c7d2fe; border-color: var(--rte-accent); }
+.rte-table-size { font-size: 12px; color: #64748b; margin-top: 4px; text-align: center; }
+
+/* Export bar */
+.rte-exportbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--rte-toolbar-bg);
+  border-top: 1px solid var(--rte-border);
+  align-items: center;
+  user-select: none;
+}
+.rte-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid var(--rte-border);
+  border-radius: 6px;
+  background: var(--rte-bg);
+  font-family: var(--rte-font);
+  font-size: 12px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .1s;
+  white-space: nowrap;
+}
+.rte-export-btn:hover { background: var(--rte-hover); border-color: #94a3b8; transform: scale(1.03); }
+.rte-export-btn:active { transform: scale(.97); }
+.rte-export-btn .rte-export-icon { font-size: 14px; }
+.rte-toast {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: #1e293b;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: var(--rte-font);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  z-index: 60;
+  white-space: nowrap;
+}
+.rte-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Status bar */
+.rte-statusbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: #94a3b8;
+  background: var(--rte-toolbar-bg);
+  border-top: 1px solid var(--rte-border);
+}
+
+/* Hidden file inputs */
+.rte-wrap input[type="file"] { display: none; }
+
+/* Responsive */
+@media (max-width: 580px) {
+  .rte-btn { min-width: 28px; height: 28px; font-size: 16px; }
+  .rte-btn-text { font-size: 13px; }
+  .rte-content { padding: 12px 14px; font-size: 14px; }
+}
+`;
+
+  function injectCSS() {
+    if (document.getElementById("rte-styles")) return;
+    const s = document.createElement("style");
+    s.id = "rte-styles";
+    s.textContent = CSS;
+    document.head.appendChild(s);
+  }
+
+  // ── Color Palette ────────────────────────────────────────
+  const COLORS = [
+    "#000000","#434343","#666666","#999999","#b7b7b7","#cccccc","#d9d9d9","#ffffff",
+    "#e06666","#e69138","#f1c232","#6aa84f","#45818e","#3d85c6","#674ea7","#a64d79",
+    "#cc0000","#e69138","#f1c232","#38761d","#134f5c","#0b5394","#351c75","#741b47",
+    "#ff0000","#ff9900","#ffff00","#00ff00","#00ffff","#0000ff","#9900ff","#ff00ff",
+    "#f4cccc","#fce5cd","#fff2cc","#d9ead3","#d0e0e3","#cfe2f3","#d9d2e9","#ead1dc",
+  ];
+
+  // ── Emoji Collection ─────────────────────────────────────
+  const EMOJIS = [
+    "😀","😂","😍","🥰","😎","🤩","😇","🥳",
+    "😢","😡","🤔","😱","🤗","😴","🤮","🥺",
+    "👍","👎","👏","🙌","💪","🤝","✌️","🤞",
+    "❤️","🧡","💛","💚","💙","💜","🖤","🤍",
+    "⭐","🌟","✨","💫","🔥","💯","🎉","🎊",
+    "✅","❌","⚠️","💡","🎯","🏆","🎁","📌",
+    "🚀","🌈","☀️","🌙","🌎","🍕","🎵","📷",
+  ];
+
+  // ── Font Families ────────────────────────────────────────
+  const FONTS = [
+    ["Default", ""],
+    ["Arial", "Arial, sans-serif"],
+    ["Georgia", "Georgia, serif"],
+    ["Times New Roman", "'Times New Roman', serif"],
+    ["Courier New", "'Courier New', monospace"],
+    ["Verdana", "Verdana, sans-serif"],
+    ["Trebuchet MS", "'Trebuchet MS', sans-serif"],
+    ["Comic Sans MS", "'Comic Sans MS', cursive"],
+    ["Impact", "Impact, sans-serif"],
+  ];
+
+  // ── Helpers ──────────────────────────────────────────────
+  function el(tag, attrs, children) {
+    const e = document.createElement(tag);
+    if (attrs) Object.entries(attrs).forEach(([k, v]) => {
+      if (k === "className") e.className = v;
+      else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+      else if (k.startsWith("on")) e.addEventListener(k.slice(2).toLowerCase(), v);
+      else e.setAttribute(k, v);
+    });
+    if (children) {
+      if (typeof children === "string") e.innerHTML = children;
+      else if (Array.isArray(children)) children.forEach(c => { if (c) e.appendChild(c); });
+      else e.appendChild(children);
+    }
+    return e;
+  }
+
+  function btn(emoji, tip, onClick, extraClass) {
+    return el("button", { className: "rte-btn" + (extraClass ? " " + extraClass : ""), "data-tip": tip, onClick }, emoji);
+  }
+
+  function fmtBtn(label, tip, onClick, fmtClass) {
+    return el("button", {
+      className: "rte-btn rte-btn-text " + fmtClass,
+      "data-tip": tip,
+      onClick
+    }, label);
+  }
+
+  function sep() {
+    return el("span", { className: "rte-sep" });
+  }
+
+  function tipWrap(child, tip) {
+    const w = el("span", { className: "rte-tip", "data-tip": tip });
+    w.appendChild(child);
+    return w;
+  }
+
+  // ── Alignment SVG Icons (traditional line-based) ──────────
+  function alignIcon(type) {
+    const lines = { left: [3,14,3,11,3,8], center: [5,13,3,15,5,13], right: [5,15,3,15,5,15], justify: [3,15,3,15,3,15] };
+    const y = [4, 9, 14];
+    const l = lines[type];
+    return '<svg viewBox="0 0 18 18"><line x1="' + l[0] + '" y1="' + y[0] + '" x2="' + l[1] + '" y2="' + y[0] + '"/><line x1="' + l[2] + '" y1="' + y[1] + '" x2="' + l[3] + '" y2="' + y[1] + '"/><line x1="' + l[4] + '" y1="' + y[2] + '" x2="' + l[5] + '" y2="' + y[2] + '"/></svg>';
+  }
+
+  // ── Save / Restore Selection ─────────────────────────────
+  function saveSelection() {
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0) return sel.getRangeAt(0).cloneRange();
+    return null;
+  }
+  function restoreSelection(range) {
+    if (!range) return;
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  // ── Build Editor ─────────────────────────────────────────
+  function init(selector, options) {
+    injectCSS();
+    const target = typeof selector === "string" ? document.querySelector(selector) : selector;
+    if (!target) { console.error("RTE: target not found", selector); return null; }
+
+    options = Object.assign({
+      placeholder: "Start typing something amazing\u2026",
+      height: null,
+    }, options);
+
+    const wrap = el("div", { className: "rte-wrap" });
+    const toolbar = el("div", { className: "rte-toolbar" });
+    const content = el("div", {
+      className: "rte-content",
+      contenteditable: "true",
+      "data-placeholder": options.placeholder,
+    });
+    if (options.height) content.style.minHeight = options.height;
+
+    const statusbar = el("div", { className: "rte-statusbar" });
+    const wordCount = el("span", { title: "Total word count" }, "Words: 0");
+    const charCount = el("span", { title: "Total character count" }, "Chars: 0");
+    statusbar.append(wordCount, charCount);
+
+    // Collect toggle-able format buttons for active state tracking
+    const formatButtons = {};
+
+    // ── exec shortcut ──
+    function exec(cmd, val) {
+      content.focus();
+      document.execCommand(cmd, false, val || null);
+      updateStatus();
+      updateActiveStates();
+    }
+
+    // ── Active state tracking ──
+    function updateActiveStates() {
+      const cmds = { bold: "bold", italic: "italic", underline: "underline", strikeThrough: "strike", superscript: "sup", subscript: "sub" };
+      Object.entries(cmds).forEach(([cmd, key]) => {
+        if (formatButtons[key]) {
+          formatButtons[key].classList.toggle("active", document.queryCommandState(cmd));
+        }
+      });
+    }
+
+    // ── Heading select ──
+    const headingSelect = el("select", { className: "rte-select", "aria-label": "Block format" });
+    [
+      ["\u00b6 Paragraph","p"],
+      ["\ud83d\udccc H1 \u2014 Title","h1"],
+      ["\ud83d\udccc H2 \u2014 Section","h2"],
+      ["\ud83d\udccc H3 \u2014 Subsection","h3"],
+      ["\ud83d\udccc H4 \u2014 Detail","h4"],
+    ].forEach(([label, val]) => {
+      const o = el("option", { value: val }, label);
+      headingSelect.appendChild(o);
+    });
+    headingSelect.addEventListener("change", () => {
+      const v = headingSelect.value;
+      exec("formatBlock", "<" + v + ">");
+    });
+
+    // ── Font Family select ──
+    const fontSelect = el("select", { className: "rte-select", "aria-label": "Font family" });
+    FONTS.forEach(([label, val]) => {
+      const o = el("option", { value: val }, label);
+      if (val) o.style.fontFamily = val;
+      fontSelect.appendChild(o);
+    });
+    fontSelect.addEventListener("change", () => {
+      if (fontSelect.value) exec("fontName", fontSelect.value);
+    });
+
+    // ── Font Size select ──
+    const sizeSelect = el("select", { className: "rte-select", "aria-label": "Font size" });
+    [
+      ["\ud83d\udd24 Size",""],
+      ["1 Tiny","1"],
+      ["2 Small","2"],
+      ["3 Normal","3"],
+      ["4 Medium","4"],
+      ["5 Large","5"],
+      ["6 Huge","6"],
+      ["7 Max","7"],
+    ].forEach(([label, val]) => {
+      const o = el("option", { value: val }, label);
+      sizeSelect.appendChild(o);
+    });
+    sizeSelect.addEventListener("change", () => {
+      if (sizeSelect.value) exec("fontSize", sizeSelect.value);
+    });
+
+    // ── Color popup builder ──
+    function buildColorPopup(title, onPick) {
+      const popup = el("div", { className: "rte-popup" });
+      popup.appendChild(el("label", {}, title));
+      const grid = el("div", { className: "rte-swatches" });
+      COLORS.forEach(c => {
+        const sw = el("div", {
+          className: "rte-swatch",
+          title: c,
+          style: { background: c, border: c === "#ffffff" ? "2px solid #d0d5dd" : "2px solid transparent" },
+          onClick: () => { onPick(c); popup.classList.remove("show"); }
+        });
+        grid.appendChild(sw);
+      });
+      popup.appendChild(grid);
+
+      const customRow = el("div", { style: { marginTop: "8px", display: "flex", gap: "6px", alignItems: "center" } });
+      const customInput = el("input", { type: "text", placeholder: "#hex or color name", style: { flex: "1" } });
+      const customBtn = el("button", { className: "rte-popup-btn primary", title: "Apply custom color", onClick: () => {
+        if (customInput.value) { onPick(customInput.value); popup.classList.remove("show"); }
+      }}, "Apply");
+      customRow.append(customInput, customBtn);
+      popup.appendChild(customRow);
+
+      return popup;
+    }
+
+    let savedRange = null;
+    const allPopups = [];
+
+    // Text color popup
+    const textColorPopup = buildColorPopup("\ud83c\udfa8 Text Color", (c) => {
+      restoreSelection(savedRange);
+      exec("foreColor", c);
+    });
+    allPopups.push(textColorPopup);
+
+    // Highlight popup
+    const bgColorPopup = buildColorPopup("\ud83d\udd8d\ufe0f Highlight Color", (c) => {
+      restoreSelection(savedRange);
+      exec("hiliteColor", c);
+    });
+    allPopups.push(bgColorPopup);
+
+    // ── Link popup ──
+    const linkPopup = el("div", { className: "rte-popup" });
+    linkPopup.innerHTML = `
+      <label>\ud83d\udd17 Insert Link</label>
+      <input type="url" class="rte-link-url" placeholder="https://example.com">
+      <div class="rte-popup-actions">
+        <button class="rte-popup-btn secondary rte-link-cancel">Cancel</button>
+        <button class="rte-popup-btn primary rte-link-ok">Insert</button>
+      </div>
+    `;
+    allPopups.push(linkPopup);
+
+    // ── Media popups ──
+    function buildMediaPopup(label, accept, embedFn) {
+      const popup = el("div", { className: "rte-popup" });
+      const urlLabel = el("label", {}, label + " \u2014 paste URL or upload file");
+      const urlInput = el("input", { type: "url", placeholder: "https://..." });
+      const fileInput = el("input", { type: "file", accept });
+      const fileBtn = el("button", { className: "rte-popup-btn secondary", title: "Browse your computer for a file", onClick: () => fileInput.click() }, "\ud83d\udcc2 Choose File");
+      const actions = el("div", { className: "rte-popup-actions" });
+      const cancelBtn = el("button", { className: "rte-popup-btn secondary", title: "Cancel without inserting", onClick: () => popup.classList.remove("show") }, "Cancel");
+      const okBtn = el("button", { className: "rte-popup-btn primary", title: "Insert from the URL above", onClick: () => {
+        if (urlInput.value) {
+          restoreSelection(savedRange);
+          embedFn(urlInput.value);
+          popup.classList.remove("show");
+          urlInput.value = "";
+        }
+      }}, "Insert");
+
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          restoreSelection(savedRange);
+          embedFn(reader.result);
+          popup.classList.remove("show");
+          urlInput.value = "";
+        };
+        reader.readAsDataURL(file);
+      });
+
+      actions.append(cancelBtn, okBtn);
+      popup.append(urlLabel, urlInput, el("div", { style: { margin: "6px 0", display: "flex", gap: "6px" } }, [fileBtn]), actions);
+      allPopups.push(popup);
+      return popup;
+    }
+
+    const imagePopup = buildMediaPopup("\ud83d\uddbc\ufe0f Image", "image/*", (src) => {
+      exec("insertHTML", '<img src="' + src + '" alt="image">');
+    });
+
+    const videoPopup = buildMediaPopup("\ud83c\udfac Video", "video/*", (src) => {
+      exec("insertHTML", '<video src="' + src + '" controls></video>');
+    });
+
+    const audioPopup = buildMediaPopup("\ud83d\udd0a Audio", "audio/*", (src) => {
+      exec("insertHTML", '<audio src="' + src + '" controls></audio>');
+    });
+
+    // ── Emoji popup ──
+    const emojiPopup = el("div", { className: "rte-popup" });
+    emojiPopup.appendChild(el("label", {}, "\ud83d\ude00 Insert Emoji"));
+    const emojiGrid = el("div", { className: "rte-emoji-grid" });
+    EMOJIS.forEach(em => {
+      const item = el("button", {
+        className: "rte-emoji-item",
+        title: "Insert " + em,
+        onClick: () => {
+          restoreSelection(savedRange);
+          exec("insertHTML", em);
+          emojiPopup.classList.remove("show");
+        }
+      }, em);
+      emojiGrid.appendChild(item);
+    });
+    emojiPopup.appendChild(emojiGrid);
+    allPopups.push(emojiPopup);
+
+    // ── Table popup ──
+    const tablePopup = el("div", { className: "rte-popup" });
+    tablePopup.appendChild(el("label", {}, "\ud83d\udcca Insert Table"));
+    const tableGrid = el("div", { className: "rte-table-grid" });
+    const tableSizeLabel = el("div", { className: "rte-table-size" }, "Select size");
+    let tRows = 0, tCols = 0;
+    const tableCells = [];
+
+    for (let r = 0; r < 6; r++) {
+      for (let c = 0; c < 6; c++) {
+        const cell = el("div", {
+          className: "rte-table-cell",
+          title: (r + 1) + " \u00d7 " + (c + 1) + " table",
+          onMouseenter: () => {
+            tRows = r + 1; tCols = c + 1;
+            tableSizeLabel.textContent = tRows + " \u00d7 " + tCols;
+            tableCells.forEach(({ el: ce, r: cr, c: cc }) => {
+              ce.classList.toggle("highlight", cr <= r && cc <= c);
+            });
+          },
+          onClick: () => {
+            restoreSelection(savedRange);
+            let html = "<table><tbody>";
+            for (let ri = 0; ri < tRows; ri++) {
+              html += "<tr>";
+              for (let ci = 0; ci < tCols; ci++) {
+                html += ri === 0 ? "<th>&nbsp;</th>" : "<td>&nbsp;</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table><p><br></p>";
+            exec("insertHTML", html);
+            tablePopup.classList.remove("show");
+          }
+        });
+        tableCells.push({ el: cell, r, c });
+        tableGrid.appendChild(cell);
+      }
+    }
+    tablePopup.append(tableGrid, tableSizeLabel);
+    allPopups.push(tablePopup);
+
+    // ── Toggle popup helper ──
+    function togglePopup(popup) {
+      allPopups.forEach(p => { if (p !== popup) p.classList.remove("show"); });
+      savedRange = saveSelection();
+      popup.classList.toggle("show");
+      popup.style.top = toolbar.offsetHeight + 4 + "px";
+      popup.style.left = "8px";
+    }
+
+    // Close popups when clicking inside editor
+    content.addEventListener("mousedown", () => {
+      allPopups.forEach(p => p.classList.remove("show"));
+    });
+
+    // ── Link popup wiring ──
+    linkPopup.querySelector(".rte-link-cancel").addEventListener("click", () => linkPopup.classList.remove("show"));
+    linkPopup.querySelector(".rte-link-ok").addEventListener("click", () => {
+      const url = linkPopup.querySelector(".rte-link-url").value;
+      if (url) {
+        restoreSelection(savedRange);
+        exec("createLink", url);
+        linkPopup.classList.remove("show");
+        linkPopup.querySelector(".rte-link-url").value = "";
+      }
+    });
+
+    // ── Create format buttons with tracking ──
+    const boldBtn = fmtBtn("B", "Bold (Ctrl+B)", () => exec("bold"), "fmt-bold");
+    formatButtons.bold = boldBtn;
+
+    const italicBtn = fmtBtn("I", "Italic (Ctrl+I)", () => exec("italic"), "fmt-italic");
+    formatButtons.italic = italicBtn;
+
+    const underlineBtn = fmtBtn("U", "Underline (Ctrl+U)", () => exec("underline"), "fmt-underline");
+    formatButtons.underline = underlineBtn;
+
+    const strikeBtn = fmtBtn("S", "Strikethrough", () => exec("strikeThrough"), "fmt-strike");
+    formatButtons.strike = strikeBtn;
+
+    const supBtn = fmtBtn("X\u00b2", "Superscript", () => exec("superscript"), "fmt-sup");
+    formatButtons.sup = supBtn;
+
+    const subBtn = fmtBtn("X\u2082", "Subscript", () => exec("subscript"), "fmt-sub");
+    formatButtons.sub = subBtn;
+
+    // ── Build Toolbar ──────────────────────────────────────
+    toolbar.append(
+      tipWrap(headingSelect, "Block Format \u2014 Paragraph / Headings"),
+      tipWrap(fontSelect, "Font Family"),
+      tipWrap(sizeSelect, "Font Size"),
+      sep(),
+
+      // Formatting: recognizable styled letters
+      boldBtn,
+      italicBtn,
+      underlineBtn,
+      strikeBtn,
+      supBtn,
+      subBtn,
+      sep(),
+
+      // Colors
+      btn("\ud83c\udfa8", "Text Color", () => togglePopup(textColorPopup)),
+      btn("\ud83d\udd8d\ufe0f", "Highlight", () => togglePopup(bgColorPopup)),
+      sep(),
+
+      // Alignment — traditional line icons
+      btn(alignIcon("left"), "Align Left", () => exec("justifyLeft")),
+      btn(alignIcon("center"), "Align Center", () => exec("justifyCenter")),
+      btn(alignIcon("right"), "Align Right", () => exec("justifyRight")),
+      btn(alignIcon("justify"), "Justify", () => exec("justifyFull")),
+      sep(),
+
+      // Lists
+      btn("\ud83d\udcdd", "Bullet List", () => exec("insertUnorderedList")),
+      btn("\ud83d\udd22", "Numbered List", () => exec("insertOrderedList")),
+      btn("\u27a1\ufe0f\ud83d\udccf", "Indent", () => exec("indent")),
+      btn("\u2b05\ufe0f\ud83d\udccf", "Outdent", () => exec("outdent")),
+      sep(),
+
+      // Insert
+      btn("\ud83d\udd17", "Insert Link", () => togglePopup(linkPopup)),
+      btn("\u26d3\ufe0f\u200d\ud83d\udca5", "Unlink", () => exec("unlink")),
+      btn("\ud83d\uddbc\ufe0f", "Insert Image", () => togglePopup(imagePopup)),
+      btn("\ud83c\udfac", "Insert Video", () => togglePopup(videoPopup)),
+      btn("\ud83d\udd0a", "Insert Audio", () => togglePopup(audioPopup)),
+      btn("\ud83d\ude00", "Insert Emoji", () => togglePopup(emojiPopup)),
+      btn("\ud83d\udcca", "Insert Table", () => togglePopup(tablePopup)),
+      sep(),
+
+      // Block
+      btn("\ud83d\udcac", "Blockquote", () => exec("formatBlock", "<blockquote>")),
+      btn("\ud83d\udcbb", "Code Block", () => exec("formatBlock", "<pre>")),
+      btn("\u2796", "Horizontal Rule", () => exec("insertHorizontalRule")),
+      sep(),
+
+      // Utility
+      btn("\u21a9\ufe0f", "Undo (Ctrl+Z)", () => exec("undo")),
+      btn("\u21aa\ufe0f", "Redo (Ctrl+Y)", () => exec("redo")),
+      btn("\ud83e\uddf9", "Clear Formatting", () => exec("removeFormat")),
+      btn("\ud83d\uddd1\ufe0f", "Clear All", () => { if (confirm("Clear all content?")) { content.innerHTML = ""; updateStatus(); } }),
+    );
+
+    // ── Toast notification ───────────────────────────────────
+    const toast = el("div", { className: "rte-toast" });
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2000);
+    }
+
+    // ── Full HTML document wrapper for export/email ────────
+    function getFullHTML() {
+      return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;line-height:1.7;color:#1e293b;max-width:800px;margin:0 auto}img,video{max-width:100%;border-radius:8px}audio{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d5dd;padding:8px 12px;text-align:left}th{background:#f8f9fb;font-weight:600}blockquote{border-left:4px solid #6366f1;margin:.6em 0;padding:.4em .8em;background:#f1f5f9}pre{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;overflow-x:auto;font-size:13px}a{color:#6366f1}hr{border:none;border-top:2px dashed #d0d5dd;margin:1em 0}</style></head><body>' + content.innerHTML + '</body></html>';
+    }
+
+    // ── Export bar (save, copy, email, etc.) ────────────────
+    const exportBar = el("div", { className: "rte-exportbar" });
+
+    function exportBtn(icon, label, tip, onClick) {
+      const b = el("button", { className: "rte-export-btn", title: tip, onClick });
+      b.innerHTML = '<span class="rte-export-icon">' + icon + '</span> ' + label;
+      return b;
+    }
+
+    exportBar.append(
+      exportBtn("\ud83d\udcbe", "Save HTML", "Download as an HTML file", () => {
+        const blob = new Blob([getFullHTML()], { type: "text/html" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "document.html";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast("\u2705 HTML file downloaded");
+      }),
+
+      exportBtn("\ud83d\udcc4", "Save Text", "Download as a plain text file", () => {
+        const blob = new Blob([content.innerText], { type: "text/plain" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "document.txt";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast("\u2705 Text file downloaded");
+      }),
+
+      exportBtn("\ud83d\udccb", "Copy HTML", "Copy rich HTML to clipboard", () => {
+        const htmlStr = content.innerHTML;
+        const textStr = content.innerText;
+        if (navigator.clipboard && navigator.clipboard.write) {
+          const blob = new Blob([htmlStr], { type: "text/html" });
+          const textBlob = new Blob([textStr], { type: "text/plain" });
+          navigator.clipboard.write([
+            new ClipboardItem({ "text/html": blob, "text/plain": textBlob })
+          ]).then(() => showToast("\u2705 HTML copied to clipboard"));
+        } else {
+          navigator.clipboard.writeText(htmlStr).then(() => showToast("\u2705 HTML source copied"));
+        }
+      }),
+
+      exportBtn("\ud83d\udcdd", "Copy Text", "Copy plain text to clipboard", () => {
+        navigator.clipboard.writeText(content.innerText)
+          .then(() => showToast("\u2705 Text copied to clipboard"));
+      }),
+
+      exportBtn("\u2709\ufe0f", "Email", "Copy content to clipboard & open email client", () => {
+        const htmlStr = content.innerHTML;
+        const textStr = content.innerText;
+        const copyDone = () => {
+          const subject = encodeURIComponent("Document");
+          window.location.href = "mailto:?subject=" + subject;
+          showToast("\ud83d\udce8 Content copied — paste into your email with Ctrl+V");
+        };
+        if (navigator.clipboard && navigator.clipboard.write) {
+          const blob = new Blob([htmlStr], { type: "text/html" });
+          const textBlob = new Blob([textStr], { type: "text/plain" });
+          navigator.clipboard.write([
+            new ClipboardItem({ "text/html": blob, "text/plain": textBlob })
+          ]).then(copyDone);
+        } else {
+          navigator.clipboard.writeText(textStr).then(copyDone);
+        }
+      }),
+
+      exportBtn("\ud83d\udda8\ufe0f", "Print", "Print or save as PDF", () => {
+        const win = window.open("", "_blank");
+        win.document.write(getFullHTML());
+        win.document.close();
+        win.print();
+      }),
+
+      exportBtn("\ud83d\udcbe", "JSON", "Copy content as JSON (for APIs & databases)", () => {
+        const json = JSON.stringify({
+          html: content.innerHTML,
+          text: content.innerText,
+          wordCount: (content.innerText.trim() ? content.innerText.trim().split(/\s+/).length : 0),
+          charCount: content.innerText.length,
+          createdAt: new Date().toISOString(),
+        }, null, 2);
+        navigator.clipboard.writeText(json)
+          .then(() => showToast("\u2705 JSON copied to clipboard"));
+      })
+    );
+
+    // ── Assemble ──
+    wrap.append(toolbar);
+    allPopups.forEach(p => wrap.appendChild(p));
+    wrap.append(content, exportBar, statusbar, toast);
+    target.appendChild(wrap);
+
+    // ── Status updates ─────────────────────────────────────
+    function updateStatus() {
+      const text = content.innerText || "";
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      wordCount.textContent = "\ud83d\udcdd Words: " + words;
+      charCount.textContent = "\ud83d\udd24 Chars: " + text.length;
+      // Fire onChange callback if set
+      if (typeof api.onChange === "function") {
+        api.onChange({ html: content.innerHTML, text: text, words: words, chars: text.length });
+      }
+    }
+    content.addEventListener("input", updateStatus);
+    content.addEventListener("keyup", () => { updateStatus(); updateActiveStates(); });
+    content.addEventListener("mouseup", updateActiveStates);
+
+    // ── Keyboard shortcuts ─────────────────────────────────
+    content.addEventListener("keydown", (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case "b": e.preventDefault(); exec("bold"); break;
+          case "i": e.preventDefault(); exec("italic"); break;
+          case "u": e.preventDefault(); exec("underline"); break;
+          case "s": e.preventDefault(); // Ctrl+S = save HTML file
+            var blob = new Blob([getFullHTML()], { type: "text/html" });
+            var a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "document.html";
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast("\u2705 Saved (Ctrl+S)");
+            break;
+          case "z":
+            if (e.shiftKey) { e.preventDefault(); exec("redo"); }
+            break;
+          case "y": e.preventDefault(); exec("redo"); break;
+        }
+      }
+    });
+
+    // ── Drag & Drop media ──────────────────────────────────
+    content.addEventListener("dragover", (e) => { e.preventDefault(); });
+    content.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const files = e.dataTransfer.files;
+      if (!files.length) return;
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (file.type.startsWith("image/")) {
+            exec("insertHTML", '<img src="' + reader.result + '" alt="' + file.name + '">');
+          } else if (file.type.startsWith("video/")) {
+            exec("insertHTML", '<video src="' + reader.result + '" controls></video>');
+          } else if (file.type.startsWith("audio/")) {
+            exec("insertHTML", '<audio src="' + reader.result + '" controls></audio>');
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // ── Paste image from clipboard ─────────────────────────
+    content.addEventListener("paste", (e) => {
+      const items = (e.clipboardData || {}).items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          e.preventDefault();
+          const file = items[i].getAsFile();
+          const reader = new FileReader();
+          reader.onload = () => {
+            exec("insertHTML", '<img src="' + reader.result + '" alt="pasted image">');
+          };
+          reader.readAsDataURL(file);
+          break;
+        }
+      }
+    });
+
+    // ── Public API ─────────────────────────────────────────
+    const api = {
+      /** Get editor HTML content */
+      getHTML: () => content.innerHTML,
+      /** Set HTML content */
+      setHTML: (html) => { content.innerHTML = html; updateStatus(); },
+      /** Get plain text */
+      getText: () => content.innerText,
+      /** Get a standalone HTML document (for saving/emailing) */
+      getFullHTML: getFullHTML,
+      /** Get content as a JSON object */
+      getJSON: () => ({
+        html: content.innerHTML,
+        text: content.innerText,
+        wordCount: (content.innerText.trim() ? content.innerText.trim().split(/\s+/).length : 0),
+        charCount: content.innerText.length,
+        createdAt: new Date().toISOString(),
+      }),
+      /** Download content as HTML file */
+      saveHTML: (filename) => {
+        const blob = new Blob([getFullHTML()], { type: "text/html" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename || "document.html";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      },
+      /** Download content as plain text file */
+      saveText: (filename) => {
+        const blob = new Blob([content.innerText], { type: "text/plain" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename || "document.txt";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      },
+      /** Copy rich HTML to clipboard */
+      copyHTML: () => {
+        const htmlStr = content.innerHTML;
+        const textStr = content.innerText;
+        if (navigator.clipboard && navigator.clipboard.write) {
+          return navigator.clipboard.write([
+            new ClipboardItem({
+              "text/html": new Blob([htmlStr], { type: "text/html" }),
+              "text/plain": new Blob([textStr], { type: "text/plain" }),
+            })
+          ]);
+        }
+        return navigator.clipboard.writeText(htmlStr);
+      },
+      /** Copy plain text to clipboard */
+      copyText: () => navigator.clipboard.writeText(content.innerText),
+      /** Copy content to clipboard and open mailto: */
+      email: (to, subject) => {
+        const s = encodeURIComponent(subject || "Document");
+        const htmlStr = content.innerHTML;
+        const textStr = content.innerText;
+        const open = () => { window.location.href = "mailto:" + (to || "") + "?subject=" + s; };
+        if (navigator.clipboard && navigator.clipboard.write) {
+          const blob = new Blob([htmlStr], { type: "text/html" });
+          const textBlob = new Blob([textStr], { type: "text/plain" });
+          navigator.clipboard.write([
+            new ClipboardItem({ "text/html": blob, "text/plain": textBlob })
+          ]).then(open);
+        } else {
+          navigator.clipboard.writeText(textStr).then(open);
+        }
+      },
+      /** Print content */
+      print: () => {
+        const win = window.open("", "_blank");
+        win.document.write(getFullHTML());
+        win.document.close();
+        win.print();
+      },
+      /** Assign a callback: editor.onChange = ({html, text, words, chars}) => {} */
+      onChange: null,
+      /** Focus the editor */
+      focus: () => content.focus(),
+      /** Destroy the editor */
+      destroy: () => { wrap.remove(); },
+      /** Direct access to the content element */
+      element: content,
+      /** Direct access to the wrapper */
+      wrapper: wrap,
+    };
+    return api;
+  }
+
+  // ── Return public API ────────────────────────────────────
+  return { init };
+});

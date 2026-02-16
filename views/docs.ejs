@@ -1,0 +1,265 @@
+<% const pageTitle = 'Documentation'; %>
+<%- include('partials/header') %>
+
+  <div class="container py-5">
+    <div class="row">
+
+      <!-- Sidebar nav -->
+      <div class="col-lg-3 mb-4">
+        <div class="sticky-top" style="top:80px">
+          <h6 class="text-uppercase text-muted mb-3" style="font-size:11px;letter-spacing:1px">Documentation</h6>
+          <nav class="nav flex-column">
+            <a class="nav-link px-0 py-1" href="#getting-started">Getting Started</a>
+            <a class="nav-link px-0 py-1" href="#installation">Installation</a>
+            <a class="nav-link px-0 py-1" href="#basic-usage">Basic Usage</a>
+            <a class="nav-link px-0 py-1" href="#configuration">Configuration</a>
+            <a class="nav-link px-0 py-1" href="#toolbar-reference">Toolbar Reference</a>
+            <a class="nav-link px-0 py-1" href="#keyboard-shortcuts">Keyboard Shortcuts</a>
+            <a class="nav-link px-0 py-1" href="#media">Media (Images, Video, Audio)</a>
+            <a class="nav-link px-0 py-1" href="#colors">Colors & Highlighting</a>
+            <a class="nav-link px-0 py-1" href="#tables">Tables</a>
+            <a class="nav-link px-0 py-1" href="#export">Saving & Exporting</a>
+            <a class="nav-link px-0 py-1" href="#integration">Backend Integration</a>
+            <a class="nav-link px-0 py-1" href="#styling">Custom Styling</a>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="col-lg-9">
+
+        <!-- Getting Started -->
+        <section id="getting-started" class="mb-5">
+          <h2>Getting Started</h2>
+          <p class="lead text-muted">Add a full-featured rich text editor to your website in under 30 seconds.</p>
+          <p>RTE is a single JavaScript file with no dependencies. It injects its own CSS, creates the toolbar, editor area, export bar, and status bar &mdash; all from one <code class="inline">&lt;script&gt;</code> tag.</p>
+        </section>
+
+        <!-- Installation -->
+        <section id="installation" class="mb-5">
+          <h2>Installation</h2>
+          <h5 class="mt-4">Option 1: Direct Download</h5>
+          <p>Download <code class="inline">rte.js</code> and include it in your project:</p>
+          <pre class="code-block"><code>&lt;script src="rte.js"&gt;&lt;/script&gt;</code></pre>
+
+          <h5 class="mt-4">Option 2: npm</h5>
+          <pre class="code-block"><code>npm install rte-rich-text-editor</code></pre>
+          <p class="mt-2">Then use it in your project:</p>
+          <pre class="code-block"><code>// CommonJS
+const RTE = require('rte-rich-text-editor');
+
+// ES Modules
+import RTE from 'rte-rich-text-editor';</code></pre>
+
+          <h5 class="mt-4">Option 3: CDN (unpkg / jsdelivr)</h5>
+          <pre class="code-block"><code>&lt;script src="https://unpkg.com/rte-rich-text-editor@1.0.0/rte.js"&gt;&lt;/script&gt;</code></pre>
+
+          <h5 class="mt-4">Option 4: Self-hosted</h5>
+          <p>Place <code class="inline">rte.js</code> in your static assets directory and reference it with a relative or absolute path.</p>
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> <strong>No CSS file needed.</strong> RTE injects its styles automatically. No build step required.
+          </div>
+        </section>
+
+        <!-- Basic Usage -->
+        <section id="basic-usage" class="mb-5">
+          <h2>Basic Usage</h2>
+          <pre class="code-block"><code>&lt;!-- 1. Create a container --&gt;
+&lt;div id="editor"&gt;&lt;/div&gt;
+
+&lt;!-- 2. Include the script --&gt;
+&lt;script src="rte.js"&gt;&lt;/script&gt;
+
+&lt;!-- 3. Initialize --&gt;
+&lt;script&gt;
+  const editor = RTE.init('#editor');
+&lt;/script&gt;</code></pre>
+          <p class="mt-3">You can also pass a DOM element directly:</p>
+          <pre class="code-block"><code>const el = document.getElementById('my-editor');
+const editor = RTE.init(el);</code></pre>
+        </section>
+
+        <!-- Configuration -->
+        <section id="configuration" class="mb-5">
+          <h2>Configuration</h2>
+          <p>Pass an options object as the second argument to <code class="inline">RTE.init()</code>:</p>
+          <pre class="code-block"><code>const editor = RTE.init('#editor', {
+  placeholder: 'Write your story...',  // Custom placeholder text
+  height: '400px',                     // Minimum editor height
+});</code></pre>
+
+          <table class="table api-table mt-4">
+            <thead>
+              <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>placeholder</code></td><td>String</td><td><code>"Start typing something amazing..."</code></td><td>Placeholder text shown when the editor is empty</td></tr>
+              <tr><td><code>height</code></td><td>String</td><td><code>null</code></td><td>Minimum height of the editor area (CSS value, e.g. <code>"400px"</code>)</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Toolbar Reference -->
+        <section id="toolbar-reference" class="mb-5">
+          <h2>Toolbar Reference</h2>
+          <p>The toolbar is organized into logical groups separated by dividers:</p>
+
+          <table class="table api-table">
+            <thead><tr><th>Group</th><th>Controls</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Block Format</strong></td><td>Dropdown</td><td>Paragraph, H1, H2, H3, H4</td></tr>
+              <tr><td><strong>Font Family</strong></td><td>Dropdown</td><td>9 font families: Arial, Georgia, Times New Roman, Courier New, Verdana, Trebuchet MS, Comic Sans MS, Impact</td></tr>
+              <tr><td><strong>Font Size</strong></td><td>Dropdown</td><td>7 size levels from Tiny to Max</td></tr>
+              <tr><td><strong>Inline Format</strong></td><td><strong>B</strong> <em>I</em> <u>U</u> <del>S</del> X&#xB2; X&#x2082;</td><td>Bold, Italic, Underline, Strikethrough, Superscript, Subscript</td></tr>
+              <tr><td><strong>Colors</strong></td><td>&#x1F3A8; &#x1F58D;&#xFE0F;</td><td>Text color picker, Background highlight picker (40 swatches + custom hex)</td></tr>
+              <tr><td><strong>Alignment</strong></td><td>SVG icons</td><td>Left, Center, Right, Justify</td></tr>
+              <tr><td><strong>Lists</strong></td><td>&#x1F4DD; &#x1F522;</td><td>Bullet list, Numbered list, Indent, Outdent</td></tr>
+              <tr><td><strong>Insert</strong></td><td>&#x1F517; &#x1F5BC;&#xFE0F; &#x1F3AC; &#x1F50A; &#x1F600; &#x1F4CA;</td><td>Link, Unlink, Image, Video, Audio, Emoji, Table</td></tr>
+              <tr><td><strong>Block</strong></td><td>&#x1F4AC; &#x1F4BB; &#x2796;</td><td>Blockquote, Code block, Horizontal rule</td></tr>
+              <tr><td><strong>Utility</strong></td><td>&#x21A9;&#xFE0F; &#x21AA;&#xFE0F; &#x1F9F9; &#x1F5D1;&#xFE0F;</td><td>Undo, Redo, Clear formatting, Clear all</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Keyboard Shortcuts -->
+        <section id="keyboard-shortcuts" class="mb-5">
+          <h2>Keyboard Shortcuts</h2>
+          <table class="table api-table">
+            <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><code>Ctrl+B</code></td><td>Toggle bold</td></tr>
+              <tr><td><code>Ctrl+I</code></td><td>Toggle italic</td></tr>
+              <tr><td><code>Ctrl+U</code></td><td>Toggle underline</td></tr>
+              <tr><td><code>Ctrl+Z</code></td><td>Undo</td></tr>
+              <tr><td><code>Ctrl+Shift+Z</code></td><td>Redo</td></tr>
+              <tr><td><code>Ctrl+Y</code></td><td>Redo</td></tr>
+              <tr><td><code>Ctrl+S</code></td><td>Save as HTML file (download)</td></tr>
+            </tbody>
+          </table>
+          <p><small class="text-muted">On macOS, use <code class="inline">Cmd</code> instead of <code class="inline">Ctrl</code>.</small></p>
+        </section>
+
+        <!-- Media -->
+        <section id="media" class="mb-5">
+          <h2>Media (Images, Video, Audio)</h2>
+          <p>Each media type can be inserted in three ways:</p>
+          <ol>
+            <li><strong>URL:</strong> Click the toolbar button, paste a URL, and click Insert.</li>
+            <li><strong>File upload:</strong> Click "Choose File" in the popup to browse your computer.</li>
+            <li><strong>Drag & Drop:</strong> Drag image, video, or audio files directly into the editor.</li>
+          </ol>
+          <p>Additionally, you can <strong>paste images from your clipboard</strong> (e.g., screenshots) and they'll be embedded automatically.</p>
+          <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> <strong>Note:</strong> Files inserted via upload or drag & drop are embedded as base64 data URLs. For production use, consider uploading files to a server and using URLs instead.
+          </div>
+        </section>
+
+        <!-- Colors -->
+        <section id="colors" class="mb-5">
+          <h2>Colors & Highlighting</h2>
+          <p>Both the text color and highlight pickers offer:</p>
+          <ul>
+            <li><strong>40 preset swatches</strong> arranged in a grid (hover to see the hex value)</li>
+            <li><strong>Custom input</strong> &mdash; type any CSS color value: hex (<code class="inline">#ff6600</code>), named (<code class="inline">tomato</code>), rgb, etc.</li>
+          </ul>
+          <p>Select text first, then pick a color. The color is applied to the selection immediately.</p>
+        </section>
+
+        <!-- Tables -->
+        <section id="tables" class="mb-5">
+          <h2>Tables</h2>
+          <p>Click the &#x1F4CA; table button to open the visual grid selector. Hover over the grid to choose dimensions (up to 6&times;6), then click to insert.</p>
+          <p>Tables are inserted with:</p>
+          <ul>
+            <li>A header row (bold, gray background)</li>
+            <li>Borders and padding</li>
+            <li>Full-width layout</li>
+          </ul>
+          <p>After insertion, click inside any cell to edit its content. Standard text formatting works inside table cells.</p>
+        </section>
+
+        <!-- Export -->
+        <section id="export" class="mb-5">
+          <h2>Saving & Exporting</h2>
+          <p>The built-in export bar at the bottom of the editor provides one-click access to:</p>
+
+          <table class="table api-table">
+            <thead><tr><th>Button</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>Save HTML</code></td><td>Downloads a complete, standalone <code class="inline">.html</code> file with embedded styles. Opens correctly in any browser.</td></tr>
+              <tr><td><code>Save Text</code></td><td>Downloads a plain <code class="inline">.txt</code> file with just the text content.</td></tr>
+              <tr><td><code>Copy HTML</code></td><td>Copies rich HTML to your clipboard. Paste into Gmail, Google Docs, Word, etc. and formatting is preserved.</td></tr>
+              <tr><td><code>Copy Text</code></td><td>Copies plain text to your clipboard.</td></tr>
+              <tr><td><code>Email</code></td><td>Opens your default email client with the editor content in the email body.</td></tr>
+              <tr><td><code>Print</code></td><td>Opens a styled print preview. Use your browser's "Save as PDF" option to create a PDF.</td></tr>
+              <tr><td><code>JSON</code></td><td>Copies a JSON object to your clipboard containing <code class="inline">html</code>, <code class="inline">text</code>, <code class="inline">wordCount</code>, <code class="inline">charCount</code>, and <code class="inline">createdAt</code> fields.</td></tr>
+            </tbody>
+          </table>
+
+          <p class="mt-3">You can also use <code class="inline">Ctrl+S</code> to quickly save an HTML file.</p>
+        </section>
+
+        <!-- Integration -->
+        <section id="integration" class="mb-5">
+          <h2>Backend Integration</h2>
+          <p>RTE provides a full JavaScript API to extract content for saving to your backend. See the <a href="/api">API Reference</a> for complete details.</p>
+
+          <h5 class="mt-4">Saving to a Server</h5>
+          <pre class="code-block"><code>// Get content and POST to your API
+document.getElementById('save-btn').addEventListener('click', async () => {
+  const response = await fetch('/api/documents', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(editor.getJSON())
+  });
+});</code></pre>
+
+          <h5 class="mt-4">Loading Existing Content</h5>
+          <pre class="code-block"><code>// Load saved HTML into the editor
+const response = await fetch('/api/documents/123');
+const data = await response.json();
+editor.setHTML(data.html);</code></pre>
+
+          <h5 class="mt-4">Listening for Changes</h5>
+          <pre class="code-block"><code>// Auto-save on every change
+editor.onChange = (data) => {
+  console.log(data.words, 'words');
+  console.log(data.chars, 'characters');
+  // debounce and save...
+};</code></pre>
+        </section>
+
+        <!-- Styling -->
+        <section id="styling" class="mb-5">
+          <h2>Custom Styling</h2>
+          <p>RTE uses CSS custom properties (variables) on the <code class="inline">.rte-wrap</code> element. Override them to match your brand:</p>
+          <pre class="code-block"><code>.rte-wrap {
+  --rte-radius: 10px;      /* Border radius */
+  --rte-border: #d0d5dd;   /* Border color */
+  --rte-bg: #ffffff;        /* Background */
+  --rte-toolbar-bg: #f8f9fb;/* Toolbar background */
+  --rte-hover: #e8ecf1;    /* Button hover */
+  --rte-active: #d4dae3;   /* Button active */
+  --rte-accent: #6366f1;   /* Accent / brand color */
+  --rte-shadow: 0 2px 12px rgba(0,0,0,.08);
+  --rte-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}</code></pre>
+          <p class="mt-3">For example, to make the editor match a dark theme:</p>
+          <pre class="code-block"><code>.rte-wrap {
+  --rte-bg: #1a1a2e;
+  --rte-toolbar-bg: #16213e;
+  --rte-border: #334155;
+  --rte-hover: #1e3a5f;
+  --rte-active: #0f3460;
+  --rte-accent: #e94560;
+  --rte-shadow: 0 2px 12px rgba(0,0,0,.3);
+}
+.rte-content { color: #e2e8f0; }
+.rte-btn { color: #cbd5e1; }</code></pre>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+<%- include('partials/footer') %>

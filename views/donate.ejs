@@ -1,0 +1,96 @@
+<% const pageTitle = 'Donate'; %>
+<%- include('partials/header') %>
+
+  <div class="section">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+
+          <div style="font-size:3rem;margin-bottom:12px"><i class="bi bi-heart-fill" style="color:#e94560"></i></div>
+          <h2 class="mb-2">Support RTE</h2>
+          <p class="lead text-muted mb-4">RTE is free and open source. Your donation helps keep the project maintained and growing.</p>
+
+          <% if (typeof cancelled !== 'undefined' && cancelled) { %>
+            <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              <div>Donation cancelled. No charge was made.</div>
+            </div>
+          <% } %>
+
+          <div class="feature-card mx-auto" style="max-width:400px;height:auto">
+            <div class="d-flex justify-content-center gap-2 mb-3">
+              <button class="btn btn-outline-secondary amt-btn" data-amount="5">$5</button>
+              <button class="btn btn-outline-secondary amt-btn" data-amount="10">$10</button>
+              <button class="btn btn-outline-secondary amt-btn" data-amount="25">$25</button>
+              <button class="btn btn-outline-secondary amt-btn" data-amount="50">$50</button>
+            </div>
+
+            <div class="input-group mb-3">
+              <span class="input-group-text" style="font-weight:700">$</span>
+              <input type="number" class="form-control form-control-lg" id="donate-amount" placeholder="Custom amount" min="1" step="0.01" value="10">
+            </div>
+
+            <button id="donate-btn" class="btn btn-lg w-100" style="background:var(--rte-brand);color:#fff;font-weight:700">
+              <i class="bi bi-credit-card me-2"></i>Donate
+            </button>
+            <p class="text-muted mt-2 mb-0" style="font-size:12px"><i class="bi bi-lock-fill me-1"></i>Secure payment via Stripe. Minimum $1.00.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const amtBtns = document.querySelectorAll('.amt-btn');
+    const amtInput = document.getElementById('donate-amount');
+    const donateBtn = document.getElementById('donate-btn');
+
+    amtBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        amtBtns.forEach(b => b.classList.remove('active', 'btn-primary'));
+        btn.classList.add('active', 'btn-primary');
+        btn.classList.remove('btn-outline-secondary');
+        amtInput.value = btn.dataset.amount;
+      });
+    });
+
+    amtInput.addEventListener('input', () => {
+      amtBtns.forEach(b => {
+        b.classList.remove('active', 'btn-primary');
+        b.classList.add('btn-outline-secondary');
+      });
+    });
+
+    donateBtn.addEventListener('click', async () => {
+      const amount = parseFloat(amtInput.value);
+      if (!amount || amount < 1) {
+        alert('Minimum donation is $1.00');
+        return;
+      }
+      donateBtn.disabled = true;
+      donateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Redirecting...';
+
+      try {
+        const res = await fetch('/donate/create-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount }),
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert(data.error || 'Something went wrong');
+          donateBtn.disabled = false;
+          donateBtn.innerHTML = '<i class="bi bi-credit-card me-2"></i>Donate';
+        }
+      } catch (err) {
+        alert('Failed to connect. Please try again.');
+        donateBtn.disabled = false;
+        donateBtn.innerHTML = '<i class="bi bi-credit-card me-2"></i>Donate';
+      }
+    });
+  </script>
+
+<%- include('partials/footer') %>

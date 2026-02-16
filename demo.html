@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RTE — Rich Text Editor Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 28px;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+    p.sub {
+      color: #64748b;
+      margin-bottom: 30px;
+      font-size: 15px;
+    }
+    #editor {
+      width: 100%;
+      max-width: 860px;
+    }
+    .output-section {
+      width: 100%;
+      max-width: 860px;
+      margin-top: 30px;
+    }
+    .output-section h2 {
+      font-size: 16px;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+    .output-section pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.5;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    button.get-html {
+      margin-top: 16px;
+      padding: 10px 24px;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    button.get-html:hover { background: #4f46e5; }
+  </style>
+</head>
+<body>
+
+  <h1>Rich Text Editor</h1>
+  <p class="sub">A standalone, embeddable editor — just one <code>&lt;script&gt;</code> tag.</p>
+
+  <div id="editor"></div>
+
+  <div class="output-section">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <button class="get-html" onclick="showHTML()">Show HTML</button>
+      <button class="get-html" onclick="showJSON()">Show JSON</button>
+      <button class="get-html" onclick="showFull()">Show Full Document</button>
+    </div>
+    <h2>Output:</h2>
+    <pre id="output">Use the buttons above or the export bar in the editor…</pre>
+  </div>
+
+  <script src="rte.js"></script>
+  <script>
+    const editor = RTE.init('#editor');
+
+    // Listen for changes
+    editor.onChange = (data) => {
+      // data has: html, text, words, chars
+    };
+
+    function showHTML() {
+      document.getElementById('output').textContent = editor.getHTML();
+    }
+    function showJSON() {
+      document.getElementById('output').textContent = JSON.stringify(editor.getJSON(), null, 2);
+    }
+    function showFull() {
+      document.getElementById('output').textContent = editor.getFullHTML();
+    }
+  </script>
+</body>
+</html>

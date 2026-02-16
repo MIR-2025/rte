@@ -1,0 +1,99 @@
+<% const pageTitle = 'Contact'; %>
+<%- include('partials/header') %>
+
+  <div class="section">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+          <h2 class="mb-2">Get in Touch</h2>
+          <p class="lead text-muted mb-4">Have a question, feature request, or bug report? We'd love to hear from you.</p>
+
+          <% if (sent) { %>
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+              <i class="bi bi-check-circle-fill me-2" style="font-size:1.4rem"></i>
+              <div>
+                <strong>Message sent!</strong> Thanks for reaching out. We'll get back to you as soon as possible.
+              </div>
+            </div>
+          <% } %>
+
+          <% if (error) { %>
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2" style="font-size:1.4rem"></i>
+              <div><%= error %></div>
+            </div>
+          <% } %>
+
+          <% if (!sent) { %>
+          <form method="POST" action="/contact" class="needs-validation" novalidate>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="name" class="form-label fw-semibold">Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Your name" required>
+              </div>
+              <div class="col-md-6">
+                <label for="email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="subject" class="form-label fw-semibold">Subject</label>
+              <input type="text" class="form-control" id="subject" name="subject" placeholder="What is this about?">
+            </div>
+
+            <div class="mb-3">
+              <label for="message" class="form-label fw-semibold">Message <span class="text-danger">*</span></label>
+              <textarea class="form-control" id="message" name="message" rows="6" placeholder="Your message..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-lg px-4" style="background:var(--rte-brand);color:#fff;font-weight:600">
+              <i class="bi bi-send me-2"></i>Send Message
+            </button>
+
+          </form>
+
+          <script>
+            // Bootstrap client-side validation
+            (function () {
+              const form = document.querySelector('.needs-validation');
+              form.addEventListener('submit', function (e) {
+                if (!form.checkValidity()) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
+                form.classList.add('was-validated');
+              });
+            })();
+          </script>
+          <% } %>
+
+        </div>
+
+        <div class="col-lg-4 offset-lg-1 mt-5 mt-lg-0">
+          <div class="feature-card">
+            <div class="icon"><i class="bi bi-envelope-fill" style="color:var(--rte-brand)"></i></div>
+            <h5>Email</h5>
+            <p class="text-muted mb-0"><a href="mailto:rte@whitneys.co" style="color:var(--rte-brand)">rte@whitneys.co</a></p>
+          </div>
+
+          <div class="feature-card mt-3">
+            <div class="icon"><i class="bi bi-clock-fill" style="color:var(--rte-brand)"></i></div>
+            <h5>Response Time</h5>
+            <p class="text-muted mb-0">We typically respond within 24 hours.</p>
+          </div>
+
+          <div class="feature-card mt-3">
+            <div class="icon"><i class="bi bi-bug-fill" style="color:var(--rte-brand)"></i></div>
+            <h5>Bug Reports</h5>
+            <p class="text-muted mb-0">Please include browser, OS, and steps to reproduce the issue.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<%- include('partials/footer') %>

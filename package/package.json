@@ -1,0 +1,43 @@
+{
+  "name": "rte-rich-text-editor",
+  "version": "1.0.6",
+  "description": "A standalone, embeddable rich text editor. One script tag. Zero dependencies. Works everywhere.",
+  "main": "rte.js",
+  "module": "rte.esm.js",
+  "browser": "rte.js",
+  "unpkg": "rte.js",
+  "jsdelivr": "rte.js",
+  "types": "rte.d.ts",
+  "exports": {
+    ".": {
+      "import": "./rte.esm.js",
+      "require": "./rte.js",
+      "default": "./rte.js"
+    }
+  },
+  "files": [
+    "rte.js",
+    "rte.esm.js",
+    "rte.d.ts",
+    "README.md"
+  ],
+  "keywords": [
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "contenteditable",
+    "text-editor",
+    "html-editor",
+    "embeddable",
+    "standalone",
+    "no-dependencies",
+    "rte"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "homepage": "https://rte.whitneys.co"
+}

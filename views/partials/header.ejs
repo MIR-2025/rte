@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= siteName %> — <%= siteTagline %><% if (typeof pageTitle !== 'undefined') { %> | <%= pageTitle %><% } %></title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --rte-brand: #6366f1;
+      --rte-brand-dark: #4f46e5;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+    /* Navbar */
+    .navbar { border-bottom: 1px solid #e2e8f0; }
+    .navbar-brand { font-weight: 800; font-size: 1.4rem; color: var(--rte-brand) !important; }
+    .navbar-brand span { font-weight: 400; color: #64748b; font-size: .85rem; margin-left: 6px; }
+    .nav-link { font-weight: 500; color: #334155 !important; }
+    .nav-link:hover, .nav-link.active { color: var(--rte-brand) !important; }
+    .nav-link.active { border-bottom: 2px solid var(--rte-brand); }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+      color: #fff;
+      padding: 80px 0 60px;
+    }
+    .hero h1 { font-size: 3rem; font-weight: 800; }
+    .hero p.lead { font-size: 1.25rem; opacity: .9; }
+    .hero .btn-light { font-weight: 600; color: var(--rte-brand); }
+    .hero .btn-outline-light { font-weight: 500; }
+
+    /* Sections */
+    .section { padding: 60px 0; }
+    .section-alt { background: #f8fafc; }
+    .section h2 { font-weight: 700; margin-bottom: 12px; }
+    .section .lead { color: #64748b; }
+
+    /* Feature cards */
+    .feature-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 28px 24px;
+      height: 100%;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,.08); }
+    .feature-card .icon { font-size: 2rem; margin-bottom: 12px; }
+    .feature-card h5 { font-weight: 700; }
+
+    /* Code blocks */
+    pre.code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 20px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+    code.inline {
+      background: #f1f5f9;
+      color: #e11d48;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    /* API table */
+    .api-table th { background: #f8fafc; font-weight: 600; white-space: nowrap; }
+    .api-table code { color: var(--rte-brand); font-weight: 600; }
+
+    /* Footer */
+    footer { background: #1e293b; color: #94a3b8; padding: 40px 0; }
+    footer a { color: #cbd5e1; text-decoration: none; }
+    footer a:hover { color: #fff; }
+    footer .brand { color: #fff; font-weight: 800; font-size: 1.2rem; }
+
+    /* Demo section */
+    #demo-editor { max-width: 100%; }
+
+    /* Scrollspy offset */
+    [id] { scroll-margin-top: 80px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg bg-white sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">RTE <span>Rich Text Editor</span></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link<%= page === 'home' ? ' active' : '' %>" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link<%= page === 'docs' ? ' active' : '' %>" href="/docs">Docs</a></li>
+          <li class="nav-item"><a class="nav-link<%= page === 'api' ? ' active' : '' %>" href="/api">API Reference</a></li>
+          <li class="nav-item"><a class="nav-link<%= page === 'examples' ? ' active' : '' %>" href="/examples">Examples</a></li>
+          <li class="nav-item"><a class="nav-link<%= page === 'contact' ? ' active' : '' %>" href="/contact">Contact</a></li>
+          <% if (stripeEnabled) { %>
+          <li class="nav-item ms-lg-2"><a class="btn btn-sm px-3" href="/donate" style="background:var(--rte-brand);color:#fff;font-weight:600;border-radius:6px;margin-top:2px"><i class="bi bi-heart-fill me-1"></i>Donate</a></li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </nav>

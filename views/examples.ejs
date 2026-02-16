@@ -1,0 +1,206 @@
+<% const pageTitle = 'Examples'; %>
+<%- include('partials/header') %>
+
+  <div class="container py-5">
+    <h2 class="mb-2">Live Examples</h2>
+    <p class="lead text-muted mb-5">Interactive demos showing different configurations and use cases</p>
+
+    <!-- Example 1: Default -->
+    <section class="mb-5">
+      <div class="d-flex align-items-center mb-3">
+        <span class="badge bg-primary me-2">1</span>
+        <h4 class="mb-0">Default Editor</h4>
+      </div>
+      <p class="text-muted">The simplest setup &mdash; just <code class="inline">RTE.init('#el')</code> with no options.</p>
+      <div id="ex-default" class="mb-3"></div>
+      <pre class="code-block"><code>const editor = RTE.init('#ex-default');</code></pre>
+    </section>
+    <hr class="my-5">
+
+    <!-- Example 2: Custom placeholder & height -->
+    <section class="mb-5">
+      <div class="d-flex align-items-center mb-3">
+        <span class="badge bg-primary me-2">2</span>
+        <h4 class="mb-0">Custom Placeholder & Height</h4>
+      </div>
+      <p class="text-muted">Configure placeholder text and minimum height.</p>
+      <div id="ex-custom" class="mb-3"></div>
+      <pre class="code-block"><code>const editor = RTE.init('#ex-custom', {
+  placeholder: 'Write your blog post here...',
+  height: '350px'
+});</code></pre>
+    </section>
+    <hr class="my-5">
+
+    <!-- Example 3: Live preview -->
+    <section class="mb-5">
+      <div class="d-flex align-items-center mb-3">
+        <span class="badge bg-primary me-2">3</span>
+        <h4 class="mb-0">Live Preview with onChange</h4>
+      </div>
+      <p class="text-muted">The preview panel below updates in real-time as you type.</p>
+      <div class="row">
+        <div class="col-lg-7">
+          <div id="ex-preview" class="mb-3"></div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between">
+              <strong>Live Preview</strong>
+              <span id="ex-preview-stats" class="text-muted" style="font-size:12px">0 words</span>
+            </div>
+            <div class="card-body" id="ex-preview-output" style="font-size:14px;line-height:1.6;overflow-y:auto;max-height:400px">
+              <span class="text-muted">Start typing to see a live preview...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre class="code-block mt-3"><code>const editor = RTE.init('#ex-preview');
+editor.onChange = (data) => {
+  document.getElementById('preview').innerHTML = data.html;
+  document.getElementById('stats').textContent = data.words + ' words';
+};</code></pre>
+    </section>
+    <hr class="my-5">
+
+    <!-- Example 4: API Buttons -->
+    <section class="mb-5">
+      <div class="d-flex align-items-center mb-3">
+        <span class="badge bg-primary me-2">4</span>
+        <h4 class="mb-0">Programmatic API Control</h4>
+      </div>
+      <p class="text-muted">Use the API methods to control the editor from external buttons.</p>
+      <div id="ex-api" class="mb-3"></div>
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <button class="btn btn-sm btn-outline-primary" onclick="apiEditor.setHTML('<h2>&#x1F389; Hello!</h2><p>This content was set <strong>programmatically</strong> using <code>setHTML()</code>.</p>')">Set Content</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="alert(apiEditor.getText())">Get Text</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('api-json').textContent = JSON.stringify(apiEditor.getJSON(), null, 2)">Get JSON</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="apiEditor.saveHTML('example.html')">Download HTML</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="apiEditor.copyHTML().then(()=>alert('Copied!'))">Copy Rich HTML</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="apiEditor.print()">Print</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="apiEditor.email('', 'Editor Content')">Email</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="apiEditor.focus()">Focus</button>
+      </div>
+      <pre class="code-block mt-3" id="api-json"><code>Click "Get JSON" above to see the output here...</code></pre>
+    </section>
+    <hr class="my-5">
+
+    <!-- Example 5: Dark Theme -->
+    <section class="mb-5">
+      <div class="d-flex align-items-center mb-3">
+        <span class="badge bg-primary me-2">5</span>
+        <h4 class="mb-0">Dark Theme (CSS Variables)</h4>
+      </div>
+      <p class="text-muted">Override CSS custom properties to create a dark-themed editor.</p>
+      <style>
+        #ex-dark .rte-wrap {
+          --rte-bg: #1a1a2e;
+          --rte-toolbar-bg: #16213e;
+          --rte-border: #334155;
+          --rte-hover: #1e3a5f;
+          --rte-active: #0f3460;
+          --rte-accent: #e94560;
+          --rte-shadow: 0 2px 12px rgba(0,0,0,.3);
+        }
+        #ex-dark .rte-content { color: #e2e8f0; }
+        #ex-dark .rte-btn { color: #cbd5e1; }
+        #ex-dark .rte-btn.active { color: #fff; }
+        #ex-dark .rte-select { background: #1a1a2e; color: #cbd5e1; border-color: #334155; }
+        #ex-dark .rte-statusbar { color: #64748b; }
+        #ex-dark .rte-export-btn { background: #16213e; color: #cbd5e1; border-color: #334155; }
+        #ex-dark .rte-export-btn:hover { background: #1e3a5f; }
+      </style>
+      <div id="ex-dark" class="mb-3"></div>
+      <pre class="code-block"><code>#dark-editor .rte-wrap {
+  --rte-bg: #1a1a2e;
+  --rte-toolbar-bg: #16213e;
+  --rte-border: #334155;
+  --rte-hover: #1e3a5f;
+  --rte-active: #0f3460;
+  --rte-accent: #e94560;
+}
+#dark-editor .rte-content { color: #e2e8f0; }
+#dark-editor .rte-btn { color: #cbd5e1; }</code></pre>
+    </section>
+    <hr class="my-5">
+
+    <!-- Example 6: Form Integration -->
+    <section class="mb-5">
+      <div class="d-flex align-items-center mb-3">
+        <span class="badge bg-primary me-2">6</span>
+        <h4 class="mb-0">Form Integration</h4>
+      </div>
+      <p class="text-muted">Sync editor content to a hidden input for standard form submission.</p>
+      <form onsubmit="return handleSubmit(event)">
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          <input type="text" class="form-control" id="form-title" placeholder="Article title" value="My First Post">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Content</label>
+          <div id="ex-form"></div>
+          <input type="hidden" id="form-content">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Form</button>
+      </form>
+      <pre class="code-block mt-3" id="form-output"><code>Submit the form to see the data here...</code></pre>
+      <pre class="code-block mt-2"><code>// Sync editor to hidden input on change
+editor.onChange = (data) => {
+  document.getElementById('hidden-input').value = data.html;
+};
+
+// Or grab it on submit
+form.addEventListener('submit', (e) => {
+  const html = editor.getHTML();
+  // send to server...
+});</code></pre>
+    </section>
+  </div>
+
+  <script src="/rte.js"></script>
+  <script>
+    // Example 1
+    RTE.init('#ex-default');
+
+    // Example 2
+    RTE.init('#ex-custom', {
+      placeholder: 'Write your blog post here...',
+      height: '350px'
+    });
+
+    // Example 3
+    const previewEditor = RTE.init('#ex-preview');
+    previewEditor.onChange = (data) => {
+      document.getElementById('ex-preview-output').innerHTML = data.html || '<span class="text-muted">Start typing to see a live preview...</span>';
+      document.getElementById('ex-preview-stats').textContent = data.words + ' words, ' + data.chars + ' chars';
+    };
+
+    // Example 4
+    const apiEditor = RTE.init('#ex-api');
+
+    // Example 5
+    RTE.init('#ex-dark', {
+      placeholder: 'Dark mode editing...'
+    });
+
+    // Example 6
+    const formEditor = RTE.init('#ex-form', {
+      placeholder: 'Write your article content...'
+    });
+    formEditor.onChange = (data) => {
+      document.getElementById('form-content').value = data.html;
+    };
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const output = {
+        title: document.getElementById('form-title').value,
+        content: formEditor.getHTML(),
+        json: formEditor.getJSON()
+      };
+      document.getElementById('form-output').textContent = JSON.stringify(output, null, 2);
+      return false;
+    }
+  </script>
+
+<%- include('partials/footer') %>

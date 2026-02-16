@@ -1,0 +1,18 @@
+{
+  "name": "rte-website",
+  "version": "1.0.0",
+  "description": "Rich Text Editor — documentation and demo site",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "nodemailer": "^8.0.1",
+    "stripe": "^20.3.1"
+  }
+}
