@@ -18,6 +18,20 @@ npm install rte-rich-text-editor-bundle
 <script src="https://unpkg.com/rte-rich-text-editor-bundle/rte-bundle.js"></script>
 ```
 
+### CommonJS
+
+```js
+const RTE = require('rte-rich-text-editor-bundle');
+const editor = RTE.init('#editor');
+```
+
+### ES Modules
+
+```js
+import RTE from 'rte-rich-text-editor-bundle';
+const editor = RTE.init('#editor');
+```
+
 ### Self-Hosted
 
 ```html
