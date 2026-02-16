@@ -183,6 +183,11 @@ const editor: RTEInstance = RTE.init('#editor')!;
 editor.onChange = (data: RTEChangeData) => { ... };
 ```
 
+## Related Packages
+
+- **[rte-rich-text-editor-ws](https://www.npmjs.com/package/rte-rich-text-editor-ws)** — WebSocket connector for auto-save and real-time collaboration
+- **[rte-rich-text-editor-bundle](https://www.npmjs.com/package/rte-rich-text-editor-bundle)** — Editor + WebSocket bundled in a single file
+
 ## License
 
 MIT

@@ -150,6 +150,11 @@ wss.on('connection', (socket) => {
 });
 ```
 
+## Related Packages
+
+- **[rte-rich-text-editor](https://www.npmjs.com/package/rte-rich-text-editor)** — The core editor (required)
+- **[rte-rich-text-editor-bundle](https://www.npmjs.com/package/rte-rich-text-editor-bundle)** — Editor + WebSocket bundled in a single file
+
 ## Documentation
 
 Full documentation with more backend examples at [rte.whitneys.co/websocket](https://rte.whitneys.co/websocket)
