@@ -12,6 +12,20 @@ Add real-time auto-save and multi-user collaboration to [RTE](https://www.npmjs.
 npm install rte-rich-text-editor-ws
 ```
 
+### CommonJS
+
+```js
+const RTE = require('rte-rich-text-editor');
+const RTEWS = require('rte-rich-text-editor-ws');
+```
+
+### ES Modules
+
+```js
+import RTE from 'rte-rich-text-editor';
+import RTEWS from 'rte-rich-text-editor-ws';
+```
+
 ### Script Tag
 
 ```html
