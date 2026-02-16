@@ -1,13 +1,24 @@
 {
   "name": "rte-rich-text-editor-bundle",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "RTE Rich Text Editor + WebSocket connector bundled in a single file. One script tag. Zero dependencies.",
   "main": "rte-bundle.js",
+  "module": "rte-bundle.js",
   "browser": "rte-bundle.js",
   "unpkg": "rte-bundle.js",
   "jsdelivr": "rte-bundle.js",
+  "types": "rte-bundle.d.ts",
+  "exports": {
+    ".": {
+      "import": "./rte-bundle.js",
+      "require": "./rte-bundle.js",
+      "types": "./rte-bundle.d.ts",
+      "default": "./rte-bundle.js"
+    }
+  },
   "files": [
     "rte-bundle.js",
+    "rte-bundle.d.ts",
     "README.md"
   ],
   "keywords": [
