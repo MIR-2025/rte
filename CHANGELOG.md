@@ -2,6 +2,12 @@
 
 All notable changes will be documented in this file.
 
+## websocket-toolkit
+
+#### [1.0.0] - 2026-02-16
+- Initial release — same as wskit-client, published under alternate name
+- Universal WebSocket client, zero dependencies
+
 ## wskit-client
 
 #### [1.0.0] - 2026-02-16
