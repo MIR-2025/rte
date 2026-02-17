@@ -24,6 +24,15 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-bundle
 
+#### [1.0.8] - 2026-02-17
+- Synced with rte-rich-text-editor 1.0.17 (`exportCSS`, `exportTemplate`, responsive media)
+
+#### [1.0.7] - 2026-02-17
+- Media responsive: images, video, and audio scale with `max-width: 100%` and `height: auto`
+
+#### [1.0.6] - 2026-02-17
+- Added changelog to README
+
 #### [1.0.5] - 2026-02-17
 - Added explicit `type="button"` to all editor buttons to prevent form submission
 
@@ -62,6 +71,16 @@ All notable changes will be documented in this file.
 - Available at `https://rte.whitneys.co/rte-ws.js`
 
 ## rte-rich-text-editor
+
+### [1.0.17] - 2026-02-17
+- Added `exportCSS` option to append custom CSS to `getFullHTML()` exports
+- Added `exportTemplate` option for full control over `getFullHTML()` output (use `{{content}}` placeholder)
+
+### [1.0.16] - 2026-02-17
+- Media responsive: images, video, and audio scale with `max-width: 100%` and `height: auto`
+
+### [1.0.15] - 2026-02-17
+- Added changelog to README
 
 ### [1.0.14] - 2026-02-17
 - Added explicit `type="button"` to `btn()` and `fmtBtn()` helpers

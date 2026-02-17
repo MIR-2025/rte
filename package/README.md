@@ -190,6 +190,16 @@ editor.onChange = (data: RTEChangeData) => { ... };
 
 ## Changelog
 
+### 1.0.17
+- Added `exportCSS` option to append custom CSS to `getFullHTML()` exports
+- Added `exportTemplate` option for full control over `getFullHTML()` output (use `{{content}}` placeholder)
+
+### 1.0.16
+- Media responsive: images, video, and audio scale with `max-width: 100%` and `height: auto`
+
+### 1.0.15
+- Added changelog to README
+
 ### 1.0.14
 - Added explicit `type="button"` to `btn()` and `fmtBtn()` helpers
 

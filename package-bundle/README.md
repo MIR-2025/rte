@@ -90,6 +90,15 @@ If you only need the editor or only the WebSocket connector:
 
 ## Changelog
 
+### 1.0.8
+- Synced with rte-rich-text-editor 1.0.17 (`exportCSS`, `exportTemplate`, responsive media)
+
+### 1.0.7
+- Media responsive: images, video, and audio scale with `max-width: 100%` and `height: auto`
+
+### 1.0.6
+- Added changelog to README
+
 ### 1.0.5
 - Added explicit `type="button"` to all editor buttons to prevent form submission
 
