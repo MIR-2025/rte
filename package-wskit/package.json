@@ -1,0 +1,48 @@
+{
+  "name": "wskit-client",
+  "version": "1.0.0",
+  "description": "Universal WebSocket client. Auto-reconnect, message queue, channels, request/response, heartbeat. Zero dependencies.",
+  "main": "wskit.js",
+  "module": "wskit.js",
+  "browser": "wskit.js",
+  "unpkg": "wskit.js",
+  "jsdelivr": "wskit.js",
+  "types": "wskit.d.ts",
+  "exports": {
+    ".": {
+      "import": "./wskit.js",
+      "require": "./wskit.js",
+      "types": "./wskit.d.ts",
+      "default": "./wskit.js"
+    }
+  },
+  "files": [
+    "wskit.js",
+    "wskit.d.ts",
+    "README.md"
+  ],
+  "keywords": [
+    "websocket",
+    "ws",
+    "client",
+    "real-time",
+    "reconnect",
+    "message-queue",
+    "channels",
+    "request-response",
+    "heartbeat",
+    "standalone",
+    "no-dependencies",
+    "universal"
+  ],
+  "author": "phpMyDEV, LLC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MIR-2025/rte.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MIR-2025/rte/issues"
+  },
+  "homepage": "https://github.com/MIR-2025/rte"
+}

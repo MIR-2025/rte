@@ -1,6 +1,20 @@
 # Changelog
 
-All notable changes to RTE — Rich Text Editor will be documented in this file.
+All notable changes will be documented in this file.
+
+## wskit-client
+
+#### [1.0.0] - 2026-02-16
+- Initial release — universal WebSocket client, zero dependencies
+- Auto-reconnect with exponential backoff
+- Message queue (buffers sends while disconnected, flushes on reconnect)
+- Channel-based message routing by type field
+- Request/response pattern with Promises
+- Configurable heartbeat keep-alive
+- Auto JSON parse/stringify
+- Debug mode for verbose console logging
+- UMD wrapper (script tag, CommonJS, AMD, ES Modules)
+- TypeScript declarations included
 
 ## rte-rich-text-editor-bundle
 
