@@ -180,8 +180,8 @@
 /* Editor area */
 .rte-content {
   min-height: 260px;
-  max-height: 70vh;
   overflow: auto;
+  resize: vertical;
   padding: 16px 20px;
   outline: none;
   font-size: 15px;
