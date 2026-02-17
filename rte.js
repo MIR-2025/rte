@@ -181,7 +181,7 @@
 .rte-content {
   min-height: 260px;
   max-height: 70vh;
-  overflow-y: auto;
+  overflow: auto;
   padding: 16px 20px;
   outline: none;
   font-size: 15px;
@@ -217,7 +217,6 @@
   font-size: 13px;
 }
 .rte-content img, .rte-content video, .rte-content audio {
-  max-width: 100%;
   border-radius: 8px;
   margin: 8px 0;
   display: block;
