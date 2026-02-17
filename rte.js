@@ -477,6 +477,7 @@
   // ── Helpers ──────────────────────────────────────────────
   function el(tag, attrs, children) {
     const e = document.createElement(tag);
+    if (tag === "button") e.type = "button";
     if (attrs) Object.entries(attrs).forEach(([k, v]) => {
       if (k === "className") e.className = v;
       else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
