@@ -1,0 +1,475 @@
+<% const pageTitle = 'WSKit — Universal WebSocket Client'; %>
+<%- include('partials/header') %>
+
+  <div class="container py-5">
+    <div class="row">
+
+      <!-- Sidebar nav -->
+      <div class="col-lg-3 mb-4">
+        <div class="sticky-top" style="top:80px">
+          <h6 class="text-uppercase text-muted mb-3" style="font-size:11px;letter-spacing:1px">WSKit</h6>
+          <nav class="nav flex-column">
+            <a class="nav-link px-0 py-1" href="#overview">Overview</a>
+            <a class="nav-link px-0 py-1" href="#installation">Installation</a>
+            <a class="nav-link px-0 py-1" href="#quick-start">Quick Start</a>
+            <a class="nav-link px-0 py-1" href="#channels">Channels</a>
+            <a class="nav-link px-0 py-1" href="#request-response">Request / Response</a>
+            <a class="nav-link px-0 py-1" href="#message-queue">Message Queue</a>
+            <a class="nav-link px-0 py-1" href="#configuration">Configuration</a>
+            <a class="nav-link px-0 py-1" href="#api">API Reference</a>
+            <a class="nav-link px-0 py-1" href="#reconnect">Reconnection</a>
+            <a class="nav-link px-0 py-1" href="#heartbeat">Heartbeat</a>
+            <a class="nav-link px-0 py-1" href="#backend-examples">Backend Examples</a>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="col-lg-9">
+
+        <!-- Overview -->
+        <section id="overview" class="mb-5">
+          <h2>WSKit &mdash; Universal WebSocket Client</h2>
+          <p class="lead text-muted">One script tag. Zero dependencies. Works with any backend.</p>
+          <p><code class="inline">wskit.js</code> is a standalone, universal WebSocket client that handles the boilerplate of working with WebSockets: auto-reconnect, message queuing, channel-based routing, request/response with Promises, heartbeat keep-alive, and automatic JSON serialization.</p>
+          <div class="row g-3 mt-3">
+            <div class="col-md-4">
+              <div class="feature-card" style="height:auto">
+                <div class="icon">&#x1F504;</div>
+                <h5>Auto-Reconnect</h5>
+                <p class="text-muted mb-0">Exponential backoff from 1s up to 30s. Configurable max attempts.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="feature-card" style="height:auto">
+                <div class="icon">&#x1F4E8;</div>
+                <h5>Message Queue</h5>
+                <p class="text-muted mb-0">Buffers sends while disconnected and flushes automatically on reconnect.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="feature-card" style="height:auto">
+                <div class="icon">&#x1F4AC;</div>
+                <h5>Channels</h5>
+                <p class="text-muted mb-0">Route messages by type. Subscribe, unsubscribe, and handle with ease.</p>
+              </div>
+            </div>
+          </div>
+          <div class="row g-3 mt-1">
+            <div class="col-md-4">
+              <div class="feature-card" style="height:auto">
+                <div class="icon">&#x1F91D;</div>
+                <h5>Request / Response</h5>
+                <p class="text-muted mb-0">Send a message and <code>await</code> a matching response. Built-in timeout.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="feature-card" style="height:auto">
+                <div class="icon">&#x1F493;</div>
+                <h5>Heartbeat</h5>
+                <p class="text-muted mb-0">Configurable keep-alive ping to detect stale connections.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="feature-card" style="height:auto">
+                <div class="icon">&#x1F527;</div>
+                <h5>Auto-JSON</h5>
+                <p class="text-muted mb-0">Automatically parse incoming and stringify outgoing JSON messages.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Installation -->
+        <section id="installation" class="mb-5">
+          <h2>Installation</h2>
+
+          <h5 class="mt-4">npm</h5>
+          <pre class="code-block"><code>npm install wskit-client</code></pre>
+
+          <h5 class="mt-4">ES Modules</h5>
+          <pre class="code-block"><code>import WSKit from 'wskit-client';</code></pre>
+
+          <h5 class="mt-4">CommonJS</h5>
+          <pre class="code-block"><code>const WSKit = require('wskit-client');</code></pre>
+
+          <h5 class="mt-4">Script Tag (CDN)</h5>
+          <pre class="code-block"><code>&lt;script src="https://unpkg.com/wskit-client/wskit.js"&gt;&lt;/script&gt;</code></pre>
+
+          <h5 class="mt-4">Self-Hosted</h5>
+          <pre class="code-block"><code>&lt;script src="https://rte.whitneys.co/wskit.js"&gt;&lt;/script&gt;</code></pre>
+
+          <div class="alert alert-info mt-3">
+            <i class="bi bi-info-circle"></i> <strong>Zero dependencies.</strong> WSKit works in any browser with native WebSocket support. ~5 KB gzipped.
+          </div>
+        </section>
+
+        <!-- Quick Start -->
+        <section id="quick-start" class="mb-5">
+          <h2>Quick Start</h2>
+          <pre class="code-block"><code>&lt;script src="https://unpkg.com/wskit-client/wskit.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const ws = WSKit.connect('wss://yourserver.com/ws', {
+    onOpen: () =&gt; console.log('Connected'),
+    onMessage: (msg) =&gt; console.log('Received:', msg),
+    onClose: () =&gt; console.log('Disconnected'),
+  });
+
+  ws.send({ type: 'chat', text: 'Hello!' });
+&lt;/script&gt;</code></pre>
+          <p class="mt-3">That's it. WSKit connects, auto-serializes JSON, and starts reconnecting if the connection drops.</p>
+        </section>
+
+        <!-- Channels -->
+        <section id="channels" class="mb-5">
+          <h2>Channels</h2>
+          <p>Route incoming messages by their <code class="inline">type</code> field (configurable via <code class="inline">typeField</code>):</p>
+          <pre class="code-block"><code>// Subscribe — returns an unsubscribe function
+const off = ws.on('chat', (msg) =&gt; {
+  console.log(msg.user + ':', msg.text);
+});
+
+// Unsubscribe later
+off();
+
+// Or unsubscribe by type
+ws.off('chat');</code></pre>
+
+          <p class="mt-3">You can subscribe multiple handlers to the same type. The global <code class="inline">onMessage</code> callback still fires for every message regardless of channel subscriptions.</p>
+
+          <h5 class="mt-4">Example: Chat + Notifications</h5>
+          <pre class="code-block"><code>ws.on('chat', (msg) =&gt; {
+  appendMessage(msg.user, msg.text);
+});
+
+ws.on('notification', (msg) =&gt; {
+  showToast(msg.title, msg.body);
+});
+
+ws.on('presence', (msg) =&gt; {
+  updateUserList(msg.users);
+});</code></pre>
+        </section>
+
+        <!-- Request/Response -->
+        <section id="request-response" class="mb-5">
+          <h2>Request / Response</h2>
+          <p>Send a message and wait for a matching response using Promises:</p>
+          <pre class="code-block"><code>const user = await ws.request({ type: 'getUser', id: 123 });
+console.log(user.name); // "John"</code></pre>
+
+          <p class="mt-3">WSKit auto-generates a unique <code class="inline">_id</code> field on the outgoing message. Your server must echo the same <code class="inline">_id</code> in its response:</p>
+          <pre class="code-block"><code>// Server-side (Node.js)
+socket.on('message', (raw) =&gt; {
+  const msg = JSON.parse(raw);
+  if (msg.type === 'getUser') {
+    socket.send(JSON.stringify({
+      _id: msg._id,  // echo back the _id
+      name: 'John',
+      email: 'john@example.com',
+    }));
+  }
+});</code></pre>
+
+          <h5 class="mt-4">Custom Timeout</h5>
+          <pre class="code-block"><code>// Override the default 10s timeout
+const result = await ws.request({ type: 'slowQuery', q: 'data' }, 30000);</code></pre>
+
+          <div class="alert alert-info mt-3">
+            <i class="bi bi-info-circle"></i> The <code>_id</code> field name is configurable via the <code>idField</code> option.
+          </div>
+        </section>
+
+        <!-- Message Queue -->
+        <section id="message-queue" class="mb-5">
+          <h2>Message Queue</h2>
+          <p>Messages sent while disconnected are buffered and automatically flushed when the connection is restored:</p>
+          <pre class="code-block"><code>const ws = WSKit.connect(url, {
+  queueWhileDisconnected: true,  // default
+  maxQueueSize: 100,             // default
+});
+
+// These will be queued if not yet connected
+ws.send({ type: 'init', token: 'abc' });
+ws.send({ type: 'subscribe', channel: 'updates' });
+
+// Check queue size
+console.log(ws.queueSize); // 2
+
+// Clear queue if needed
+ws.clearQueue();</code></pre>
+
+          <p class="mt-3"><code class="inline">ws.send()</code> returns <code class="inline">true</code> if the message was sent immediately, or <code class="inline">false</code> if it was queued. When the queue is full, new messages are dropped.</p>
+        </section>
+
+        <!-- Configuration -->
+        <section id="configuration" class="mb-5">
+          <h2>Configuration</h2>
+          <p>Pass an options object as the second argument to <code class="inline">WSKit.connect()</code>:</p>
+
+          <pre class="code-block"><code>const ws = WSKit.connect('wss://yourserver.com/ws', {
+  // Reconnection
+  reconnect: true,              // auto-reconnect (default: true)
+  reconnectBaseMs: 1000,        // initial delay (default: 1000)
+  reconnectMaxMs: 30000,        // max delay (default: 30000)
+  maxReconnectAttempts: 0,      // 0 = unlimited (default: 0)
+
+  // Heartbeat
+  heartbeatMs: 30000,           // ping interval (default: 30000)
+  heartbeatMessage: { type: 'ping' },
+
+  // Message queue
+  queueWhileDisconnected: true, // buffer sends (default: true)
+  maxQueueSize: 100,            // max queue size (default: 100)
+
+  // JSON
+  autoJSON: true,               // auto parse/stringify (default: true)
+  typeField: 'type',            // channel routing field (default: 'type')
+
+  // Request/response
+  requestTimeout: 10000,        // timeout in ms (default: 10000)
+  idField: '_id',               // matching field (default: '_id')
+
+  // Debug
+  debug: false,                 // console logging (default: false)
+
+  // Callbacks
+  onOpen: () =&gt; {},
+  onClose: (e) =&gt; {},
+  onError: (e) =&gt; {},
+  onMessage: (data) =&gt; {},
+  onReconnect: (attempt) =&gt; {},
+  onStateChange: (newState, prevState) =&gt; {},
+});</code></pre>
+
+          <table class="table api-table mt-4">
+            <thead>
+              <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>reconnect</code></td><td>Boolean</td><td><code>true</code></td><td>Auto-reconnect on disconnect</td></tr>
+              <tr><td><code>reconnectBaseMs</code></td><td>Number</td><td><code>1000</code></td><td>Initial reconnect delay in ms</td></tr>
+              <tr><td><code>reconnectMaxMs</code></td><td>Number</td><td><code>30000</code></td><td>Max reconnect delay in ms</td></tr>
+              <tr><td><code>maxReconnectAttempts</code></td><td>Number</td><td><code>0</code></td><td>Max attempts (0 = unlimited)</td></tr>
+              <tr><td><code>heartbeatMs</code></td><td>Number</td><td><code>30000</code></td><td>Ping interval in ms (0 to disable)</td></tr>
+              <tr><td><code>heartbeatMessage</code></td><td>Any</td><td><code>{ type: "ping" }</code></td><td>Heartbeat payload</td></tr>
+              <tr><td><code>queueWhileDisconnected</code></td><td>Boolean</td><td><code>true</code></td><td>Buffer sends while disconnected</td></tr>
+              <tr><td><code>maxQueueSize</code></td><td>Number</td><td><code>100</code></td><td>Max queued messages</td></tr>
+              <tr><td><code>autoJSON</code></td><td>Boolean</td><td><code>true</code></td><td>Auto parse/stringify JSON</td></tr>
+              <tr><td><code>typeField</code></td><td>String</td><td><code>"type"</code></td><td>Field for channel routing</td></tr>
+              <tr><td><code>requestTimeout</code></td><td>Number</td><td><code>10000</code></td><td>Request/response timeout in ms</td></tr>
+              <tr><td><code>idField</code></td><td>String</td><td><code>"_id"</code></td><td>Field for request/response matching</td></tr>
+              <tr><td><code>debug</code></td><td>Boolean</td><td><code>false</code></td><td>Enable verbose console logging</td></tr>
+            </tbody>
+          </table>
+
+          <h5 class="mt-4">Callbacks</h5>
+          <table class="table api-table">
+            <thead>
+              <tr><th>Callback</th><th>Arguments</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>onOpen</code></td><td><em>(none)</em></td><td>WebSocket connected</td></tr>
+              <tr><td><code>onClose</code></td><td><code>CloseEvent</code></td><td>WebSocket closed</td></tr>
+              <tr><td><code>onError</code></td><td><code>Event | Error</code></td><td>WebSocket error</td></tr>
+              <tr><td><code>onMessage</code></td><td><code>data</code></td><td>Every incoming message (parsed if autoJSON)</td></tr>
+              <tr><td><code>onReconnect</code></td><td><code>attempt</code></td><td>Before each reconnect attempt</td></tr>
+              <tr><td><code>onStateChange</code></td><td><code>newState, prevState</code></td><td>Connection state changed</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- API Reference -->
+        <section id="api" class="mb-5">
+          <h2>API Reference</h2>
+          <p><code class="inline">WSKit.connect()</code> returns a connection object:</p>
+
+          <table class="table api-table mt-3">
+            <thead><tr><th>Method / Property</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>ws.send(data)</code></td><td>Send data (auto-JSON if enabled). Returns <code>true</code> if sent, <code>false</code> if queued.</td></tr>
+              <tr><td><code>ws.request(data, timeout?)</code></td><td>Send and wait for a matching response. Returns a <code>Promise</code>.</td></tr>
+              <tr><td><code>ws.on(type, handler)</code></td><td>Subscribe to a message type. Returns an unsubscribe function.</td></tr>
+              <tr><td><code>ws.off(type, handler?)</code></td><td>Unsubscribe from a type. Omit handler to remove all handlers for that type.</td></tr>
+              <tr><td><code>ws.disconnect()</code></td><td>Close connection and stop reconnecting. Rejects all pending requests.</td></tr>
+              <tr><td><code>ws.reconnect()</code></td><td>Manually reconnect. Resets attempt counter.</td></tr>
+              <tr><td><code>ws.clearQueue()</code></td><td>Clear the message queue.</td></tr>
+              <tr><td><code>ws.state</code></td><td><code>"connecting"</code>, <code>"open"</code>, <code>"closed"</code>, or <code>"reconnecting"</code></td></tr>
+              <tr><td><code>ws.queueSize</code></td><td>Number of messages in the queue</td></tr>
+              <tr><td><code>ws.socket</code></td><td>The raw <code>WebSocket</code> instance</td></tr>
+              <tr><td><code>ws.url</code></td><td>The WebSocket URL</td></tr>
+              <tr><td><code>ws.reconnectAttempts</code></td><td>Current reconnect attempt count</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Reconnection -->
+        <section id="reconnect" class="mb-5">
+          <h2>Reconnection</h2>
+          <p>WSKit uses exponential backoff for reconnection:</p>
+          <ul>
+            <li>1st attempt: 1 second</li>
+            <li>2nd attempt: 2 seconds</li>
+            <li>3rd attempt: 4 seconds</li>
+            <li>4th attempt: 8 seconds</li>
+            <li>...up to <code class="inline">reconnectMaxMs</code> (default 30s)</li>
+          </ul>
+
+          <p>On successful reconnect, the message queue is flushed automatically. Set <code class="inline">maxReconnectAttempts</code> to limit retries:</p>
+          <pre class="code-block"><code>const ws = WSKit.connect(url, {
+  reconnect: true,
+  reconnectBaseMs: 500,
+  reconnectMaxMs: 15000,
+  maxReconnectAttempts: 10,    // give up after 10 attempts
+  onReconnect: (attempt) =&gt; {
+    console.log('Reconnecting... attempt', attempt);
+  },
+  onStateChange: (state) =&gt; {
+    document.getElementById('status').textContent = state;
+  },
+});</code></pre>
+        </section>
+
+        <!-- Heartbeat -->
+        <section id="heartbeat" class="mb-5">
+          <h2>Heartbeat</h2>
+          <p>WSKit sends a configurable ping message at regular intervals to keep the connection alive and detect stale connections:</p>
+          <pre class="code-block"><code>const ws = WSKit.connect(url, {
+  heartbeatMs: 30000,                  // every 30 seconds (default)
+  heartbeatMessage: { type: 'ping' },  // payload (default)
+});
+
+// Disable heartbeat
+const ws2 = WSKit.connect(url, {
+  heartbeatMs: 0,  // disabled
+});</code></pre>
+
+          <p class="mt-3">Your server can respond with a <code class="inline">pong</code> or simply ignore the ping. The heartbeat stops when disconnected and restarts on reconnect.</p>
+        </section>
+
+        <!-- Backend Examples -->
+        <section id="backend-examples" class="mb-5">
+          <h2>Backend Examples</h2>
+
+          <h5 class="mt-4">Node.js (ws)</h5>
+          <pre class="code-block"><code>import { WebSocketServer } from 'ws';
+
+const wss = new WebSocketServer({ port: 8080 });
+
+wss.on('connection', (socket) =&gt; {
+  socket.on('message', (raw) =&gt; {
+    const msg = JSON.parse(raw);
+
+    switch (msg.type) {
+      case 'chat':
+        // Broadcast to all clients
+        wss.clients.forEach((client) =&gt; {
+          if (client.readyState === 1) {
+            client.send(JSON.stringify(msg));
+          }
+        });
+        break;
+
+      case 'getUser':
+        // Request/response — echo back _id
+        socket.send(JSON.stringify({
+          _id: msg._id,
+          name: 'John',
+          email: 'john@example.com',
+        }));
+        break;
+
+      case 'ping':
+        socket.send(JSON.stringify({ type: 'pong' }));
+        break;
+    }
+  });
+});</code></pre>
+
+          <h5 class="mt-4">Python (websockets)</h5>
+          <pre class="code-block"><code>import asyncio, json, websockets
+
+connected = set()
+
+async def handler(ws):
+    connected.add(ws)
+    try:
+        async for raw in ws:
+            msg = json.loads(raw)
+
+            if msg.get("type") == "chat":
+                for client in connected:
+                    if client != ws:
+                        await client.send(json.dumps(msg))
+
+            elif msg.get("type") == "getUser":
+                await ws.send(json.dumps({
+                    "_id": msg["_id"],
+                    "name": "John",
+                    "email": "john@example.com",
+                }))
+
+            elif msg.get("type") == "ping":
+                await ws.send(json.dumps({"type": "pong"}))
+    finally:
+        connected.discard(ws)
+
+asyncio.run(websockets.serve(handler, "0.0.0.0", 8080))</code></pre>
+
+          <h5 class="mt-4">Go (gorilla/websocket)</h5>
+          <pre class="code-block"><code>package main
+
+import (
+    "encoding/json"
+    "log"
+    "net/http"
+    "github.com/gorilla/websocket"
+)
+
+var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    conn, _ := upgrader.Upgrade(w, r, nil)
+    defer conn.Close()
+
+    for {
+        _, raw, err := conn.ReadMessage()
+        if err != nil { break }
+
+        var msg map[string]interface{}
+        json.Unmarshal(raw, &amp;msg)
+
+        switch msg["type"] {
+        case "getUser":
+            resp, _ := json.Marshal(map[string]interface{}{
+                "_id":   msg["_id"],
+                "name":  "John",
+                "email": "john@example.com",
+            })
+            conn.WriteMessage(websocket.TextMessage, resp)
+
+        case "ping":
+            resp, _ := json.Marshal(map[string]string{"type": "pong"})
+            conn.WriteMessage(websocket.TextMessage, resp)
+        }
+    }
+}
+
+func main() {
+    http.HandleFunc("/ws", handler)
+    log.Fatal(http.ListenAndServe(":8080", nil))
+}</code></pre>
+        </section>
+
+        <!-- npm -->
+        <section class="mb-5">
+          <h2>npm</h2>
+          <p>WSKit is available on npm as <a href="https://www.npmjs.com/package/wskit-client" style="color:var(--rte-brand);font-weight:600">wskit-client</a>.</p>
+          <pre class="code-block"><code>npm install wskit-client</code></pre>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+<%- include('partials/footer') %>

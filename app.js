@@ -86,6 +86,10 @@ app.get('/websocket', (req, res) => {
   res.render('websocket', { page: 'websocket' });
 });
 
+app.get('/wskit', (req, res) => {
+  res.render('wskit', { page: 'wskit' });
+});
+
 app.get('/contact', (req, res) => {
   res.render('contact', { page: 'contact', sent: false, error: null });
 });
