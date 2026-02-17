@@ -217,6 +217,8 @@
   font-size: 13px;
 }
 .rte-content img, .rte-content video, .rte-content audio {
+  max-width: 100%;
+  height: auto;
   border-radius: 8px;
   margin: 8px 0;
   display: block;
