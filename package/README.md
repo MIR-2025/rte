@@ -188,6 +188,39 @@ editor.onChange = (data: RTEChangeData) => { ... };
 - **[rte-rich-text-editor-ws](https://www.npmjs.com/package/rte-rich-text-editor-ws)** — WebSocket connector for auto-save and real-time collaboration
 - **[rte-rich-text-editor-bundle](https://www.npmjs.com/package/rte-rich-text-editor-bundle)** — Editor + WebSocket bundled in a single file
 
+## Changelog
+
+### 1.0.14
+- Added explicit `type="button"` to `btn()` and `fmtBtn()` helpers
+
+### 1.0.13
+- Added `type="button"` to all editor buttons to prevent form submission inside `<form>` elements
+
+### 1.0.12
+- Made editor vertically resizable (`resize: vertical`, removed `max-height` cap)
+
+### 1.0.11
+- Images now insert at full native resolution (removed `max-width: 100%`)
+- Added horizontal scrolling for oversized content
+
+### 1.0.10
+- Click-to-resize image handles with proportional drag resizing
+- Blue overlay with 4 corner handles on image click
+- Delete/Backspace removes selected image, Escape clears selection
+- Resize classes stripped from exported HTML/JSON
+
+### 1.0.9
+- Added related package links (ws, bundle) to README
+
+### 1.0.8
+- Added repository URL, author, and bugs URL to package metadata
+
+### 1.0.7
+- Email button copies rich HTML to clipboard instead of opening mail client
+
+### 1.0.0
+- Initial release — single-file rich text editor, zero dependencies
+
 ## License
 
 MIT

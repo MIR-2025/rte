@@ -88,6 +88,26 @@ If you only need the editor or only the WebSocket connector:
 - [WebSocket docs](https://rte.whitneys.co/websocket)
 - [Examples](https://rte.whitneys.co/examples)
 
+## Changelog
+
+### 1.0.5
+- Added explicit `type="button"` to all editor buttons to prevent form submission
+
+### 1.0.4
+- Added `type="button"` via `el()` helper to prevent form submission inside `<form>` elements
+
+### 1.0.3
+- Synced with rte-rich-text-editor 1.0.12 (image resize, content overflow, vertical resizing)
+
+### 1.0.2
+- Added CommonJS and ES Modules usage examples to README
+
+### 1.0.1
+- Added TypeScript declarations and module fields
+
+### 1.0.0
+- Initial release — editor + WebSocket connector in one file
+
 ## License
 
 MIT — phpMyDEV, LLC

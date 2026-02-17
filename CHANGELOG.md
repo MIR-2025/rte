@@ -24,6 +24,15 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-bundle
 
+#### [1.0.5] - 2026-02-17
+- Added explicit `type="button"` to all editor buttons to prevent form submission
+
+#### [1.0.4] - 2026-02-17
+- Added `type="button"` via `el()` helper to prevent form submission when editor is inside a `<form>`
+
+#### [1.0.3] - 2026-02-17
+- Synced with rte-rich-text-editor 1.0.12 (image resize, content overflow, vertical resizing)
+
 #### [1.0.2] - 2026-02-16
 - Added CommonJS and ES Modules usage examples to README
 
@@ -53,6 +62,26 @@ All notable changes will be documented in this file.
 - Available at `https://rte.whitneys.co/rte-ws.js`
 
 ## rte-rich-text-editor
+
+### [1.0.14] - 2026-02-17
+- Added explicit `type="button"` to `btn()` and `fmtBtn()` helpers
+
+### [1.0.13] - 2026-02-17
+- Added `type="button"` to all editor buttons via `el()` helper to prevent form submission when editor is inside a `<form>`
+
+### [1.0.12] - 2026-02-17
+- Made editor vertically resizable (CSS `resize: vertical`, removed `max-height` cap)
+
+### [1.0.11] - 2026-02-17
+- Removed `max-width: 100%` on images so they insert at full native resolution
+- Changed `.rte-content` overflow from `overflow-y: auto` to `overflow: auto` for horizontal scrolling
+
+### [1.0.10] - 2026-02-17
+- Added click-to-resize image handles with proportional drag resizing
+- Blue overlay with 4 corner handles appears on image click
+- Delete/Backspace removes selected image, Escape clears selection
+- Resize classes stripped from `getHTML()` and `getJSON()` exports
+- Cleanup in `destroy()` method
 
 ### [1.0.9] - 2026-02-16
 - Added related package links (ws, bundle) to README
