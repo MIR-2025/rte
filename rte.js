@@ -400,6 +400,32 @@
 /* Hidden file inputs */
 .rte-wrap input[type="file"] { display: none; }
 
+/* Image resize overlay */
+.rte-img-resize-overlay {
+  position: absolute;
+  border: 2px solid #3b82f6;
+  pointer-events: none;
+  z-index: 10;
+}
+.rte-img-resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #3b82f6;
+  border: 1px solid #fff;
+  border-radius: 2px;
+  pointer-events: auto;
+  z-index: 11;
+}
+.rte-img-resize-handle.nw { top: -5px; left: -5px; cursor: nw-resize; }
+.rte-img-resize-handle.ne { top: -5px; right: -5px; cursor: ne-resize; }
+.rte-img-resize-handle.sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+.rte-img-resize-handle.se { bottom: -5px; right: -5px; cursor: se-resize; }
+.rte-img-resizing {
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+}
+
 /* Responsive */
 @media (max-width: 580px) {
   .rte-btn { min-width: 28px; height: 28px; font-size: 16px; }
@@ -778,8 +804,9 @@
     }
 
     // Close popups when clicking inside editor
-    content.addEventListener("mousedown", () => {
+    content.addEventListener("mousedown", (e) => {
       allPopups.forEach(p => p.classList.remove("show"));
+      if (e.target.tagName !== "IMG") clearImageResize();
     });
 
     // ── Link popup wiring ──
@@ -1052,10 +1079,101 @@
       }
     });
 
+    // ── Image Resize System ───────────────────────────────
+    let resizeOverlay = null;
+    let resizeImg = null;
+    let resizeDragging = false;
+    let resizeStartX = 0;
+    let resizeStartWidth = 0;
+    let resizeAspect = 1;
+
+    function clearImageResize() {
+      if (resizeOverlay) { resizeOverlay.remove(); resizeOverlay = null; }
+      if (resizeImg) { resizeImg.classList.remove("rte-img-resizing"); resizeImg = null; }
+      resizeDragging = false;
+    }
+
+    function positionOverlay() {
+      if (!resizeOverlay || !resizeImg) return;
+      const imgRect = resizeImg.getBoundingClientRect();
+      const wrapRect = wrap.getBoundingClientRect();
+      resizeOverlay.style.top = (imgRect.top - wrapRect.top) + "px";
+      resizeOverlay.style.left = (imgRect.left - wrapRect.left) + "px";
+      resizeOverlay.style.width = imgRect.width + "px";
+      resizeOverlay.style.height = imgRect.height + "px";
+    }
+
+    function selectImageForResize(img) {
+      clearImageResize();
+      resizeImg = img;
+      img.classList.add("rte-img-resizing");
+
+      resizeOverlay = document.createElement("div");
+      resizeOverlay.className = "rte-img-resize-overlay";
+      ["nw", "ne", "sw", "se"].forEach(pos => {
+        const handle = document.createElement("div");
+        handle.className = "rte-img-resize-handle " + pos;
+        handle.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          resizeDragging = true;
+          resizeStartX = e.clientX;
+          resizeStartWidth = resizeImg.getBoundingClientRect().width;
+          resizeAspect = resizeImg.naturalHeight / resizeImg.naturalWidth;
+        });
+        resizeOverlay.appendChild(handle);
+      });
+
+      wrap.appendChild(resizeOverlay);
+      positionOverlay();
+    }
+
+    content.addEventListener("click", (e) => {
+      if (e.target.tagName === "IMG") {
+        e.preventDefault();
+        selectImageForResize(e.target);
+      }
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!resizeDragging || !resizeImg) return;
+      const dx = e.clientX - resizeStartX;
+      const newWidth = Math.max(20, resizeStartWidth + dx);
+      resizeImg.style.width = newWidth + "px";
+      resizeImg.style.height = "auto";
+      positionOverlay();
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (resizeDragging) {
+        resizeDragging = false;
+        updateStatus();
+      }
+    });
+
+    content.addEventListener("scroll", positionOverlay);
+    content.addEventListener("input", positionOverlay);
+
+    document.addEventListener("keydown", (e) => {
+      if (!resizeImg) return;
+      if (e.key === "Escape") {
+        clearImageResize();
+      } else if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        resizeImg.remove();
+        clearImageResize();
+        updateStatus();
+      }
+    });
+
     // ── Public API ─────────────────────────────────────────
     const api = {
       /** Get editor HTML content */
-      getHTML: () => content.innerHTML,
+      getHTML: () => {
+        const clone = content.cloneNode(true);
+        clone.querySelectorAll(".rte-img-resizing").forEach(el => el.classList.remove("rte-img-resizing"));
+        return clone.innerHTML;
+      },
       /** Set HTML content */
       setHTML: (html) => { content.innerHTML = html; updateStatus(); },
       /** Get plain text */
@@ -1063,13 +1181,17 @@
       /** Get a standalone HTML document (for saving/emailing) */
       getFullHTML: getFullHTML,
       /** Get content as a JSON object */
-      getJSON: () => ({
-        html: content.innerHTML,
-        text: content.innerText,
-        wordCount: (content.innerText.trim() ? content.innerText.trim().split(/\s+/).length : 0),
-        charCount: content.innerText.length,
-        createdAt: new Date().toISOString(),
-      }),
+      getJSON: () => {
+        const clone = content.cloneNode(true);
+        clone.querySelectorAll(".rte-img-resizing").forEach(el => el.classList.remove("rte-img-resizing"));
+        return {
+          html: clone.innerHTML,
+          text: content.innerText,
+          wordCount: (content.innerText.trim() ? content.innerText.trim().split(/\s+/).length : 0),
+          charCount: content.innerText.length,
+          createdAt: new Date().toISOString(),
+        };
+      },
       /** Download content as HTML file */
       saveHTML: (filename) => {
         const blob = new Blob([getFullHTML()], { type: "text/html" });
@@ -1129,7 +1251,7 @@
       /** Focus the editor */
       focus: () => content.focus(),
       /** Destroy the editor */
-      destroy: () => { wrap.remove(); },
+      destroy: () => { clearImageResize(); wrap.remove(); },
       /** Direct access to the content element */
       element: content,
       /** Direct access to the wrapper */
