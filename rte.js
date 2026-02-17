@@ -493,11 +493,12 @@
   }
 
   function btn(emoji, tip, onClick, extraClass) {
-    return el("button", { className: "rte-btn" + (extraClass ? " " + extraClass : ""), "data-tip": tip, onClick }, emoji);
+    return el("button", { type: "button", className: "rte-btn" + (extraClass ? " " + extraClass : ""), "data-tip": tip, onClick }, emoji);
   }
 
   function fmtBtn(label, tip, onClick, fmtClass) {
     return el("button", {
+      type: "button",
       className: "rte-btn rte-btn-text " + fmtClass,
       "data-tip": tip,
       onClick
