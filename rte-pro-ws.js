@@ -1365,6 +1365,46 @@
 
     // ── Keyboard shortcuts ──
     content.addEventListener("keydown", e => {
+      // Tab navigation inside tables
+      if (e.key === "Tab") {
+        const sel = window.getSelection();
+        const cell = sel && sel.anchorNode
+          ? (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement).closest("td, th")
+          : null;
+        if (cell) {
+          e.preventDefault();
+          const row = cell.parentElement;
+          const table = cell.closest("table");
+          const allCells = Array.from(table.querySelectorAll("td, th"));
+          const idx = allCells.indexOf(cell);
+          let target;
+          if (e.shiftKey) {
+            // Previous cell
+            target = allCells[idx - 1] || null;
+          } else {
+            target = allCells[idx + 1] || null;
+            // At last cell: add a new row and move into it
+            if (!target) {
+              const colCount = row.children.length;
+              const newRow = document.createElement("tr");
+              for (let c = 0; c < colCount; c++) {
+                const td = document.createElement("td");
+                td.innerHTML = "&nbsp;";
+                newRow.appendChild(td);
+              }
+              (table.querySelector("tbody") || table).appendChild(newRow);
+              target = newRow.firstChild;
+              updateStatus();
+            }
+          }
+          if (target) {
+            const range = document.createRange();
+            range.selectNodeContents(target);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+      }
       if (e.ctrlKey || e.metaKey) {
         switch (e.key.toLowerCase()) {
           case "b": e.preventDefault(); exec("bold"); break;

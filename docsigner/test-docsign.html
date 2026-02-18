@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocSign — Test</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; padding: 20px; }
+    .test-header { text-align: center; margin-bottom: 20px; }
+    .test-header h1 { font-size: 22px; color: #1a1a2e; }
+    .test-header p { color: #6b7280; font-size: 14px; margin-top: 4px; }
+    .controls { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .controls label { font-size: 13px; font-weight: 600; color: #374151; }
+    .controls select, .controls input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+    .controls button { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-create { background: #3b82f6; color: #fff; }
+    .btn-create:hover { background: #2563eb; }
+    .btn-join { background: #059669; color: #fff; }
+    .btn-join:hover { background: #047857; }
+    #docsign-container { height: 650px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .doc-id-display { font-family: monospace; font-size: 12px; color: #6b7280; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <div class="test-header">
+    <h1>DocSign Test Page</h1>
+    <p>Open this page in two tabs with different users to test real-time signing.</p>
+  </div>
+
+  <div class="controls">
+    <button class="btn-create" id="btn-create">Create Sample Document</button>
+    <button class="btn-upload" id="btn-upload" style="background:#7c3aed;color:#fff;">Upload Document</button>
+    <label>or Join ID:</label>
+    <input type="text" id="join-id" placeholder="paste doc ID..." size="30">
+    <button class="btn-join" id="btn-join">Join</button>
+    <span class="doc-id-display" id="current-doc-id">No document</span>
+    <span style="flex-grow:1;"></span>
+    <label>Sign as:</label>
+    <select id="user-select" disabled>
+      <option value="">— load a document first —</option>
+    </select>
+  </div>
+
+  <div id="docsign-container"></div>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="docsign.js"></script>
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var userSelect = document.getElementById('user-select');
+    var signer = null;
+
+    // Single persistent instance — created once, never destroyed during session
+    function ensureSigner() {
+      if (signer) return signer;
+      signer = DocSign.init('#docsign-container', {
+        serverUrl: window.location.origin,
+        userId: '_pending',
+        userName: 'Pending'
+      });
+
+      signer.onSigned = function (data) { console.log('Signed by:', data.signedBy); };
+      signer.onCompleted = function (data) { console.log('Document completed!', data); };
+      signer.onError = function (msg) { console.error('Error:', msg); };
+
+      // Whenever a doc loads (create, join, or switchUser rejoin), populate the dropdown
+      signer.onDocLoaded = function (doc) {
+        document.getElementById('current-doc-id').textContent = 'Doc ID: ' + doc.id;
+        // Only repopulate if the dropdown doesn't already have these signers
+        var needsPopulate = userSelect.options.length <= 1 || userSelect.options[1].value !== doc.signers[0].id;
+        if (needsPopulate) {
+          userSelect.innerHTML = '';
+          userSelect.appendChild(new Option('— choose who you are —', ''));
+          doc.signers.forEach(function (s) {
+            var opt = new Option(s.name, s.id);
+            opt.setAttribute('data-name', s.name);
+            userSelect.appendChild(opt);
+          });
+          userSelect.disabled = false;
+        }
+        // Keep current selection in sync
+        if (signer.userId && signer.userId !== '_pending') {
+          userSelect.value = signer.userId;
+        }
+        // Auto-select from URL param on first load
+        if (params.get('user') && !userSelect.value) {
+          userSelect.value = params.get('user');
+          if (userSelect.value) {
+            var opt = userSelect.options[userSelect.selectedIndex];
+            signer.switchUser(opt.value, opt.getAttribute('data-name'));
+          }
+        }
+      };
+
+      return signer;
+    }
+
+    // Create sample document
+    document.getElementById('btn-create').addEventListener('click', function () {
+      var s = ensureSigner();
+      s.create({
+        title: 'Service Agreement',
+        content: [
+          '<h1>Service Agreement</h1>',
+          '<p><strong>Effective Date:</strong> February 17, 2026</p>',
+          '<p>This Service Agreement ("Agreement") is entered into by and between the undersigned parties.</p>',
+          '<h2>1. Scope of Services</h2>',
+          '<p>The Service Provider agrees to deliver consulting services as described in Exhibit A, attached hereto. Services shall be performed in a professional and timely manner consistent with industry standards.</p>',
+          '<h2>2. Compensation</h2>',
+          '<p>The Client agrees to pay the Service Provider a fee of <strong>$5,000 per month</strong> for services rendered. Invoices shall be submitted on the first business day of each month and are due within 30 days of receipt.</p>',
+          '<h2>3. Term and Termination</h2>',
+          '<p>This Agreement shall commence on the Effective Date and continue for a period of 12 months. Either party may terminate this Agreement with 30 days\' written notice.</p>',
+          '<h2>4. Confidentiality</h2>',
+          '<p>Both parties agree to maintain the confidentiality of any proprietary information shared during the course of this engagement. This obligation shall survive termination of this Agreement.</p>',
+          '<h2>5. Limitation of Liability</h2>',
+          '<p>In no event shall either party be liable for indirect, incidental, or consequential damages arising from this Agreement.</p>',
+          '<p style="margin-top:30px;">IN WITNESS WHEREOF, the parties have executed this Agreement as of the date first written above.</p>'
+        ].join('\n'),
+        signers: [
+          { id: 'user-1', name: 'Alice Johnson', email: 'alice@example.com' },
+          { id: 'user-2', name: 'Bob Smith', email: 'bob@example.com' },
+          { id: 'user-3', name: 'Carol Davis', email: 'carol@example.com' }
+        ]
+      });
+    });
+
+    // Upload document
+    document.getElementById('btn-upload').addEventListener('click', function () {
+      ensureSigner().openCreateModal();
+    });
+
+    // Join existing document
+    document.getElementById('btn-join').addEventListener('click', function () {
+      var docId = document.getElementById('join-id').value.trim();
+      if (!docId) { alert('Enter a document ID'); return; }
+      ensureSigner().join(docId);
+    });
+
+    // When user picks a signer from the dropdown, switch identity and rejoin
+    userSelect.addEventListener('change', function () {
+      if (!signer || !signer.doc || !userSelect.value) return;
+      var opt = userSelect.options[userSelect.selectedIndex];
+      signer.switchUser(opt.value, opt.getAttribute('data-name'));
+    });
+
+    // Auto-join from URL param
+    if (params.get('doc')) {
+      ensureSigner().join(params.get('doc'));
+    }
+  </script>
+</body>
+</html>

@@ -180,8 +180,8 @@
 /* Editor area */
 .rte-content {
   min-height: 260px;
-  max-height: 70vh;
-  overflow-y: auto;
+  overflow: auto;
+  resize: vertical;
   padding: 16px 20px;
   outline: none;
   font-size: 15px;
@@ -218,6 +218,7 @@
 }
 .rte-content img, .rte-content video, .rte-content audio {
   max-width: 100%;
+  height: auto;
   border-radius: 8px;
   margin: 8px 0;
   display: block;
@@ -400,6 +401,32 @@
 /* Hidden file inputs */
 .rte-wrap input[type="file"] { display: none; }
 
+/* Image resize overlay */
+.rte-img-resize-overlay {
+  position: absolute;
+  border: 2px solid #3b82f6;
+  pointer-events: none;
+  z-index: 10;
+}
+.rte-img-resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #3b82f6;
+  border: 1px solid #fff;
+  border-radius: 2px;
+  pointer-events: auto;
+  z-index: 11;
+}
+.rte-img-resize-handle.nw { top: -5px; left: -5px; cursor: nw-resize; }
+.rte-img-resize-handle.ne { top: -5px; right: -5px; cursor: ne-resize; }
+.rte-img-resize-handle.sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+.rte-img-resize-handle.se { bottom: -5px; right: -5px; cursor: se-resize; }
+.rte-img-resizing {
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+}
+
 /* Responsive */
 @media (max-width: 580px) {
   .rte-btn { min-width: 28px; height: 28px; font-size: 16px; }
@@ -452,6 +479,7 @@
   // ── Helpers ──────────────────────────────────────────────
   function el(tag, attrs, children) {
     const e = document.createElement(tag);
+    if (tag === "button") e.type = "button";
     if (attrs) Object.entries(attrs).forEach(([k, v]) => {
       if (k === "className") e.className = v;
       else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
@@ -467,11 +495,12 @@
   }
 
   function btn(emoji, tip, onClick, extraClass) {
-    return el("button", { className: "rte-btn" + (extraClass ? " " + extraClass : ""), "data-tip": tip, onClick }, emoji);
+    return el("button", { type: "button", className: "rte-btn" + (extraClass ? " " + extraClass : ""), "data-tip": tip, onClick }, emoji);
   }
 
   function fmtBtn(label, tip, onClick, fmtClass) {
     return el("button", {
+      type: "button",
       className: "rte-btn rte-btn-text " + fmtClass,
       "data-tip": tip,
       onClick
@@ -518,6 +547,8 @@
     options = Object.assign({
       placeholder: "Start typing something amazing\u2026",
       height: null,
+      exportCSS: null,
+      exportTemplate: null,
     }, options);
 
     const wrap = el("div", { className: "rte-wrap" });
@@ -778,8 +809,9 @@
     }
 
     // Close popups when clicking inside editor
-    content.addEventListener("mousedown", () => {
+    content.addEventListener("mousedown", (e) => {
       allPopups.forEach(p => p.classList.remove("show"));
+      if (e.target.tagName !== "IMG") clearImageResize();
     });
 
     // ── Link popup wiring ──
@@ -881,7 +913,12 @@
 
     // ── Full HTML document wrapper for export/email ────────
     function getFullHTML() {
-      return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;line-height:1.7;color:#1e293b;max-width:800px;margin:0 auto}img,video{max-width:100%;border-radius:8px}audio{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d5dd;padding:8px 12px;text-align:left}th{background:#f8f9fb;font-weight:600}blockquote{border-left:4px solid #6366f1;margin:.6em 0;padding:.4em .8em;background:#f1f5f9}pre{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;overflow-x:auto;font-size:13px}a{color:#6366f1}hr{border:none;border-top:2px dashed #d0d5dd;margin:1em 0}</style></head><body>' + content.innerHTML + '</body></html>';
+      if (options.exportTemplate) {
+        return options.exportTemplate.replace('{{content}}', content.innerHTML);
+      }
+      var css = 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;line-height:1.7;color:#1e293b;max-width:800px;margin:0 auto}img,video{max-width:100%;border-radius:8px}audio{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d5dd;padding:8px 12px;text-align:left}th{background:#f8f9fb;font-weight:600}blockquote{border-left:4px solid #6366f1;margin:.6em 0;padding:.4em .8em;background:#f1f5f9}pre{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;overflow-x:auto;font-size:13px}a{color:#6366f1}hr{border:none;border-top:2px dashed #d0d5dd;margin:1em 0}';
+      if (options.exportCSS) css += options.exportCSS;
+      return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>' + css + '</style></head><body>' + content.innerHTML + '</body></html>';
     }
 
     // ── Export bar (save, copy, email, etc.) ────────────────
@@ -991,6 +1028,46 @@
 
     // ── Keyboard shortcuts ─────────────────────────────────
     content.addEventListener("keydown", (e) => {
+      // Tab navigation inside tables
+      if (e.key === "Tab") {
+        const sel = window.getSelection();
+        const cell = sel && sel.anchorNode
+          ? (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement).closest("td, th")
+          : null;
+        if (cell) {
+          e.preventDefault();
+          const row = cell.parentElement;
+          const table = cell.closest("table");
+          const allCells = Array.from(table.querySelectorAll("td, th"));
+          const idx = allCells.indexOf(cell);
+          let target;
+          if (e.shiftKey) {
+            // Previous cell
+            target = allCells[idx - 1] || null;
+          } else {
+            target = allCells[idx + 1] || null;
+            // At last cell: add a new row and move into it
+            if (!target) {
+              const colCount = row.children.length;
+              const newRow = document.createElement("tr");
+              for (let c = 0; c < colCount; c++) {
+                const td = document.createElement("td");
+                td.innerHTML = "&nbsp;";
+                newRow.appendChild(td);
+              }
+              (table.querySelector("tbody") || table).appendChild(newRow);
+              target = newRow.firstChild;
+              updateStatus();
+            }
+          }
+          if (target) {
+            const range = document.createRange();
+            range.selectNodeContents(target);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+      }
       if (e.ctrlKey || e.metaKey) {
         switch (e.key.toLowerCase()) {
           case "b": e.preventDefault(); exec("bold"); break;
@@ -1052,10 +1129,101 @@
       }
     });
 
+    // ── Image Resize System ───────────────────────────────
+    let resizeOverlay = null;
+    let resizeImg = null;
+    let resizeDragging = false;
+    let resizeStartX = 0;
+    let resizeStartWidth = 0;
+    let resizeAspect = 1;
+
+    function clearImageResize() {
+      if (resizeOverlay) { resizeOverlay.remove(); resizeOverlay = null; }
+      if (resizeImg) { resizeImg.classList.remove("rte-img-resizing"); resizeImg = null; }
+      resizeDragging = false;
+    }
+
+    function positionOverlay() {
+      if (!resizeOverlay || !resizeImg) return;
+      const imgRect = resizeImg.getBoundingClientRect();
+      const wrapRect = wrap.getBoundingClientRect();
+      resizeOverlay.style.top = (imgRect.top - wrapRect.top) + "px";
+      resizeOverlay.style.left = (imgRect.left - wrapRect.left) + "px";
+      resizeOverlay.style.width = imgRect.width + "px";
+      resizeOverlay.style.height = imgRect.height + "px";
+    }
+
+    function selectImageForResize(img) {
+      clearImageResize();
+      resizeImg = img;
+      img.classList.add("rte-img-resizing");
+
+      resizeOverlay = document.createElement("div");
+      resizeOverlay.className = "rte-img-resize-overlay";
+      ["nw", "ne", "sw", "se"].forEach(pos => {
+        const handle = document.createElement("div");
+        handle.className = "rte-img-resize-handle " + pos;
+        handle.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          resizeDragging = true;
+          resizeStartX = e.clientX;
+          resizeStartWidth = resizeImg.getBoundingClientRect().width;
+          resizeAspect = resizeImg.naturalHeight / resizeImg.naturalWidth;
+        });
+        resizeOverlay.appendChild(handle);
+      });
+
+      wrap.appendChild(resizeOverlay);
+      positionOverlay();
+    }
+
+    content.addEventListener("click", (e) => {
+      if (e.target.tagName === "IMG") {
+        e.preventDefault();
+        selectImageForResize(e.target);
+      }
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!resizeDragging || !resizeImg) return;
+      const dx = e.clientX - resizeStartX;
+      const newWidth = Math.max(20, resizeStartWidth + dx);
+      resizeImg.style.width = newWidth + "px";
+      resizeImg.style.height = "auto";
+      positionOverlay();
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (resizeDragging) {
+        resizeDragging = false;
+        updateStatus();
+      }
+    });
+
+    content.addEventListener("scroll", positionOverlay);
+    content.addEventListener("input", positionOverlay);
+
+    document.addEventListener("keydown", (e) => {
+      if (!resizeImg) return;
+      if (e.key === "Escape") {
+        clearImageResize();
+      } else if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        resizeImg.remove();
+        clearImageResize();
+        updateStatus();
+      }
+    });
+
     // ── Public API ─────────────────────────────────────────
     const api = {
       /** Get editor HTML content */
-      getHTML: () => content.innerHTML,
+      getHTML: () => {
+        const clone = content.cloneNode(true);
+        clone.querySelectorAll(".rte-img-resizing").forEach(el => el.classList.remove("rte-img-resizing"));
+        return clone.innerHTML;
+      },
       /** Set HTML content */
       setHTML: (html) => { content.innerHTML = html; updateStatus(); },
       /** Get plain text */
@@ -1063,13 +1231,17 @@
       /** Get a standalone HTML document (for saving/emailing) */
       getFullHTML: getFullHTML,
       /** Get content as a JSON object */
-      getJSON: () => ({
-        html: content.innerHTML,
-        text: content.innerText,
-        wordCount: (content.innerText.trim() ? content.innerText.trim().split(/\s+/).length : 0),
-        charCount: content.innerText.length,
-        createdAt: new Date().toISOString(),
-      }),
+      getJSON: () => {
+        const clone = content.cloneNode(true);
+        clone.querySelectorAll(".rte-img-resizing").forEach(el => el.classList.remove("rte-img-resizing"));
+        return {
+          html: clone.innerHTML,
+          text: content.innerText,
+          wordCount: (content.innerText.trim() ? content.innerText.trim().split(/\s+/).length : 0),
+          charCount: content.innerText.length,
+          createdAt: new Date().toISOString(),
+        };
+      },
       /** Download content as HTML file */
       saveHTML: (filename) => {
         const blob = new Blob([getFullHTML()], { type: "text/html" });
@@ -1129,7 +1301,7 @@
       /** Focus the editor */
       focus: () => content.focus(),
       /** Destroy the editor */
-      destroy: () => { wrap.remove(); },
+      destroy: () => { clearImageResize(); wrap.remove(); },
       /** Direct access to the content element */
       element: content,
       /** Direct access to the wrapper */

@@ -1096,11 +1096,26 @@
 
     const AI_SYSTEM = "You are an AI writing assistant embedded in a rich text editor. IMPORTANT: Always respond with clean, raw HTML suitable for a WYSIWYG editor contenteditable div. Use semantic HTML tags: <h1>-<h4>, <p>, <strong>, <em>, <ul>, <ol>, <li>, <blockquote>, <pre>, <a>, <table>, <tr>, <td>, <th>, <img>, <hr>, <br>, <span style=\"...\">. Do NOT use markdown formatting. Do NOT wrap your response in ```html code fences. Do NOT include <html>, <head>, <body>, or <style> tags — only inner content HTML. For layouts, use inline styles on divs/sections. Output ONLY the HTML content, no explanations.";
 
+    function stripDocumentTags(html) {
+      // Remove code fences
+      html = html.replace(/^```html?\s*\n?/i, "").replace(/\n?```\s*$/,"");
+      // Remove doctype, html, head, meta, title, style, body tags — keep only inner content
+      html = html.replace(/<!DOCTYPE[^>]*>/gi, "");
+      html = html.replace(/<\/?html[^>]*>/gi, "");
+      html = html.replace(/<head[\s\S]*?<\/head>/gi, "");
+      html = html.replace(/<\/?body[^>]*>/gi, "");
+      html = html.replace(/<style[\s\S]*?<\/style>/gi, "");
+      html = html.replace(/<meta[^>]*>/gi, "");
+      html = html.replace(/<title[\s\S]*?<\/title>/gi, "");
+      html = html.replace(/<link[^>]*>/gi, "");
+      return html.trim();
+    }
     function aiResponseToHTML(text) {
-      // If it already looks like HTML, return as-is
-      if (text.trim().startsWith("<") && /<\/(p|div|h[1-6]|ul|ol|table|section|blockquote)>/i.test(text)) return text;
-      // Strip code fences if Claude wrapped in ```html ... ```
+      // Strip code fences
       text = text.replace(/^```html?\s*\n?/i, "").replace(/\n?```\s*$/,"");
+      // Strip document-level tags
+      text = stripDocumentTags(text);
+      // If it looks like HTML, return it
       if (text.trim().startsWith("<") && /<\/(p|div|h[1-6]|ul|ol|table|section|blockquote)>/i.test(text)) return text;
       // Otherwise convert markdown to HTML
       return markdownToHtml(text);
@@ -1294,11 +1309,11 @@
       clone.querySelectorAll(".rte-pro-drag-handle").forEach(h => h.remove());
       clone.querySelectorAll("[data-rte-tag]").forEach(el => el.removeAttribute("data-rte-tag"));
       clone.querySelectorAll("mark.rte-pro-highlight-match, mark.rte-pro-highlight-current").forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
-      return clone.innerHTML;
+      return stripDocumentTags(clone.innerHTML);
     }
     function getFullHTML() {
       if (options.exportTemplate) return options.exportTemplate.replace('{{content}}', cleanHTML());
-      var css = 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;line-height:1.7;color:#1e293b;max-width:800px;margin:0 auto}img,video{max-width:100%;border-radius:8px}audio{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d5dd;padding:8px 12px;text-align:left}th{background:#f8f9fb;font-weight:600}blockquote{border-left:4px solid #6366f1;margin:.6em 0;padding:.4em .8em;background:#f1f5f9}pre{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;overflow-x:auto;font-size:13px}a{color:#6366f1}hr{border:none;border-top:2px dashed #d0d5dd;margin:1em 0}';
+      var css = 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;line-height:1.7;color:#1e293b}img,video{max-width:100%;border-radius:8px}audio{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d5dd;padding:8px 12px;text-align:left}th{background:#f8f9fb;font-weight:600}blockquote{border-left:4px solid #6366f1;margin:.6em 0;padding:.4em .8em;background:#f1f5f9}pre{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;overflow-x:auto;font-size:13px}a{color:#6366f1}hr{border:none;border-top:2px dashed #d0d5dd;margin:1em 0}';
       if (options.exportCSS) css += options.exportCSS;
       return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>'+css+'</style></head><body>'+cleanHTML()+'</body></html>';
     }
@@ -1329,11 +1344,12 @@
       readingTimeEl.textContent = "\u{1F4D6} ~" + Math.ceil(words / 200) + " min read";
       if (options.wordGoal > 0) { const pct = Math.min(100, Math.round(words/options.wordGoal*100)); const bar = wrap.querySelector(".rte-pro-word-progress"); if (bar) bar.style.width = pct+"%"; const lbl = wrap.querySelector(".rte-pro-word-goal-label"); if (lbl) lbl.textContent = words+"/"+options.wordGoal+" words ("+pct+"%)"; }
       if (options.charGoal > 0) { const pct = Math.min(100, Math.round(chars/options.charGoal*100)); const bar = wrap.querySelector(".rte-pro-char-progress"); if (bar) bar.style.width = pct+"%"; const lbl = wrap.querySelector(".rte-pro-char-goal-label"); if (lbl) lbl.textContent = chars+"/"+options.charGoal+" chars ("+pct+"%)"; }
-      if (typeof api.onChange === "function") api.onChange({ html:content.innerHTML, text:text, words:words, chars:chars });
+      try { if (typeof api !== "undefined" && typeof api.onChange === "function") api.onChange({ html:content.innerHTML, text:text, words:words, chars:chars }); } catch(e) {}
     }
     content.addEventListener("input", updateStatus);
     content.addEventListener("keyup", () => { updateStatus(); updateActiveStates(); });
     content.addEventListener("mouseup", updateActiveStates);
+    new MutationObserver(updateStatus).observe(content, { childList:true, subtree:true, characterData:true, attributes:true });
 
     // ── Word/char goal progress bars ──
     if (options.wordGoal > 0 || options.charGoal > 0) {
@@ -1349,6 +1365,46 @@
 
     // ── Keyboard shortcuts ──
     content.addEventListener("keydown", e => {
+      // Tab navigation inside tables
+      if (e.key === "Tab") {
+        const sel = window.getSelection();
+        const cell = sel && sel.anchorNode
+          ? (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement).closest("td, th")
+          : null;
+        if (cell) {
+          e.preventDefault();
+          const row = cell.parentElement;
+          const table = cell.closest("table");
+          const allCells = Array.from(table.querySelectorAll("td, th"));
+          const idx = allCells.indexOf(cell);
+          let target;
+          if (e.shiftKey) {
+            // Previous cell
+            target = allCells[idx - 1] || null;
+          } else {
+            target = allCells[idx + 1] || null;
+            // At last cell: add a new row and move into it
+            if (!target) {
+              const colCount = row.children.length;
+              const newRow = document.createElement("tr");
+              for (let c = 0; c < colCount; c++) {
+                const td = document.createElement("td");
+                td.innerHTML = "&nbsp;";
+                newRow.appendChild(td);
+              }
+              (table.querySelector("tbody") || table).appendChild(newRow);
+              target = newRow.firstChild;
+              updateStatus();
+            }
+          }
+          if (target) {
+            const range = document.createRange();
+            range.selectNodeContents(target);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+      }
       if (e.ctrlKey || e.metaKey) {
         switch (e.key.toLowerCase()) {
           case "b": e.preventDefault(); exec("bold"); break;
