@@ -1334,6 +1334,7 @@
     content.addEventListener("input", updateStatus);
     content.addEventListener("keyup", () => { updateStatus(); updateActiveStates(); });
     content.addEventListener("mouseup", updateActiveStates);
+    new MutationObserver(updateStatus).observe(content, { childList:true, subtree:true, characterData:true, attributes:true });
 
     // ── Word/char goal progress bars ──
     if (options.wordGoal > 0 || options.charGoal > 0) {
