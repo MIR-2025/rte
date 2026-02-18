@@ -125,6 +125,9 @@ Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](ht
 
 All notable changes to `rte-rich-text-editor-pro-ws` will be documented in this file.
 
+## [1.0.5] - 2026-02-18
+- Added filename input to export bar for custom export filenames
+
 ## [1.0.2] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
 - Tab at last cell automatically creates a new row

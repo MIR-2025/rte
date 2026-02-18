@@ -4,6 +4,9 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-pro
 
+#### [1.0.9] - 2026-02-18
+- Added filename input to export bar for custom export filenames
+
 #### [1.0.6] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
 - Tab at last cell automatically creates a new row
@@ -44,6 +47,9 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-bundle
 
+#### [1.0.13] - 2026-02-18
+- Added filename input to export bar for custom export filenames
+
 #### [1.0.10] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
 - Tab at last cell automatically creates a new row
@@ -79,6 +85,9 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-ws
 
+#### [1.0.7] - 2026-02-18
+- Version bump (no code changes — WebSocket wrapper only)
+
 #### [1.0.4] - 2026-02-18
 - Version bump (no code changes — WebSocket wrapper only)
 
@@ -98,6 +107,9 @@ All notable changes will be documented in this file.
 - Available at `https://rte.whitneys.co/rte-ws.js`
 
 ## rte-rich-text-editor
+
+### [1.0.22] - 2026-02-18
+- Added filename input to export bar for custom export filenames
 
 ### [1.0.19] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)

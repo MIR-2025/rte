@@ -367,6 +367,9 @@
 .rte-export-btn:hover { background: var(--rte-hover); border-color: #94a3b8; transform: scale(1.03); }
 .rte-export-btn:active { transform: scale(.97); }
 .rte-export-btn .rte-export-icon { font-size: 14px; }
+.rte-filename-input { padding: 4px 8px; border: 1px solid var(--rte-border); border-radius: 6px; font-family: var(--rte-font); font-size: 12px; color: #334155; background: var(--rte-bg); width: 150px; outline: none; margin-right: 2px; }
+.rte-filename-input:focus { border-color: #60a5fa; box-shadow: 0 0 0 2px rgba(96,165,250,0.2); }
+.rte-filename-input::placeholder { color: #94a3b8; }
 .rte-toast {
   position: absolute;
   bottom: 50px;
@@ -887,6 +890,18 @@
     // ── Export bar (save, copy, email, etc.) ────────────────
     const exportBar = el("div", { className: "rte-exportbar" });
 
+    const filenameInput = el("input", {
+      className: "rte-filename-input",
+      type: "text",
+      placeholder: "document",
+      title: "Export filename (without extension)"
+    });
+
+    function getFilename(ext) {
+      const base = filenameInput.value.trim().replace(/\.[^.]+$/, "") || "document";
+      return base + ext;
+    }
+
     function exportBtn(icon, label, tip, onClick) {
       const b = el("button", { className: "rte-export-btn", title: tip, onClick });
       b.innerHTML = '<span class="rte-export-icon">' + icon + '</span> ' + label;
@@ -894,11 +909,13 @@
     }
 
     exportBar.append(
+      filenameInput,
+
       exportBtn("\ud83d\udcbe", "Save HTML", "Download as an HTML file", () => {
         const blob = new Blob([getFullHTML()], { type: "text/html" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "document.html";
+        a.download = getFilename(".html");
         a.click();
         URL.revokeObjectURL(a.href);
         showToast("\u2705 HTML file downloaded");
@@ -908,7 +925,7 @@
         const blob = new Blob([content.innerText], { type: "text/plain" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "document.txt";
+        a.download = getFilename(".txt");
         a.click();
         URL.revokeObjectURL(a.href);
         showToast("\u2705 Text file downloaded");
@@ -1040,7 +1057,7 @@
             var blob = new Blob([getFullHTML()], { type: "text/html" });
             var a = document.createElement("a");
             a.href = URL.createObjectURL(blob);
-            a.download = "document.html";
+            a.download = getFilename(".html");
             a.click();
             URL.revokeObjectURL(a.href);
             showToast("\u2705 Saved (Ctrl+S)");
@@ -1115,7 +1132,7 @@
         const blob = new Blob([getFullHTML()], { type: "text/html" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = filename || "document.html";
+        a.download = filename || getFilename(".html");
         a.click();
         URL.revokeObjectURL(a.href);
       },
@@ -1124,7 +1141,7 @@
         const blob = new Blob([content.innerText], { type: "text/plain" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = filename || "document.txt";
+        a.download = filename || getFilename(".txt");
         a.click();
         URL.revokeObjectURL(a.href);
       },

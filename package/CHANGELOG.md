@@ -2,6 +2,9 @@
 
 All notable changes to `rte-rich-text-editor` will be documented in this file.
 
+## [1.0.22] - 2026-02-18
+- Added filename input to export bar for custom export filenames
+
 ## [1.0.20] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
 - Tab at last cell automatically creates a new row

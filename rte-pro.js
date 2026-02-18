@@ -156,6 +156,9 @@
 .rte-export-btn:hover { background: var(--rte-hover); border-color: #94a3b8; transform: scale(1.03); }
 .rte-export-btn:active { transform: scale(.97); }
 .rte-export-btn .rte-export-icon { font-size: 14px; }
+.rte-filename-input { padding: 4px 8px; border: 1px solid var(--rte-border); border-radius: 6px; font-family: var(--rte-font); font-size: 12px; color: #334155; background: var(--rte-bg); width: 150px; outline: none; margin-right: 2px; }
+.rte-filename-input:focus { border-color: #60a5fa; box-shadow: 0 0 0 2px rgba(96,165,250,0.2); }
+.rte-filename-input::placeholder { color: #94a3b8; }
 .rte-toast { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%) translateY(8px); background: #1e293b; color: #fff; padding: 6px 16px; border-radius: 8px; font-size: 13px; font-family: var(--rte-font); pointer-events: none; opacity: 0; transition: opacity .2s, transform .2s; z-index: 60; white-space: nowrap; }
 .rte-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .rte-statusbar { display: flex; justify-content: space-between; gap: 12px; padding: 4px 12px; font-size: 11px; color: #94a3b8; background: var(--rte-toolbar-bg); border-top: 1px solid var(--rte-border); flex-wrap: wrap; }
@@ -1320,10 +1323,13 @@
 
     // ── Export bar ──
     const exportBar = el("div", { className:"rte-exportbar" });
+    const filenameInput = el("input", { className:"rte-filename-input", type:"text", placeholder:"document", title:"Export filename (without extension)" });
+    function getFilename(ext) { const base = filenameInput.value.trim().replace(/\.[^.]+$/, "") || "document"; return base + ext; }
     function exportBtn(icon, label, tip, onClick) { const b = el("button", { className:"rte-export-btn", title:tip, onClick }); b.innerHTML = '<span class="rte-export-icon">'+icon+'</span> '+label; return b; }
     exportBar.append(
-      exportBtn("\u{1F4BE}","Save HTML","Download as HTML",() => { const b=new Blob([getFullHTML()],{type:"text/html"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="document.html"; a.click(); URL.revokeObjectURL(a.href); showToast("\u2705 HTML file downloaded"); }),
-      exportBtn("\u{1F4C4}","Save Text","Download as text",() => { const b=new Blob([content.innerText],{type:"text/plain"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="document.txt"; a.click(); URL.revokeObjectURL(a.href); showToast("\u2705 Text file downloaded"); }),
+      filenameInput,
+      exportBtn("\u{1F4BE}","Save HTML","Download as HTML",() => { const b=new Blob([getFullHTML()],{type:"text/html"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=getFilename(".html"); a.click(); URL.revokeObjectURL(a.href); showToast("\u2705 HTML file downloaded"); }),
+      exportBtn("\u{1F4C4}","Save Text","Download as text",() => { const b=new Blob([content.innerText],{type:"text/plain"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=getFilename(".txt"); a.click(); URL.revokeObjectURL(a.href); showToast("\u2705 Text file downloaded"); }),
       exportBtn("\u{1F4CB}","Copy HTML","Copy rich HTML",() => { const h=cleanHTML(),t=content.innerText; if(navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]).then(()=>showToast("\u2705 HTML copied"));}else{navigator.clipboard.writeText(h).then(()=>showToast("\u2705 HTML copied"));} }),
       exportBtn("\u{1F4DD}","Copy Text","Copy plain text",() => { navigator.clipboard.writeText(content.innerText).then(()=>showToast("\u2705 Text copied")); }),
       exportBtn("\u2709\uFE0F","Email","Copy for email",() => { const h=cleanHTML(),t=content.innerText; if(navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]).then(()=>showToast("\u2705 Content copied \u2014 paste into email"));}else{navigator.clipboard.writeText(t).then(()=>showToast("\u2705 Text copied"));} }),
@@ -1410,7 +1416,7 @@
           case "b": e.preventDefault(); exec("bold"); break;
           case "i": e.preventDefault(); exec("italic"); break;
           case "u": e.preventDefault(); exec("underline"); break;
-          case "s": e.preventDefault(); var blob=new Blob([getFullHTML()],{type:"text/html"}); var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="document.html"; a.click(); URL.revokeObjectURL(a.href); showToast("\u2705 Saved"); break;
+          case "s": e.preventDefault(); var blob=new Blob([getFullHTML()],{type:"text/html"}); var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=getFilename(".html"); a.click(); URL.revokeObjectURL(a.href); showToast("\u2705 Saved"); break;
           case "f": if (!e.shiftKey) { e.preventDefault(); toggleFindBar(); } else { e.preventDefault(); toggleFullscreen(); } break;
           case "/": e.preventDefault(); toggleSourceView(); break;
           case "z": e.preventDefault(); if (e.shiftKey) { customRedo(); } else { customUndo(); } break;
@@ -1467,8 +1473,8 @@
       getJSON: () => ({ html:cleanHTML(), text:content.innerText, wordCount:(content.innerText.trim()?content.innerText.trim().split(/\s+/).length:0), charCount:content.innerText.length, createdAt:new Date().toISOString() }),
       getMarkdown: () => htmlToMarkdown(content.innerHTML),
       setMarkdown: md => { content.innerHTML = markdownToHtml(md); updateStatus(); },
-      saveHTML: filename => { const b=new Blob([getFullHTML()],{type:"text/html"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||"document.html"; a.click(); URL.revokeObjectURL(a.href); },
-      saveText: filename => { const b=new Blob([content.innerText],{type:"text/plain"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||"document.txt"; a.click(); URL.revokeObjectURL(a.href); },
+      saveHTML: filename => { const b=new Blob([getFullHTML()],{type:"text/html"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||getFilename(".html"); a.click(); URL.revokeObjectURL(a.href); },
+      saveText: filename => { const b=new Blob([content.innerText],{type:"text/plain"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||getFilename(".txt"); a.click(); URL.revokeObjectURL(a.href); },
       copyHTML: () => { const h=cleanHTML(),t=content.innerText; if(navigator.clipboard&&navigator.clipboard.write) return navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]); return navigator.clipboard.writeText(h); },
       copyText: () => navigator.clipboard.writeText(content.innerText),
       email: () => { const h=cleanHTML(),t=content.innerText; if(navigator.clipboard&&navigator.clipboard.write) return navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]); return navigator.clipboard.writeText(t); },
