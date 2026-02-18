@@ -1329,7 +1329,7 @@
       readingTimeEl.textContent = "\u{1F4D6} ~" + Math.ceil(words / 200) + " min read";
       if (options.wordGoal > 0) { const pct = Math.min(100, Math.round(words/options.wordGoal*100)); const bar = wrap.querySelector(".rte-pro-word-progress"); if (bar) bar.style.width = pct+"%"; const lbl = wrap.querySelector(".rte-pro-word-goal-label"); if (lbl) lbl.textContent = words+"/"+options.wordGoal+" words ("+pct+"%)"; }
       if (options.charGoal > 0) { const pct = Math.min(100, Math.round(chars/options.charGoal*100)); const bar = wrap.querySelector(".rte-pro-char-progress"); if (bar) bar.style.width = pct+"%"; const lbl = wrap.querySelector(".rte-pro-char-goal-label"); if (lbl) lbl.textContent = chars+"/"+options.charGoal+" chars ("+pct+"%)"; }
-      if (typeof api.onChange === "function") api.onChange({ html:content.innerHTML, text:text, words:words, chars:chars });
+      try { if (typeof api !== "undefined" && typeof api.onChange === "function") api.onChange({ html:content.innerHTML, text:text, words:words, chars:chars }); } catch(e) {}
     }
     content.addEventListener("input", updateStatus);
     content.addEventListener("keyup", () => { updateStatus(); updateActiveStates(); });
