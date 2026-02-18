@@ -124,6 +124,13 @@ editor.onChange = ({ words, chars }) => { ... }
 
 ## Changelog
 
+### [1.0.2] - 2026-02-17
+- Fixed onChange not firing on toolbar actions (added MutationObserver)
+- Fixed `api` reference error during init
+- Strip document-level tags (DOCTYPE, html, head, style, body) from AI responses and exports
+- Removed max-width:800px constraint from exported HTML
+- Custom 50-state undo/redo now wired to Ctrl+Z/Y and toolbar buttons
+
 ### [1.0.1] - 2026-02-17
 - Added screenshot to npm README
 - Added CHANGELOG.md to package
@@ -167,8 +174,16 @@ editor.onChange = ({ words, chars }) => { ... }
 
 MIT — phpMyDEV, LLC
 
-## Links
+## Related Packages
 
-- Website: [rte.whitneys.co](https://rte.whitneys.co)
-- GitHub: [github.com/MIR-2025/rte](https://github.com/MIR-2025/rte)
-- Base editor: [rte-rich-text-editor](https://www.npmjs.com/package/rte-rich-text-editor)
+| Package | Description |
+|---|---|
+| [rte-rich-text-editor](https://www.npmjs.com/package/rte-rich-text-editor) | Core editor — lightweight, 33 toolbar controls |
+| [rte-rich-text-editor-ws](https://www.npmjs.com/package/rte-rich-text-editor-ws) | WebSocket connector for RTE |
+| [rte-rich-text-editor-bundle](https://www.npmjs.com/package/rte-rich-text-editor-bundle) | RTE + WebSocket in one file |
+| [rte-rich-text-editor-pro](https://www.npmjs.com/package/rte-rich-text-editor-pro) | Pro editor — 16 toolbar groups, AI, slash commands, mentions |
+| [rte-rich-text-editor-pro-ws](https://www.npmjs.com/package/rte-rich-text-editor-pro-ws) | RTEPro + WebSocket in one file |
+| [wskit-client](https://www.npmjs.com/package/wskit-client) | Universal WebSocket client |
+| [websocket-toolkit](https://www.npmjs.com/package/websocket-toolkit) | Universal WebSocket client (alternate name) |
+
+Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](https://github.com/MIR-2025/rte)

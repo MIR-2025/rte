@@ -166,12 +166,17 @@ wss.on('connection', (socket) => {
 
 ## Related Packages
 
-- **[rte-rich-text-editor](https://www.npmjs.com/package/rte-rich-text-editor)** — The core editor (required)
-- **[rte-rich-text-editor-bundle](https://www.npmjs.com/package/rte-rich-text-editor-bundle)** — Editor + WebSocket bundled in a single file
+| Package | Description |
+|---|---|
+| [rte-rich-text-editor](https://www.npmjs.com/package/rte-rich-text-editor) | Core editor — lightweight, 33 toolbar controls |
+| [rte-rich-text-editor-ws](https://www.npmjs.com/package/rte-rich-text-editor-ws) | WebSocket connector for RTE |
+| [rte-rich-text-editor-bundle](https://www.npmjs.com/package/rte-rich-text-editor-bundle) | RTE + WebSocket in one file |
+| [rte-rich-text-editor-pro](https://www.npmjs.com/package/rte-rich-text-editor-pro) | Pro editor — 16 toolbar groups, AI, slash commands, mentions |
+| [rte-rich-text-editor-pro-ws](https://www.npmjs.com/package/rte-rich-text-editor-pro-ws) | RTEPro + WebSocket in one file |
+| [wskit-client](https://www.npmjs.com/package/wskit-client) | Universal WebSocket client |
+| [websocket-toolkit](https://www.npmjs.com/package/websocket-toolkit) | Universal WebSocket client (alternate name) |
 
-## Documentation
-
-Full documentation with more backend examples at [rte.whitneys.co/websocket](https://rte.whitneys.co/websocket)
+Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](https://github.com/MIR-2025/rte)
 
 ## License
 

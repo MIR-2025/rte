@@ -74,19 +74,19 @@ const editor = RTE.init('#editor');
 | `RTE` | Rich text editor — formatting, media, tables, emoji, export |
 | `RTEWS` | WebSocket connector — auto-save, collaboration, reconnect |
 
-## Separate Packages
+## Related Packages
 
-If you only need the editor or only the WebSocket connector:
+| Package | Description |
+|---|---|
+| [rte-rich-text-editor](https://www.npmjs.com/package/rte-rich-text-editor) | Core editor — lightweight, 33 toolbar controls |
+| [rte-rich-text-editor-ws](https://www.npmjs.com/package/rte-rich-text-editor-ws) | WebSocket connector for RTE |
+| [rte-rich-text-editor-bundle](https://www.npmjs.com/package/rte-rich-text-editor-bundle) | RTE + WebSocket in one file |
+| [rte-rich-text-editor-pro](https://www.npmjs.com/package/rte-rich-text-editor-pro) | Pro editor — 16 toolbar groups, AI, slash commands, mentions |
+| [rte-rich-text-editor-pro-ws](https://www.npmjs.com/package/rte-rich-text-editor-pro-ws) | RTEPro + WebSocket in one file |
+| [wskit-client](https://www.npmjs.com/package/wskit-client) | Universal WebSocket client |
+| [websocket-toolkit](https://www.npmjs.com/package/websocket-toolkit) | Universal WebSocket client (alternate name) |
 
-- **Editor only:** [`rte-rich-text-editor`](https://www.npmjs.com/package/rte-rich-text-editor)
-- **WebSocket only:** [`rte-rich-text-editor-ws`](https://www.npmjs.com/package/rte-rich-text-editor-ws)
-
-## Documentation
-
-- [Editor docs](https://rte.whitneys.co/docs)
-- [API reference](https://rte.whitneys.co/api)
-- [WebSocket docs](https://rte.whitneys.co/websocket)
-- [Examples](https://rte.whitneys.co/examples)
+Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](https://github.com/MIR-2025/rte)
 
 ## Changelog
 

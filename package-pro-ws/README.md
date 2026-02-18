@@ -107,9 +107,16 @@ All features from [rte-rich-text-editor-pro](https://www.npmjs.com/package/rte-r
 
 MIT — phpMyDEV, LLC
 
-## Links
+## Related Packages
 
-- Website: [rte.whitneys.co](https://rte.whitneys.co)
-- GitHub: [github.com/MIR-2025/rte](https://github.com/MIR-2025/rte)
-- RTEPro (editor only): [rte-rich-text-editor-pro](https://www.npmjs.com/package/rte-rich-text-editor-pro)
-- RTE (base editor): [rte-rich-text-editor](https://www.npmjs.com/package/rte-rich-text-editor)
+| Package | Description |
+|---|---|
+| [rte-rich-text-editor](https://www.npmjs.com/package/rte-rich-text-editor) | Core editor — lightweight, 33 toolbar controls |
+| [rte-rich-text-editor-ws](https://www.npmjs.com/package/rte-rich-text-editor-ws) | WebSocket connector for RTE |
+| [rte-rich-text-editor-bundle](https://www.npmjs.com/package/rte-rich-text-editor-bundle) | RTE + WebSocket in one file |
+| [rte-rich-text-editor-pro](https://www.npmjs.com/package/rte-rich-text-editor-pro) | Pro editor — 16 toolbar groups, AI, slash commands, mentions |
+| [rte-rich-text-editor-pro-ws](https://www.npmjs.com/package/rte-rich-text-editor-pro-ws) | RTEPro + WebSocket in one file |
+| [wskit-client](https://www.npmjs.com/package/wskit-client) | Universal WebSocket client |
+| [websocket-toolkit](https://www.npmjs.com/package/websocket-toolkit) | Universal WebSocket client (alternate name) |
+
+Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](https://github.com/MIR-2025/rte)
