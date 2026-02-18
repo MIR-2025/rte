@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor-bundle",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "RTE Rich Text Editor + WebSocket connector bundled in a single file. One script tag. Zero dependencies.",
   "main": "rte-bundle.js",
   "module": "rte-bundle.js",
