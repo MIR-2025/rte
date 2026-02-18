@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor",
-  "version": "1.0.19",
+  "version": "1.0.21",
   "description": "A standalone, embeddable rich text editor. One script tag. Zero dependencies. Works everywhere.",
   "main": "rte.js",
   "module": "rte.esm.js",
@@ -19,7 +19,8 @@
     "rte.js",
     "rte.esm.js",
     "rte.d.ts",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "keywords": [
     "rich-text-editor",
