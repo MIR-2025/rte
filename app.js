@@ -62,6 +62,13 @@ app.use((req, res, next) => {
   next();
 });
 
+// Anthropic API key endpoint (for RTEPro AI features)
+app.get('/api/ai-key', (req, res) => {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) return res.status(404).json({ error: 'No API key configured' });
+  res.json({ key });
+});
+
 // Static files — serves rte.js from project root
 app.use(express.static(__dirname));
 

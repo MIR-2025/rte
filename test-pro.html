@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RTEPro Test</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 24px; background: #f1f5f9; }
+    h1 { color: #1e293b; margin-bottom: 4px; }
+    p.sub { color: #64748b; margin-top: 0; margin-bottom: 20px; }
+    #editor { max-width: 960px; margin: 0 auto; }
+    .api-note { max-width: 960px; margin: 16px auto 0; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; font-size: 13px; color: #92400e; }
+  </style>
+</head>
+<body>
+  <div style="max-width:960px;margin:0 auto">
+    <h1>RTEPro Test Page</h1>
+    <p class="sub">All 16 toolbar groups &middot; AI integration &middot; Slash commands &middot; Mentions &middot; Full feature set</p>
+  </div>
+  <div id="editor"></div>
+  <div class="api-note">
+    <strong>Tips:</strong> Type <code>/</code> for slash commands &middot; Type <code>@</code> for mentions &middot;
+    Right-click a table cell for table editing &middot; Press <kbd>F11</kbd> for fullscreen &middot;
+    <kbd>Ctrl+F</kbd> find &middot; <kbd>Ctrl+/</kbd> source view &middot; <kbd>Ctrl+Shift+M</kbd> markdown &middot;
+    <kbd>Ctrl+Shift+A</kbd> AI panel &middot; <kbd>📐</kbd> Gridlines in Mode group
+  </div>
+
+  <script src="rte-pro.js"></script>
+  <script>
+    (async function() {
+      // Fetch API key from server (loaded from .env)
+      let apiKey = null;
+      try {
+        const resp = await fetch('/api/ai-key');
+        if (resp.ok) { const data = await resp.json(); apiKey = data.key; }
+      } catch(e) { console.log('No AI key available (running as static file?)'); }
+
+      const editor = RTEPro.init('#editor', {
+        placeholder: 'Start typing... Try / for slash commands, @ for mentions',
+        height: '350px',
+        wordGoal: 500,
+        apiKey: apiKey,
+        mentions: [
+          { name: 'Alice Johnson', id: 'alice', avatar: '👩' },
+          { name: 'Bob Smith', id: 'bob', avatar: '👨' },
+          { name: 'Charlie Brown', id: 'charlie', avatar: '🧑' },
+          { name: 'Diana Prince', id: 'diana', avatar: '👸' },
+        ],
+        hashtagUrl: '/tags/{{tag}}',
+        watermark: 'DRAFT',
+      });
+
+      editor.onChange = ({ words, chars }) => {
+        console.log(`Words: ${words}, Chars: ${chars}`);
+      };
+
+      window.editor = editor;
+      console.log('RTEPro loaded. AI:', apiKey ? 'Ready' : 'No key');
+      console.log('API methods:', Object.keys(editor).join(', '));
+    })();
+  </script>
+</body>
+</html>
