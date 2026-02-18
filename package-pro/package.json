@@ -1,0 +1,54 @@
+{
+  "name": "rte-rich-text-editor-pro",
+  "version": "1.0.1",
+  "description": "RTEPro — Full-featured WYSIWYG editor with AI integration, 16 toolbar groups, slash commands, mentions, version history. One script tag. Zero dependencies.",
+  "main": "rte-pro.js",
+  "browser": "rte-pro.js",
+  "unpkg": "rte-pro.js",
+  "jsdelivr": "rte-pro.js",
+  "types": "rte-pro.d.ts",
+  "exports": {
+    ".": {
+      "import": "./rte-pro.js",
+      "require": "./rte-pro.js",
+      "default": "./rte-pro.js"
+    }
+  },
+  "files": [
+    "rte-pro.js",
+    "rte-pro.d.ts",
+    "rte-pro.png",
+    "CHANGELOG.md",
+    "README.md"
+  ],
+  "keywords": [
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "contenteditable",
+    "ai",
+    "anthropic",
+    "claude",
+    "slash-commands",
+    "mentions",
+    "markdown",
+    "find-replace",
+    "version-history",
+    "fullscreen",
+    "embeddable",
+    "standalone",
+    "no-dependencies",
+    "rte",
+    "rte-pro"
+  ],
+  "author": "phpMyDEV, LLC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MIR-2025/rte.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MIR-2025/rte/issues"
+  },
+  "homepage": "https://rte.whitneys.co"
+}

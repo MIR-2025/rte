@@ -2,6 +2,22 @@
 
 All notable changes will be documented in this file.
 
+## rte-rich-text-editor-pro
+
+#### [1.0.1] - 2026-02-17
+- Added screenshot, changelog, and `rte-pro.png` to npm package
+
+#### [1.0.0] - 2026-02-17
+- Initial release — full-featured WYSIWYG editor with AI integration
+- 16 configurable toolbar groups, AI panel with Anthropic Claude SSE streaming
+- Slash commands, @ mentions, hashtag auto-linking
+- Find & Replace, source view, markdown toggle, fullscreen
+- Custom 50-state undo/redo, version history, auto-save
+- Content analysis: readability, SEO, accessibility
+- Tables, footnotes, TOC, code highlighting, gridlines
+- Drag & drop, focus mode, watermark, word/char goals
+- 30+ API methods, TypeScript declarations, UMD, zero dependencies
+
 ## websocket-toolkit
 
 #### [1.0.0] - 2026-02-16
