@@ -4,6 +4,8 @@ RTEPro full-featured WYSIWYG editor + WebSocket connector in a single file. AI i
 
 ![RTEPro Screenshot](https://raw.githubusercontent.com/MIR-2025/rte/main/package-pro/rte-pro.png)
 
+![RTEPro Find & Replace](https://raw.githubusercontent.com/MIR-2025/rte/main/package-pro/rte-pro-fr.png)
+
 ## Install
 
 ```bash
@@ -124,6 +126,9 @@ Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](ht
 # Changelog
 
 All notable changes to `rte-rich-text-editor-pro-ws` will be documented in this file.
+
+## [1.0.6] - 2026-02-18
+- Added Find & Replace screenshot to README
 
 ## [1.0.5] - 2026-02-18
 - Added filename input to export bar for custom export filenames

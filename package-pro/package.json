@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor-pro",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "RTEPro — Full-featured WYSIWYG editor with AI integration, 16 toolbar groups, slash commands, mentions, version history. One script tag. Zero dependencies.",
   "main": "rte-pro.js",
   "browser": "rte-pro.js",
@@ -18,6 +18,7 @@
     "rte-pro.js",
     "rte-pro.d.ts",
     "rte-pro.png",
+    "rte-pro-fr.png",
     "CHANGELOG.md",
     "README.md"
   ],

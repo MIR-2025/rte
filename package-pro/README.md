@@ -4,6 +4,8 @@ A standalone, embeddable rich text editor with AI integration, 16 toolbar groups
 
 ![RTEPro Screenshot](https://raw.githubusercontent.com/MIR-2025/rte/main/package-pro/rte-pro.png)
 
+![RTEPro Find & Replace](https://raw.githubusercontent.com/MIR-2025/rte/main/package-pro/rte-pro-fr.png)
+
 ## Install
 
 ```bash
@@ -143,6 +145,9 @@ Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](ht
 # Changelog
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
+
+## [1.0.10] - 2026-02-18
+- Added Find & Replace screenshot to README
 
 ## [1.0.9] - 2026-02-18
 - Added filename input to export bar for custom export filenames
