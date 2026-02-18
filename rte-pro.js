@@ -1096,11 +1096,26 @@
 
     const AI_SYSTEM = "You are an AI writing assistant embedded in a rich text editor. IMPORTANT: Always respond with clean, raw HTML suitable for a WYSIWYG editor contenteditable div. Use semantic HTML tags: <h1>-<h4>, <p>, <strong>, <em>, <ul>, <ol>, <li>, <blockquote>, <pre>, <a>, <table>, <tr>, <td>, <th>, <img>, <hr>, <br>, <span style=\"...\">. Do NOT use markdown formatting. Do NOT wrap your response in ```html code fences. Do NOT include <html>, <head>, <body>, or <style> tags — only inner content HTML. For layouts, use inline styles on divs/sections. Output ONLY the HTML content, no explanations.";
 
+    function stripDocumentTags(html) {
+      // Remove code fences
+      html = html.replace(/^```html?\s*\n?/i, "").replace(/\n?```\s*$/,"");
+      // Remove doctype, html, head, meta, title, style, body tags — keep only inner content
+      html = html.replace(/<!DOCTYPE[^>]*>/gi, "");
+      html = html.replace(/<\/?html[^>]*>/gi, "");
+      html = html.replace(/<head[\s\S]*?<\/head>/gi, "");
+      html = html.replace(/<\/?body[^>]*>/gi, "");
+      html = html.replace(/<style[\s\S]*?<\/style>/gi, "");
+      html = html.replace(/<meta[^>]*>/gi, "");
+      html = html.replace(/<title[\s\S]*?<\/title>/gi, "");
+      html = html.replace(/<link[^>]*>/gi, "");
+      return html.trim();
+    }
     function aiResponseToHTML(text) {
-      // If it already looks like HTML, return as-is
-      if (text.trim().startsWith("<") && /<\/(p|div|h[1-6]|ul|ol|table|section|blockquote)>/i.test(text)) return text;
-      // Strip code fences if Claude wrapped in ```html ... ```
+      // Strip code fences
       text = text.replace(/^```html?\s*\n?/i, "").replace(/\n?```\s*$/,"");
+      // Strip document-level tags
+      text = stripDocumentTags(text);
+      // If it looks like HTML, return it
       if (text.trim().startsWith("<") && /<\/(p|div|h[1-6]|ul|ol|table|section|blockquote)>/i.test(text)) return text;
       // Otherwise convert markdown to HTML
       return markdownToHtml(text);
@@ -1294,7 +1309,7 @@
       clone.querySelectorAll(".rte-pro-drag-handle").forEach(h => h.remove());
       clone.querySelectorAll("[data-rte-tag]").forEach(el => el.removeAttribute("data-rte-tag"));
       clone.querySelectorAll("mark.rte-pro-highlight-match, mark.rte-pro-highlight-current").forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
-      return clone.innerHTML;
+      return stripDocumentTags(clone.innerHTML);
     }
     function getFullHTML() {
       if (options.exportTemplate) return options.exportTemplate.replace('{{content}}', cleanHTML());
