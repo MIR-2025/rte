@@ -48,6 +48,44 @@
         </div>
       </div>
 
+      <!-- Live Preview -->
+      <h5 class="mt-5 mb-3"><i class="bi bi-eye me-1"></i> Live Preview</h5>
+      <p class="text-muted" style="font-size:14px">Type in the editor above and see the output update in real time.</p>
+      <ul class="nav nav-tabs" id="previewTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="tab-html" data-bs-toggle="tab" data-bs-target="#preview-html" type="button" role="tab">HTML</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-rendered" data-bs-toggle="tab" data-bs-target="#preview-rendered" type="button" role="tab">Rendered</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-text" data-bs-toggle="tab" data-bs-target="#preview-text" type="button" role="tab">Plain Text</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-markdown" data-bs-toggle="tab" data-bs-target="#preview-markdown" type="button" role="tab">Markdown</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-json" data-bs-toggle="tab" data-bs-target="#preview-json" type="button" role="tab">JSON</button>
+        </li>
+      </ul>
+      <div class="tab-content border border-top-0 rounded-bottom" style="min-height:180px;max-height:400px;overflow:auto">
+        <div class="tab-pane fade show active p-3" id="preview-html" role="tabpanel">
+          <pre id="lp-html" style="margin:0;white-space:pre-wrap;word-break:break-word;font-size:13px;color:#1e293b"></pre>
+        </div>
+        <div class="tab-pane fade p-3" id="preview-rendered" role="tabpanel">
+          <div id="lp-rendered" style="font-size:14px"></div>
+        </div>
+        <div class="tab-pane fade p-3" id="preview-text" role="tabpanel">
+          <pre id="lp-text" style="margin:0;white-space:pre-wrap;word-break:break-word;font-size:13px;color:#1e293b"></pre>
+        </div>
+        <div class="tab-pane fade p-3" id="preview-markdown" role="tabpanel">
+          <pre id="lp-markdown" style="margin:0;white-space:pre-wrap;word-break:break-word;font-size:13px;color:#1e293b"></pre>
+        </div>
+        <div class="tab-pane fade p-3" id="preview-json" role="tabpanel">
+          <pre id="lp-json" style="margin:0;white-space:pre-wrap;word-break:break-word;font-size:13px;color:#1e293b"></pre>
+        </div>
+      </div>
+
       <h5 class="mt-5 mb-3">Install</h5>
       <pre class="code-block"><code>npm install rte-rich-text-editor-pro</code></pre>
 
@@ -120,6 +158,24 @@ RTEPro.init('#editor', {
       });
 
       window.editor = editor;
+
+      // Live preview
+      const lpHTML = document.getElementById('lp-html');
+      const lpRendered = document.getElementById('lp-rendered');
+      const lpText = document.getElementById('lp-text');
+      const lpMarkdown = document.getElementById('lp-markdown');
+      const lpJSON = document.getElementById('lp-json');
+
+      function updatePreview() {
+        lpHTML.textContent = editor.getHTML();
+        lpRendered.innerHTML = editor.getHTML();
+        lpText.textContent = editor.getText();
+        lpMarkdown.textContent = editor.getMarkdown();
+        lpJSON.textContent = JSON.stringify(editor.getJSON(), null, 2);
+      }
+
+      editor.onChange = () => updatePreview();
+      updatePreview();
     })();
   </script>
 
