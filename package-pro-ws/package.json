@@ -1,0 +1,53 @@
+{
+  "name": "rte-rich-text-editor-pro-ws",
+  "version": "1.0.0",
+  "description": "RTEPro + WebSocket connector bundled in a single file. Full-featured WYSIWYG editor with AI integration, real-time collaboration, auto-save. Zero dependencies.",
+  "main": "rte-pro-ws.js",
+  "browser": "rte-pro-ws.js",
+  "unpkg": "rte-pro-ws.js",
+  "jsdelivr": "rte-pro-ws.js",
+  "types": "rte-pro-ws.d.ts",
+  "exports": {
+    ".": {
+      "import": "./rte-pro-ws.js",
+      "require": "./rte-pro-ws.js",
+      "default": "./rte-pro-ws.js"
+    }
+  },
+  "files": [
+    "rte-pro-ws.js",
+    "rte-pro-ws.d.ts",
+    "CHANGELOG.md",
+    "README.md"
+  ],
+  "keywords": [
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "websocket",
+    "real-time",
+    "collaboration",
+    "ai",
+    "anthropic",
+    "claude",
+    "slash-commands",
+    "mentions",
+    "auto-save",
+    "embeddable",
+    "standalone",
+    "no-dependencies",
+    "rte",
+    "rte-pro",
+    "bundle"
+  ],
+  "author": "phpMyDEV, LLC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MIR-2025/rte.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MIR-2025/rte/issues"
+  },
+  "homepage": "https://rte.whitneys.co"
+}

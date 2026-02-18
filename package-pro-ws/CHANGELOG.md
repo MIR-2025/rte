@@ -1,0 +1,9 @@
+# Changelog
+
+All notable changes to `rte-rich-text-editor-pro-ws` will be documented in this file.
+
+## [1.0.0] - 2026-02-17
+- Initial release — RTEPro editor + WebSocket connector bundled in a single file
+- Includes all RTEPro 1.0.3 features (16 toolbar groups, AI integration, slash commands, mentions, etc.)
+- WebSocket connector (RTEProWS) with auto-save, real-time collaboration, auto-reconnect, heartbeat
+- Single script tag, zero dependencies
