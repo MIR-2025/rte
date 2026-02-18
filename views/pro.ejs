@@ -1,0 +1,126 @@
+<% const pageTitle = 'Pro Editor'; %>
+<%- include('partials/header') %>
+
+  <div class="section">
+    <div class="container">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h2 class="mb-0">RTEPro <span class="badge bg-primary" style="font-size:.5em;vertical-align:middle">PRO</span></h2>
+        <div>
+          <a href="https://www.npmjs.com/package/rte-rich-text-editor-pro" class="btn btn-sm btn-outline-secondary me-1" target="_blank"><i class="bi bi-box-seam me-1"></i>npm</a>
+          <a href="https://github.com/MIR-2025/rte" class="btn btn-sm btn-outline-secondary" target="_blank"><i class="bi bi-github me-1"></i>GitHub</a>
+        </div>
+      </div>
+      <p class="lead text-muted mb-4">Full-featured WYSIWYG editor with AI integration, 16 toolbar groups, slash commands, mentions, and more. Zero dependencies.</p>
+
+      <div id="editor"></div>
+
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <div class="card border-0 bg-light">
+            <div class="card-body">
+              <h6 class="fw-bold mb-3"><i class="bi bi-keyboard me-1"></i> Keyboard Shortcuts</h6>
+              <table class="table table-sm mb-0" style="font-size:13px">
+                <tr><td><kbd>Ctrl+F</kbd></td><td>Find & Replace</td></tr>
+                <tr><td><kbd>Ctrl+/</kbd></td><td>Source View</td></tr>
+                <tr><td><kbd>Ctrl+Shift+M</kbd></td><td>Markdown Toggle</td></tr>
+                <tr><td><kbd>Ctrl+Shift+A</kbd></td><td>AI Panel</td></tr>
+                <tr><td><kbd>Ctrl+Shift+F</kbd> / <kbd>F11</kbd></td><td>Fullscreen</td></tr>
+                <tr><td><kbd>Ctrl+Z</kbd></td><td>Undo</td></tr>
+                <tr><td><kbd>Ctrl+Shift+Z</kbd> / <kbd>Ctrl+Y</kbd></td><td>Redo</td></tr>
+                <tr><td><kbd>Ctrl+S</kbd></td><td>Save HTML</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0 bg-light">
+            <div class="card-body">
+              <h6 class="fw-bold mb-3"><i class="bi bi-lightning me-1"></i> Quick Tips</h6>
+              <ul style="font-size:13px" class="mb-0">
+                <li>Type <code class="inline">/</code> for slash commands (headings, lists, tables, etc.)</li>
+                <li>Type <code class="inline">@</code> for mentions</li>
+                <li>Right-click a table cell for row/column editing</li>
+                <li>Use the gridlines button (<i class="bi bi-grid-3x3"></i>) in Mode group to see element outlines</li>
+                <li>AI features require an Anthropic API key</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h5 class="mt-5 mb-3">Install</h5>
+      <pre class="code-block"><code>npm install rte-rich-text-editor-pro</code></pre>
+
+      <h5 class="mt-4 mb-3">Quick Start</h5>
+      <pre class="code-block"><code>&lt;div id="editor"&gt;&lt;/div&gt;
+&lt;script src="https://unpkg.com/rte-rich-text-editor-pro/rte-pro.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const editor = RTEPro.init('#editor', {
+    placeholder: 'Start typing...',
+    height: '400px',
+    apiKey: 'sk-ant-...',          // optional — enables AI features
+    toolbar: null,                  // null = all 16 groups
+    mentions: [
+      { name: 'Alice', id: 'alice', avatar: '👩' },
+      { name: 'Bob', id: 'bob', avatar: '👨' },
+    ],
+    wordGoal: 500,
+    watermark: 'DRAFT',
+  });
+&lt;/script&gt;</code></pre>
+
+      <h5 class="mt-4 mb-3">Toolbar Groups (16)</h5>
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        <span class="badge bg-secondary">format</span>
+        <span class="badge bg-secondary">text</span>
+        <span class="badge bg-secondary">color</span>
+        <span class="badge bg-secondary">align</span>
+        <span class="badge bg-secondary">list</span>
+        <span class="badge bg-secondary">insert</span>
+        <span class="badge bg-secondary">block</span>
+        <span class="badge bg-secondary">style</span>
+        <span class="badge bg-secondary">direction</span>
+        <span class="badge bg-secondary">tools</span>
+        <span class="badge bg-secondary">history</span>
+        <span class="badge bg-secondary">cleanup</span>
+        <span class="badge bg-secondary">advanced</span>
+        <span class="badge bg-secondary">mode</span>
+        <span class="badge bg-secondary">analysis</span>
+        <span class="badge bg-secondary">ai</span>
+      </div>
+      <pre class="code-block"><code>// Show only specific groups:
+RTEPro.init('#editor', {
+  toolbar: ['text', 'format', 'insert', 'ai']
+});</code></pre>
+    </div>
+  </div>
+
+  <script src="/rte-pro.js"></script>
+  <script>
+    (async function() {
+      let apiKey = null;
+      try {
+        const resp = await fetch('/api/ai-key');
+        if (resp.ok) { const data = await resp.json(); apiKey = data.key; }
+      } catch(e) {}
+
+      const editor = RTEPro.init('#editor', {
+        placeholder: 'Start typing... Try / for slash commands, @ for mentions',
+        height: '350px',
+        wordGoal: 500,
+        apiKey: apiKey,
+        mentions: [
+          { name: 'Alice Johnson', id: 'alice', avatar: '👩' },
+          { name: 'Bob Smith', id: 'bob', avatar: '👨' },
+          { name: 'Charlie Brown', id: 'charlie', avatar: '🧑' },
+          { name: 'Diana Prince', id: 'diana', avatar: '👸' },
+        ],
+        hashtagUrl: '/tags/{{tag}}',
+        watermark: 'DRAFT',
+      });
+
+      window.editor = editor;
+    })();
+  </script>
+
+<%- include('partials/footer') %>
