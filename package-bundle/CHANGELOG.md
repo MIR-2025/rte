@@ -7,12 +7,24 @@ All notable changes to `rte-rich-text-editor-bundle` will be documented in this 
 - Fixed color picker losing text selection on click (mousedown preventDefault)
 - Fixed toolbar tooltip z-index (tooltips no longer hidden behind next row of buttons)
 
+## [1.0.14] - 2026-02-18
+- Version bump for README updates
+
 ## [1.0.13] - 2026-02-18
 - Added filename input to export bar for custom export filenames
+
+## [1.0.12] - 2026-02-18
+- Added cross-links to all 7 npm packages in README
 
 ## [1.0.11] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
 - Tab at last cell automatically creates a new row
+
+## [1.0.10] - 2026-02-18
+- Added CHANGELOG.md to package, appended changelog to README
+
+## [1.0.9] - 2026-02-18
+- Version bump for README updates
 
 ## [1.0.8] - 2026-02-17
 - Synced with rte-rich-text-editor 1.0.17 (`exportCSS`, `exportTemplate`, responsive media)

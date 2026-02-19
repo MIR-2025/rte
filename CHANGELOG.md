@@ -4,6 +4,9 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-pro
 
+#### [1.0.12] - 2026-02-18
+- Restored accidentally deleted package screenshots (rte-pro.png, rte-pro-fr.png)
+
 #### [1.0.11] - 2026-02-18
 - Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
 - Fixed color picker losing text selection on click (mousedown preventDefault)
@@ -12,12 +15,36 @@ All notable changes will be documented in this file.
 - Added "Remove Columns" to right-click context menu
 - Fixed toolbar tooltip z-index (tooltips no longer hidden behind next row of buttons)
 
+#### [1.0.10] - 2026-02-18
+- Added Find & Replace screenshot to README
+
 #### [1.0.9] - 2026-02-18
 - Added filename input to export bar for custom export filenames
+
+#### [1.0.8] - 2026-02-18
+- Added cross-links to all 7 npm packages in README
+
+#### [1.0.7] - 2026-02-18
+- Added CHANGELOG.md to package, appended changelog to README
 
 #### [1.0.6] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
 - Tab at last cell automatically creates a new row
+
+#### [1.0.5] - 2026-02-18
+- Added live preview tabs and Pro demo page
+
+#### [1.0.4] - 2026-02-17
+- Version bump for README updates
+
+#### [1.0.3] - 2026-02-17
+- Strip document-level tags (DOCTYPE, html, head, style, body) from AI responses and exports
+- Removed max-width:800px constraint from exported HTML
+
+#### [1.0.2] - 2026-02-17
+- Fixed onChange not firing on toolbar actions (added MutationObserver)
+- Fixed `api` reference error during init
+- Custom 50-state undo/redo now wired to Ctrl+Z/Y and toolbar buttons
 
 #### [1.0.1] - 2026-02-17
 - Added screenshot, changelog, and `rte-pro.png` to npm package
@@ -33,95 +60,63 @@ All notable changes will be documented in this file.
 - Drag & drop, focus mode, watermark, word/char goals
 - 30+ API methods, TypeScript declarations, UMD, zero dependencies
 
-## websocket-toolkit
+## rte-rich-text-editor-pro-ws
 
-#### [1.0.0] - 2026-02-16
-- Initial release — same as wskit-client, published under alternate name
-- Universal WebSocket client, zero dependencies
+#### [1.0.7] - 2026-02-18
+- Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
+- Fixed color picker losing text selection on click (mousedown preventDefault)
+- Fixed gradient text overwriting existing styles (now preserves bold, italic, etc.)
+- Fixed columns not allowing new content below (added trailing paragraph)
+- Added "Remove Columns" to right-click context menu
+- Fixed toolbar tooltip z-index (tooltips no longer hidden behind next row of buttons)
 
-## wskit-client
+#### [1.0.6] - 2026-02-18
+- Added Find & Replace screenshot to README
 
-#### [1.0.0] - 2026-02-16
-- Initial release — universal WebSocket client, zero dependencies
-- Auto-reconnect with exponential backoff
-- Message queue (buffers sends while disconnected, flushes on reconnect)
-- Channel-based message routing by type field
-- Request/response pattern with Promises
-- Configurable heartbeat keep-alive
-- Auto JSON parse/stringify
-- Debug mode for verbose console logging
-- UMD wrapper (script tag, CommonJS, AMD, ES Modules)
-- TypeScript declarations included
-
-## rte-rich-text-editor-bundle
-
-#### [1.0.13] - 2026-02-18
+#### [1.0.5] - 2026-02-18
 - Added filename input to export bar for custom export filenames
 
-#### [1.0.10] - 2026-02-18
+#### [1.0.4] - 2026-02-18
+- Added cross-links to all 7 npm packages in README
+
+#### [1.0.3] - 2026-02-18
+- Added CHANGELOG.md to package, appended changelog to README
+
+#### [1.0.2] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
 - Tab at last cell automatically creates a new row
 
-#### [1.0.8] - 2026-02-17
-- Synced with rte-rich-text-editor 1.0.17 (`exportCSS`, `exportTemplate`, responsive media)
+#### [1.0.1] - 2026-02-18
+- Version bump for README updates
 
-#### [1.0.7] - 2026-02-17
-- Media responsive: images, video, and audio scale with `max-width: 100%` and `height: auto`
-
-#### [1.0.6] - 2026-02-17
-- Added changelog to README
-
-#### [1.0.5] - 2026-02-17
-- Added explicit `type="button"` to all editor buttons to prevent form submission
-
-#### [1.0.4] - 2026-02-17
-- Added `type="button"` via `el()` helper to prevent form submission when editor is inside a `<form>`
-
-#### [1.0.3] - 2026-02-17
-- Synced with rte-rich-text-editor 1.0.12 (image resize, content overflow, vertical resizing)
-
-#### [1.0.2] - 2026-02-16
-- Added CommonJS and ES Modules usage examples to README
-
-#### [1.0.1] - 2026-02-16
-- Added TypeScript declarations (`rte-bundle.d.ts`) for both RTE and RTEWS
-- Added `exports`, `module`, and `types` fields to package.json
-
-#### [1.0.0] - 2026-02-16
-- Initial release — RTE editor + WebSocket connector bundled in a single file
-- Available at `https://rte.whitneys.co/rte-bundle.js`
-
-## rte-rich-text-editor-ws
-
-#### [1.0.7] - 2026-02-18
-- Version bump (no code changes — WebSocket wrapper only)
-
-#### [1.0.4] - 2026-02-18
-- Version bump (no code changes — WebSocket wrapper only)
-
-#### [1.0.2] - 2026-02-16
-- Added CommonJS and ES Modules usage examples to README
-
-#### [1.0.1] - 2026-02-16
-- Added related package links to README
-
-#### [1.0.0] - 2026-02-16
-- Initial release — standalone WebSocket connector for RTE
-- Auto-save with configurable debounce
-- Real-time collaboration with cursor preservation
-- Auto-reconnect with exponential backoff
-- Heartbeat keep-alive
-- UMD wrapper (script tag, CommonJS, AMD)
-- Available at `https://rte.whitneys.co/rte-ws.js`
+#### [1.0.0] - 2026-02-17
+- Initial release — RTEPro editor + WebSocket connector bundled in a single file
 
 ## rte-rich-text-editor
+
+### [1.0.24] - 2026-02-18
+- Restored accidentally deleted package screenshot (rte.png)
+
+### [1.0.23] - 2026-02-18
+- Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
+- Fixed color picker losing text selection on click (mousedown preventDefault)
+- Fixed toolbar tooltip z-index (tooltips no longer hidden behind next row of buttons)
 
 ### [1.0.22] - 2026-02-18
 - Added filename input to export bar for custom export filenames
 
-### [1.0.19] - 2026-02-18
+### [1.0.21] - 2026-02-18
+- Added cross-links to all 7 npm packages in README
+
+### [1.0.20] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
 - Tab at last cell automatically creates a new row
+
+### [1.0.19] - 2026-02-18
+- Added CHANGELOG.md to package, appended changelog to README
+
+### [1.0.18] - 2026-02-18
+- Version bump for README updates
 
 ### [1.0.17] - 2026-02-17
 - Added `exportCSS` option to append custom CSS to `getFullHTML()` exports
@@ -193,4 +188,111 @@ All notable changes will be documented in this file.
 - Export bar: Save HTML, Save Text, Copy HTML, Copy Text, Email, Print/PDF, JSON
 - Drag & drop and clipboard paste for images, video, audio
 - CSS custom properties for theming
+- TypeScript declarations included
+
+## rte-rich-text-editor-bundle
+
+#### [1.0.15] - 2026-02-18
+- Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
+- Fixed color picker losing text selection on click (mousedown preventDefault)
+- Fixed toolbar tooltip z-index (tooltips no longer hidden behind next row of buttons)
+
+#### [1.0.14] - 2026-02-18
+- Version bump for README updates
+
+#### [1.0.13] - 2026-02-18
+- Added filename input to export bar for custom export filenames
+
+#### [1.0.12] - 2026-02-18
+- Added cross-links to all 7 npm packages in README
+
+#### [1.0.11] - 2026-02-18
+- Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
+- Tab at last cell automatically creates a new row
+
+#### [1.0.10] - 2026-02-18
+- Added CHANGELOG.md to package, appended changelog to README
+
+#### [1.0.9] - 2026-02-18
+- Version bump for README updates
+
+#### [1.0.8] - 2026-02-17
+- Synced with rte-rich-text-editor 1.0.17 (`exportCSS`, `exportTemplate`, responsive media)
+
+#### [1.0.7] - 2026-02-17
+- Media responsive: images, video, and audio scale with `max-width: 100%` and `height: auto`
+
+#### [1.0.6] - 2026-02-17
+- Added changelog to README
+
+#### [1.0.5] - 2026-02-17
+- Added explicit `type="button"` to all editor buttons to prevent form submission
+
+#### [1.0.4] - 2026-02-17
+- Added `type="button"` via `el()` helper to prevent form submission when editor is inside a `<form>`
+
+#### [1.0.3] - 2026-02-17
+- Synced with rte-rich-text-editor 1.0.12 (image resize, content overflow, vertical resizing)
+
+#### [1.0.2] - 2026-02-16
+- Added CommonJS and ES Modules usage examples to README
+
+#### [1.0.1] - 2026-02-16
+- Added TypeScript declarations (`rte-bundle.d.ts`) for both RTE and RTEWS
+- Added `exports`, `module`, and `types` fields to package.json
+
+#### [1.0.0] - 2026-02-16
+- Initial release — RTE editor + WebSocket connector bundled in a single file
+- Available at `https://rte.whitneys.co/rte-bundle.js`
+
+## rte-rich-text-editor-ws
+
+#### [1.0.7] - 2026-02-18
+- Version bump (no code changes — WebSocket wrapper only)
+
+#### [1.0.6] - 2026-02-18
+- Version bump (no code changes — WebSocket wrapper only)
+
+#### [1.0.5] - 2026-02-18
+- Version bump (no code changes — WebSocket wrapper only)
+
+#### [1.0.4] - 2026-02-18
+- Added cross-links to all 7 npm packages in README
+
+#### [1.0.3] - 2026-02-18
+- Added CHANGELOG.md to package, appended changelog to README
+
+#### [1.0.2] - 2026-02-16
+- Added CommonJS and ES Modules usage examples to README
+
+#### [1.0.1] - 2026-02-16
+- Added related package links to README
+
+#### [1.0.0] - 2026-02-16
+- Initial release — standalone WebSocket connector for RTE
+- Auto-save with configurable debounce
+- Real-time collaboration with cursor preservation
+- Auto-reconnect with exponential backoff
+- Heartbeat keep-alive
+- UMD wrapper (script tag, CommonJS, AMD)
+- Available at `https://rte.whitneys.co/rte-ws.js`
+
+## websocket-toolkit
+
+#### [1.0.0] - 2026-02-16
+- Initial release — same as wskit-client, published under alternate name
+- Universal WebSocket client, zero dependencies
+
+## wskit-client
+
+#### [1.0.0] - 2026-02-16
+- Initial release — universal WebSocket client, zero dependencies
+- Auto-reconnect with exponential backoff
+- Message queue (buffers sends while disconnected, flushes on reconnect)
+- Channel-based message routing by type field
+- Request/response pattern with Promises
+- Configurable heartbeat keep-alive
+- Auto JSON parse/stringify
+- Debug mode for verbose console logging
+- UMD wrapper (script tag, CommonJS, AMD, ES Modules)
 - TypeScript declarations included

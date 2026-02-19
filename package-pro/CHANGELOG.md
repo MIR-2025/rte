@@ -19,15 +19,29 @@ All notable changes to `rte-rich-text-editor-pro` will be documented in this fil
 ## [1.0.9] - 2026-02-18
 - Added filename input to export bar for custom export filenames
 
+## [1.0.8] - 2026-02-18
+- Added cross-links to all 7 npm packages in README
+
+## [1.0.7] - 2026-02-18
+- Added CHANGELOG.md to package, appended changelog to README
+
 ## [1.0.6] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
 - Tab at last cell automatically creates a new row
 
+## [1.0.5] - 2026-02-18
+- Added live preview tabs and Pro demo page
+
+## [1.0.4] - 2026-02-17
+- Version bump for README updates
+
+## [1.0.3] - 2026-02-17
+- Strip document-level tags (DOCTYPE, html, head, style, body) from AI responses and exports
+- Removed max-width:800px constraint from exported HTML
+
 ## [1.0.2] - 2026-02-17
 - Fixed onChange not firing on toolbar actions (added MutationObserver)
 - Fixed `api` reference error during init
-- Strip document-level tags (DOCTYPE, html, head, style, body) from AI responses and exports
-- Removed max-width:800px constraint from exported HTML
 - Custom 50-state undo/redo now wired to Ctrl+Z/Y and toolbar buttons
 
 ## [1.0.1] - 2026-02-17

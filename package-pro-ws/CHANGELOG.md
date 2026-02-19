@@ -16,9 +16,18 @@ All notable changes to `rte-rich-text-editor-pro-ws` will be documented in this 
 ## [1.0.5] - 2026-02-18
 - Added filename input to export bar for custom export filenames
 
+## [1.0.4] - 2026-02-18
+- Added cross-links to all 7 npm packages in README
+
+## [1.0.3] - 2026-02-18
+- Added CHANGELOG.md to package, appended changelog to README
+
 ## [1.0.2] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
 - Tab at last cell automatically creates a new row
+
+## [1.0.1] - 2026-02-18
+- Version bump for README updates
 
 ## [1.0.0] - 2026-02-17
 - Initial release — RTEPro editor + WebSocket connector bundled in a single file
