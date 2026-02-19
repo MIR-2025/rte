@@ -2,6 +2,9 @@
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
 
+## [1.0.12] - 2026-02-18
+- Restored accidentally deleted package screenshots (rte-pro.png, rte-pro-fr.png)
+
 ## [1.0.11] - 2026-02-18
 - Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
 - Fixed color picker losing text selection on click (mousedown preventDefault)
