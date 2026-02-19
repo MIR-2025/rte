@@ -201,12 +201,32 @@ Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](ht
 
 All notable changes to `rte-rich-text-editor` will be documented in this file.
 
+## [1.0.25] - 2026-02-18
+- Added cleanHTML() for clean exports (strips resize classes, image overlays, contenteditable attributes)
+
+## [1.0.24] - 2026-02-18
+- Restored accidentally deleted package screenshot (rte.png)
+
+## [1.0.23] - 2026-02-18
+- Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
+- Fixed color picker losing text selection on click (mousedown preventDefault)
+- Fixed toolbar tooltip z-index (tooltips no longer hidden behind next row of buttons)
+
 ## [1.0.22] - 2026-02-18
 - Added filename input to export bar for custom export filenames
+
+## [1.0.21] - 2026-02-18
+- Added cross-links to all 7 npm packages in README
 
 ## [1.0.20] - 2026-02-18
 - Added Tab key navigation in tables (Tab = next cell, Shift+Tab = previous cell)
 - Tab at last cell automatically creates a new row
+
+## [1.0.19] - 2026-02-18
+- Added CHANGELOG.md to package, appended changelog to README
+
+## [1.0.18] - 2026-02-18
+- Version bump for README updates
 
 ## [1.0.17] - 2026-02-17
 - Added `exportCSS` option to append custom CSS to `getFullHTML()` exports

@@ -2,6 +2,9 @@
 
 All notable changes to `rte-rich-text-editor-bundle` will be documented in this file.
 
+## [1.0.16] - 2026-02-18
+- Added cleanHTML() for clean exports (strips resize classes, image overlays, contenteditable attributes)
+
 ## [1.0.15] - 2026-02-18
 - Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
 - Fixed color picker losing text selection on click (mousedown preventDefault)

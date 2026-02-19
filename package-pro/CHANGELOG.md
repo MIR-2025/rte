@@ -2,6 +2,12 @@
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
 
+## [1.0.13] - 2026-02-18
+- Fixed HTML export stripping column layout classes (columns, page breaks, mentions now preserved)
+- Fixed drag handle and column handle elements leaking into exports
+- Added inline styles for email-compatible column exports (table-cell layout)
+- Added cleanText() for drag-handle-free text exports
+
 ## [1.0.12] - 2026-02-18
 - Restored accidentally deleted package screenshots (rte-pro.png, rte-pro-fr.png)
 

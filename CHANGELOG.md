@@ -4,6 +4,12 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-pro
 
+#### [1.0.13] - 2026-02-18
+- Fixed HTML export stripping column layout classes (columns, page breaks, mentions now preserved)
+- Fixed drag handle and column handle elements leaking into exports
+- Added inline styles for email-compatible column exports (table-cell layout)
+- Added cleanText() for drag-handle-free text exports
+
 #### [1.0.12] - 2026-02-18
 - Restored accidentally deleted package screenshots (rte-pro.png, rte-pro-fr.png)
 
@@ -62,6 +68,12 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-pro-ws
 
+#### [1.0.8] - 2026-02-18
+- Fixed HTML export stripping column layout classes (columns, page breaks, mentions now preserved)
+- Fixed drag handle and column handle elements leaking into exports
+- Added inline styles for email-compatible column exports (table-cell layout)
+- Added cleanText() for drag-handle-free text exports
+
 #### [1.0.7] - 2026-02-18
 - Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
 - Fixed color picker losing text selection on click (mousedown preventDefault)
@@ -93,6 +105,9 @@ All notable changes will be documented in this file.
 - Initial release — RTEPro editor + WebSocket connector bundled in a single file
 
 ## rte-rich-text-editor
+
+### [1.0.25] - 2026-02-18
+- Added cleanHTML() for clean exports (strips resize classes, image overlays, contenteditable attributes)
 
 ### [1.0.24] - 2026-02-18
 - Restored accidentally deleted package screenshot (rte.png)
@@ -192,6 +207,9 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-bundle
 
+#### [1.0.16] - 2026-02-18
+- Added cleanHTML() for clean exports (strips resize classes, image overlays, contenteditable attributes)
+
 #### [1.0.15] - 2026-02-18
 - Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
 - Fixed color picker losing text selection on click (mousedown preventDefault)
@@ -246,6 +264,9 @@ All notable changes will be documented in this file.
 - Available at `https://rte.whitneys.co/rte-bundle.js`
 
 ## rte-rich-text-editor-ws
+
+#### [1.0.8] - 2026-02-18
+- Version bump (no code changes — WebSocket wrapper only)
 
 #### [1.0.7] - 2026-02-18
 - Version bump (no code changes — WebSocket wrapper only)

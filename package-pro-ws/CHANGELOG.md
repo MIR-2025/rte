@@ -2,6 +2,12 @@
 
 All notable changes to `rte-rich-text-editor-pro-ws` will be documented in this file.
 
+## [1.0.8] - 2026-02-18
+- Fixed HTML export stripping column layout classes (columns, page breaks, mentions now preserved)
+- Fixed drag handle and column handle elements leaking into exports
+- Added inline styles for email-compatible column exports (table-cell layout)
+- Added cleanText() for drag-handle-free text exports
+
 ## [1.0.7] - 2026-02-18
 - Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
 - Fixed color picker losing text selection on click (mousedown preventDefault)

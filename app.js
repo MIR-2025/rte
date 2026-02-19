@@ -4,6 +4,7 @@ import { dirname, join } from 'path';
 import { createTransport } from 'nodemailer';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
+import morgan from 'morgan';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+app.use(morgan('combined'));
 const PORT = 26216;
 
 // Stripe

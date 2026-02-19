@@ -1456,18 +1456,37 @@
     // ── Export helpers ──
     function cleanHTML() {
       const clone = content.cloneNode(true);
+      clone.querySelectorAll(".rte-pro-drag-handle, .rte-pro-col-handle").forEach(h => h.remove());
       clone.querySelectorAll("[class]").forEach(el => {
-        const classes = Array.from(el.classList).filter(c => !c.startsWith("rte-pro-") && c !== "rte-img-resizing" && c !== "active-block");
+        const keep = new Set(["rte-pro-cols","rte-pro-cols-2","rte-pro-cols-3","rte-pro-col","rte-pro-page-break","rte-pro-mention"]);
+        const classes = Array.from(el.classList).filter(c => keep.has(c) || (!c.startsWith("rte-pro-") && c !== "rte-img-resizing" && c !== "active-block"));
         if (!classes.length) el.removeAttribute("class"); else el.className = classes.join(" ");
       });
-      clone.querySelectorAll(".rte-pro-drag-handle").forEach(h => h.remove());
+      clone.querySelectorAll(".rte-pro-cols").forEach(el => {
+        el.style.cssText = "display:table;width:100%;border-spacing:12px;table-layout:fixed";
+      });
+      clone.querySelectorAll(".rte-pro-col").forEach(el => {
+        el.style.cssText = "display:table-cell;padding:12px;border:1px solid #d0d5dd;border-radius:4px;vertical-align:top";
+      });
+      clone.querySelectorAll(".rte-pro-page-break").forEach(el => {
+        el.style.cssText = "border-top:2px dashed #94a3b8;margin:16px 0;page-break-after:always";
+      });
+      clone.querySelectorAll(".rte-pro-mention").forEach(el => {
+        el.style.cssText = "background:#ede9fe;color:#6366f1;padding:1px 4px;border-radius:3px;font-weight:500";
+      });
+      clone.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
       clone.querySelectorAll("[data-rte-tag]").forEach(el => el.removeAttribute("data-rte-tag"));
       clone.querySelectorAll("mark.rte-pro-highlight-match, mark.rte-pro-highlight-current").forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
       return stripDocumentTags(clone.innerHTML);
     }
+    function cleanText() {
+      const clone = content.cloneNode(true);
+      clone.querySelectorAll(".rte-pro-drag-handle, .rte-pro-col-handle").forEach(h => h.remove());
+      return clone.innerText;
+    }
     function getFullHTML() {
       if (options.exportTemplate) return options.exportTemplate.replace('{{content}}', cleanHTML());
-      var css = 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;line-height:1.7;color:#1e293b}img,video{max-width:100%;border-radius:8px}audio{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d5dd;padding:8px 12px;text-align:left}th{background:#f8f9fb;font-weight:600}blockquote{border-left:4px solid #6366f1;margin:.6em 0;padding:.4em .8em;background:#f1f5f9}pre{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;overflow-x:auto;font-size:13px}a{color:#6366f1}hr{border:none;border-top:2px dashed #d0d5dd;margin:1em 0}';
+      var css = 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;line-height:1.7;color:#1e293b}img,video{max-width:100%;border-radius:8px}audio{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d5dd;padding:8px 12px;text-align:left}th{background:#f8f9fb;font-weight:600}blockquote{border-left:4px solid #6366f1;margin:.6em 0;padding:.4em .8em;background:#f1f5f9}pre{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;overflow-x:auto;font-size:13px}a{color:#6366f1}hr{border:none;border-top:2px dashed #d0d5dd;margin:1em 0}.rte-pro-cols{display:grid;gap:12px;margin:8px 0}.rte-pro-cols-2{grid-template-columns:1fr 1fr}.rte-pro-cols-3{grid-template-columns:1fr 1fr 1fr}.rte-pro-col{padding:12px;border:1px solid #d0d5dd;border-radius:4px;min-height:60px}.rte-pro-page-break{border-top:2px dashed #94a3b8;margin:16px 0;page-break-after:always}.rte-pro-mention{background:#ede9fe;color:#6366f1;padding:1px 4px;border-radius:3px;font-weight:500}';
       if (options.exportCSS) css += options.exportCSS;
       return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>'+css+'</style></head><body>'+cleanHTML()+'</body></html>';
     }
@@ -1480,12 +1499,12 @@
     exportBar.append(
       filenameInput,
       exportBtn("\u{1F4BE}","Save HTML","Download as HTML",() => { const b=new Blob([getFullHTML()],{type:"text/html"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=getFilename(".html"); a.click(); URL.revokeObjectURL(a.href); showToast("\u2705 HTML file downloaded"); }),
-      exportBtn("\u{1F4C4}","Save Text","Download as text",() => { const b=new Blob([content.innerText],{type:"text/plain"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=getFilename(".txt"); a.click(); URL.revokeObjectURL(a.href); showToast("\u2705 Text file downloaded"); }),
-      exportBtn("\u{1F4CB}","Copy HTML","Copy rich HTML",() => { const h=cleanHTML(),t=content.innerText; if(navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]).then(()=>showToast("\u2705 HTML copied"));}else{navigator.clipboard.writeText(h).then(()=>showToast("\u2705 HTML copied"));} }),
-      exportBtn("\u{1F4DD}","Copy Text","Copy plain text",() => { navigator.clipboard.writeText(content.innerText).then(()=>showToast("\u2705 Text copied")); }),
-      exportBtn("\u2709\uFE0F","Email","Copy for email",() => { const h=cleanHTML(),t=content.innerText; if(navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]).then(()=>showToast("\u2705 Content copied \u2014 paste into email"));}else{navigator.clipboard.writeText(t).then(()=>showToast("\u2705 Text copied"));} }),
+      exportBtn("\u{1F4C4}","Save Text","Download as text",() => { const b=new Blob([cleanText()],{type:"text/plain"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=getFilename(".txt"); a.click(); URL.revokeObjectURL(a.href); showToast("\u2705 Text file downloaded"); }),
+      exportBtn("\u{1F4CB}","Copy HTML","Copy rich HTML",() => { const h=cleanHTML(),t=cleanText(); if(navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]).then(()=>showToast("\u2705 HTML copied"));}else{navigator.clipboard.writeText(h).then(()=>showToast("\u2705 HTML copied"));} }),
+      exportBtn("\u{1F4DD}","Copy Text","Copy plain text",() => { navigator.clipboard.writeText(cleanText()).then(()=>showToast("\u2705 Text copied")); }),
+      exportBtn("\u2709\uFE0F","Email","Copy for email",() => { const h=cleanHTML(),t=cleanText(); if(navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]).then(()=>showToast("\u2705 Content copied \u2014 paste into email"));}else{navigator.clipboard.writeText(t).then(()=>showToast("\u2705 Text copied"));} }),
       exportBtn("\u{1F5A8}\uFE0F","Print","Print or save as PDF",() => { const w=window.open("","_blank"); w.document.write(getFullHTML()); w.document.close(); w.print(); }),
-      exportBtn("\u{1F4BE}","JSON","Copy as JSON",() => { const json=JSON.stringify({ html:cleanHTML(), text:content.innerText, wordCount:(content.innerText.trim()?content.innerText.trim().split(/\s+/).length:0), charCount:content.innerText.length, createdAt:new Date().toISOString() },null,2); navigator.clipboard.writeText(json).then(()=>showToast("\u2705 JSON copied")); })
+      exportBtn("\u{1F4BE}","JSON","Copy as JSON",() => { const json=JSON.stringify({ html:cleanHTML(), text:cleanText(), wordCount:(cleanText().trim()?cleanText().trim().split(/\s+/).length:0), charCount:cleanText().length, createdAt:new Date().toISOString() },null,2); navigator.clipboard.writeText(json).then(()=>showToast("\u2705 JSON copied")); })
     );
 
     // ── Assemble ──
@@ -1792,16 +1811,16 @@
     const api = {
       getHTML: () => cleanHTML(),
       setHTML: html => { content.innerHTML = html; updateStatus(); },
-      getText: () => content.innerText,
+      getText: () => cleanText(),
       getFullHTML: getFullHTML,
-      getJSON: () => ({ html:cleanHTML(), text:content.innerText, wordCount:(content.innerText.trim()?content.innerText.trim().split(/\s+/).length:0), charCount:content.innerText.length, createdAt:new Date().toISOString() }),
+      getJSON: () => ({ html:cleanHTML(), text:cleanText(), wordCount:(cleanText().trim()?cleanText().trim().split(/\s+/).length:0), charCount:cleanText().length, createdAt:new Date().toISOString() }),
       getMarkdown: () => htmlToMarkdown(content.innerHTML),
       setMarkdown: md => { content.innerHTML = markdownToHtml(md); updateStatus(); },
       saveHTML: filename => { const b=new Blob([getFullHTML()],{type:"text/html"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||getFilename(".html"); a.click(); URL.revokeObjectURL(a.href); },
-      saveText: filename => { const b=new Blob([content.innerText],{type:"text/plain"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||getFilename(".txt"); a.click(); URL.revokeObjectURL(a.href); },
-      copyHTML: () => { const h=cleanHTML(),t=content.innerText; if(navigator.clipboard&&navigator.clipboard.write) return navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]); return navigator.clipboard.writeText(h); },
-      copyText: () => navigator.clipboard.writeText(content.innerText),
-      email: () => { const h=cleanHTML(),t=content.innerText; if(navigator.clipboard&&navigator.clipboard.write) return navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]); return navigator.clipboard.writeText(t); },
+      saveText: filename => { const b=new Blob([cleanText()],{type:"text/plain"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||getFilename(".txt"); a.click(); URL.revokeObjectURL(a.href); },
+      copyHTML: () => { const h=cleanHTML(),t=cleanText(); if(navigator.clipboard&&navigator.clipboard.write) return navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]); return navigator.clipboard.writeText(h); },
+      copyText: () => navigator.clipboard.writeText(cleanText()),
+      email: () => { const h=cleanHTML(),t=cleanText(); if(navigator.clipboard&&navigator.clipboard.write) return navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]); return navigator.clipboard.writeText(t); },
       print: () => { const w=window.open("","_blank"); w.document.write(getFullHTML()); w.document.close(); w.print(); },
       toggleSource: () => toggleSourceView(),
       toggleFullscreen: () => toggleFullscreen(),

@@ -2,6 +2,9 @@
 
 All notable changes to `rte-rich-text-editor` will be documented in this file.
 
+## [1.0.25] - 2026-02-18
+- Added cleanHTML() for clean exports (strips resize classes, image overlays, contenteditable attributes)
+
 ## [1.0.24] - 2026-02-18
 - Restored accidentally deleted package screenshot (rte.png)
 

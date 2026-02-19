@@ -927,9 +927,16 @@
       setTimeout(() => toast.classList.remove("show"), 2000);
     }
 
-    // ── Full HTML document wrapper for export/email ────────
+    // ── Export helpers ────────────────────────────────────
+    function cleanHTML() {
+      const clone = content.cloneNode(true);
+      clone.querySelectorAll(".rte-img-resizing").forEach(el => el.classList.remove("rte-img-resizing"));
+      clone.querySelectorAll(".rte-img-resize-overlay").forEach(el => el.remove());
+      clone.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
+      return clone.innerHTML;
+    }
     function getFullHTML() {
-      return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;line-height:1.7;color:#1e293b;max-width:800px;margin:0 auto}img,video{max-width:100%;border-radius:8px}audio{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d5dd;padding:8px 12px;text-align:left}th{background:#f8f9fb;font-weight:600}blockquote{border-left:4px solid #6366f1;margin:.6em 0;padding:.4em .8em;background:#f1f5f9}pre{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;overflow-x:auto;font-size:13px}a{color:#6366f1}hr{border:none;border-top:2px dashed #d0d5dd;margin:1em 0}</style></head><body>' + content.innerHTML + '</body></html>';
+      return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;line-height:1.7;color:#1e293b;max-width:800px;margin:0 auto}img,video{max-width:100%;border-radius:8px}audio{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d5dd;padding:8px 12px;text-align:left}th{background:#f8f9fb;font-weight:600}blockquote{border-left:4px solid #6366f1;margin:.6em 0;padding:.4em .8em;background:#f1f5f9}pre{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;overflow-x:auto;font-size:13px}a{color:#6366f1}hr{border:none;border-top:2px dashed #d0d5dd;margin:1em 0}</style></head><body>' + cleanHTML() + '</body></html>';
     }
 
     // ── Export bar (save, copy, email, etc.) ────────────────
@@ -1511,7 +1518,7 @@
     // ── Public API ─────────────────────────────────────────
     const api = {
       /** Get editor HTML content */
-      getHTML: () => content.innerHTML,
+      getHTML: () => cleanHTML(),
       /** Set HTML content */
       setHTML: (html) => { content.innerHTML = html; updateStatus(); },
       /** Get plain text */
@@ -1520,7 +1527,7 @@
       getFullHTML: getFullHTML,
       /** Get content as a JSON object */
       getJSON: () => ({
-        html: content.innerHTML,
+        html: cleanHTML(),
         text: content.innerText,
         wordCount: (content.innerText.trim() ? content.innerText.trim().split(/\s+/).length : 0),
         charCount: content.innerText.length,
