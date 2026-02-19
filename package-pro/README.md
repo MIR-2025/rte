@@ -2,6 +2,8 @@
 
 A standalone, embeddable rich text editor with AI integration, 16 toolbar groups, slash commands, mentions, version history, and more. One script tag. Zero dependencies.
 
+![RTEPro Editor](https://raw.githubusercontent.com/MIR-2025/rte/main/package-pro/rte-pro-1.png)
+
 ![RTEPro Screenshot](https://raw.githubusercontent.com/MIR-2025/rte/main/package-pro/rte-pro.png)
 
 ![RTEPro Find & Replace](https://raw.githubusercontent.com/MIR-2025/rte/main/package-pro/rte-pro-fr.png)

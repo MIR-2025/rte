@@ -2,6 +2,8 @@
 
 RTEPro full-featured WYSIWYG editor + WebSocket connector in a single file. AI integration, real-time collaboration, auto-save. Zero dependencies.
 
+![RTEPro Editor](https://raw.githubusercontent.com/MIR-2025/rte/main/package-pro/rte-pro-1.png)
+
 ![RTEPro Screenshot](https://raw.githubusercontent.com/MIR-2025/rte/main/package-pro/rte-pro.png)
 
 ![RTEPro Find & Replace](https://raw.githubusercontent.com/MIR-2025/rte/main/package-pro/rte-pro-fr.png)
