@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor-ws",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "WebSocket connector for RTE Rich Text Editor. Auto-save and real-time collaboration. Zero dependencies.",
   "main": "rte-ws.js",
   "browser": "rte-ws.js",
