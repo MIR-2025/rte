@@ -2,6 +2,11 @@
 
 All notable changes to `rte-rich-text-editor-bundle` will be documented in this file.
 
+## [1.0.15] - 2026-02-18
+- Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
+- Fixed color picker losing text selection on click (mousedown preventDefault)
+- Fixed toolbar tooltip z-index (tooltips no longer hidden behind next row of buttons)
+
 ## [1.0.13] - 2026-02-18
 - Added filename input to export bar for custom export filenames
 

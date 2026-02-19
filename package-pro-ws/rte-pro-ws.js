@@ -62,7 +62,7 @@
   transition: background .15s, transform .1s;
   position: relative; color: #334155;
 }
-.rte-btn:hover { background: var(--rte-hover); transform: scale(1.08); }
+.rte-btn:hover { background: var(--rte-hover); transform: scale(1.08); z-index: 10; }
 .rte-btn:active { background: var(--rte-active); transform: scale(.96); }
 .rte-btn.active {
   background: var(--rte-accent); color: #fff;
@@ -82,11 +82,12 @@
   transform: translateX(-50%) scale(.9); background: #1e293b; color: #fff;
   font-size: 11px; font-weight: 400; font-style: normal; text-decoration: none;
   padding: 4px 10px; border-radius: 5px; white-space: nowrap; pointer-events: none;
-  opacity: 0; transition: opacity .18s, transform .18s; z-index: 100;
+  opacity: 0; transition: opacity .18s, transform .18s; z-index: 10000;
   font-family: var(--rte-font); box-shadow: 0 4px 12px rgba(0,0,0,.15);
 }
 .rte-btn:hover[data-tip]::after, .rte-tip:hover[data-tip]::after { opacity: 1; transform: translateX(-50%) scale(1); }
 .rte-tip { position: relative; display: inline-flex; align-items: center; }
+.rte-tip:hover { z-index: 10; }
 .rte-select {
   height: 32px; padding: 0 8px; border: 1px solid var(--rte-border);
   border-radius: 6px; background: var(--rte-bg); font-family: var(--rte-font);
@@ -115,6 +116,17 @@
 .rte-content table { border-collapse: collapse; width: 100%; margin: 8px 0; }
 .rte-content table td, .rte-content table th { border: 1px solid var(--rte-border); padding: 8px 12px; text-align: left; min-width: 60px; }
 .rte-content table th { background: var(--rte-toolbar-bg); font-weight: 600; }
+.rte-content.rte-col-resize, .rte-content.rte-col-resize * { cursor: col-resize !important; }
+.rte-content.rte-row-resize, .rte-content.rte-row-resize * { cursor: row-resize !important; }
+.rte-content.rte-table-resizing { user-select: none; -webkit-user-select: none; }
+.rte-ctx-menu { min-width: 180px; z-index: 99999; background: #fff !important; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.13); padding: 6px; }
+.rte-ctx-item { padding: 6px 12px; cursor: pointer; font-size: 13px; border-radius: 4px; white-space: nowrap; }
+.rte-ctx-item:hover { background: var(--rte-hover); }
+.rte-ctx-sep { height: 1px; background: var(--rte-border); margin: 4px 0; }
+.rte-drag-handle { position: absolute; left: 2px; cursor: grab; z-index: 10; font-size: 10px; color: #94a3b8; user-select: none; opacity: 0; transition: opacity .15s; padding: 2px; border-radius: 3px; line-height: 1; }
+.rte-drag-handle:hover { opacity: 1 !important; background: #f1f5f9; color: #64748b; }
+.rte-dragging { opacity: 0.3 !important; }
+.rte-drop-line { height: 3px; background: #6366f1; border: none; border-radius: 2px; margin: -2px 0; pointer-events: none; }
 .rte-content a { color: var(--rte-accent); text-decoration: underline; }
 .rte-content hr { border: none; border-top: 2px dashed var(--rte-border); margin: 1em 0; }
 .rte-content ul, .rte-content ol { padding-left: 1.6em; margin: .4em 0; }
@@ -207,8 +219,13 @@
 .rte-pro-drag-handle { position: absolute; left: -24px; top: 2px; width: 20px; cursor: grab; opacity: 0; transition: opacity .2s; font-size: 14px; color: #94a3b8; user-select: none; }
 .rte-content > *:hover > .rte-pro-drag-handle { opacity: 1; }
 .rte-pro-dragging { opacity: .5; }
-.rte-pro-cols-2 { column-count: 2; column-gap: 24px; }
-.rte-pro-cols-3 { column-count: 3; column-gap: 24px; }
+.rte-pro-cols { display: grid; gap: 0; margin: 8px 0; min-height: 60px; }
+.rte-pro-cols-2 { grid-template-columns: 1fr 6px 1fr; }
+.rte-pro-cols-3 { grid-template-columns: 1fr 6px 1fr 6px 1fr; }
+.rte-pro-col { padding: 12px; outline: none; border: 1px solid var(--rte-border); border-radius: 4px; min-height: 60px; }
+.rte-pro-col-handle { cursor: col-resize; background: transparent; position: relative; display: flex; align-items: center; justify-content: center; }
+.rte-pro-col-handle::after { content: ""; width: 2px; height: 32px; background: #cbd5e1; border-radius: 1px; transition: background .15s, height .15s; }
+.rte-pro-col-handle:hover::after, .rte-pro-col-handle.active::after { background: #6366f1; height: 48px; }
 .rte-pro-page-break { border-top: 2px dashed #94a3b8; margin: 16px 0; page-break-after: always; position: relative; }
 .rte-pro-page-break::after { content: "Page Break"; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--rte-bg); padding: 0 8px; font-size: 11px; color: #94a3b8; }
 .rte-pro-version-item { padding: 10px 12px; border-bottom: 1px solid var(--rte-border); cursor: pointer; }
@@ -470,6 +487,7 @@
     // ── Color popups ──
     function buildColorPopup(title, onPick) {
       const popup = el("div", { className:"rte-popup" });
+      popup.addEventListener("mousedown", e => { if (e.target.tagName !== "INPUT") e.preventDefault(); });
       popup.appendChild(el("label", {}, title));
       const grid = el("div", { className:"rte-swatches" });
       COLORS.forEach(c => {
@@ -555,7 +573,7 @@
     gradientPopup.appendChild(gRow);
     gradientPopup.appendChild(el("div", { className:"rte-popup-actions" }, [
       el("button", { className:"rte-popup-btn secondary", onClick:() => gradientPopup.classList.remove("show") }, "Cancel"),
-      el("button", { className:"rte-popup-btn primary", onClick:() => { const t=window.getSelection().toString(); if(t) { restoreSelection(savedRange); exec("insertHTML",'<span style="background:linear-gradient('+gDir.value+','+gC1.value+','+gC2.value+');-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">'+t+'</span>'); } gradientPopup.classList.remove("show"); } }, "Apply"),
+      el("button", { className:"rte-popup-btn primary", onClick:() => { restoreSelection(savedRange); const sel=window.getSelection(); if(sel.rangeCount&&!sel.isCollapsed) { const frag=sel.getRangeAt(0).cloneContents(), tmp=document.createElement("div"); tmp.appendChild(frag); const h=tmp.innerHTML; exec("insertHTML",'<span style="background:linear-gradient('+gDir.value+','+gC1.value+','+gC2.value+');-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">'+h+'</span>'); } gradientPopup.classList.remove("show"); } }, "Apply"),
     ])); allPopups.push(gradientPopup);
 
     const bordersPopup = el("div", { className:"rte-popup" }); bordersPopup.appendChild(el("label", {}, "\u25A2 Borders"));
@@ -748,24 +766,98 @@
       return html.replace(/<p>\s*<\/p>/g, "");
     }
 
-    // ── Table context menu ──
+    // ── Context menu ──
     content.addEventListener("contextmenu", e => {
-      const td = e.target.closest("td, th"); if (!td) return; e.preventDefault();
-      const table = td.closest("table"), tr = td.parentElement;
-      const cellIndex = Array.from(tr.children).indexOf(td);
-      document.querySelectorAll(".rte-pro-table-menu").forEach(m => m.remove());
-      const menu = el("div", { className:"rte-popup rte-pro-table-menu show", style:{ position:"fixed", left:e.clientX+"px", top:e.clientY+"px", minWidth:"160px", zIndex:"999" } });
-      [["Add Row Above",()=>{ const nr=tr.cloneNode(true); Array.from(nr.cells).forEach(c=>c.innerHTML="&nbsp;"); tr.parentNode.insertBefore(nr,tr); }],
-       ["Add Row Below",()=>{ const nr=tr.cloneNode(true); Array.from(nr.cells).forEach(c=>c.innerHTML="&nbsp;"); tr.parentNode.insertBefore(nr,tr.nextSibling); }],
-       ["Add Col Left",()=>{ table.querySelectorAll("tr").forEach(r=>{ const c=document.createElement(r.rowIndex===0?"th":"td"); c.innerHTML="&nbsp;"; r.insertBefore(c,r.children[cellIndex]); }); }],
-       ["Add Col Right",()=>{ table.querySelectorAll("tr").forEach(r=>{ const c=document.createElement(r.rowIndex===0?"th":"td"); c.innerHTML="&nbsp;"; r.insertBefore(c,r.children[cellIndex+1]||null); }); }],
-       ["Delete Row",()=>{ if(table.querySelectorAll("tr").length>1)tr.remove(); else table.remove(); }],
-       ["Delete Column",()=>{ table.querySelectorAll("tr").forEach(r=>{ if(r.children[cellIndex])r.children[cellIndex].remove(); }); if(!table.querySelector("td,th"))table.remove(); }],
-       ["Delete Table",()=>table.remove()]
-      ].forEach(([label,action]) => menu.appendChild(el("div", { style:{ padding:"6px 12px", cursor:"pointer", fontSize:"13px", borderRadius:"4px" }, onMouseenter:e=>e.target.style.background="#e8ecf1", onMouseleave:e=>e.target.style.background="", onClick:()=>{ action(); menu.remove(); updateStatus(); } }, label)));
+      const items = [];
+      const td = e.target.closest("td, th");
+      if (td) {
+        const table = td.closest("table"), tr = td.parentElement, ci = Array.from(tr.children).indexOf(td);
+        items.push(["Add Row Above", () => { const nr = tr.cloneNode(true); Array.from(nr.cells).forEach(c => c.innerHTML = "&nbsp;"); tr.parentNode.insertBefore(nr, tr); }],
+          ["Add Row Below", () => { const nr = tr.cloneNode(true); Array.from(nr.cells).forEach(c => c.innerHTML = "&nbsp;"); tr.parentNode.insertBefore(nr, tr.nextSibling); }],
+          ["Delete Row", () => { if (table.querySelectorAll("tr").length > 1) tr.remove(); else table.remove(); }],
+          null,
+          ["Add Column Left", () => { table.querySelectorAll("tr").forEach(r => { const c = document.createElement(r.rowIndex === 0 ? "th" : "td"); c.innerHTML = "&nbsp;"; r.insertBefore(c, r.children[ci]); }); }],
+          ["Add Column Right", () => { table.querySelectorAll("tr").forEach(r => { const c = document.createElement(r.rowIndex === 0 ? "th" : "td"); c.innerHTML = "&nbsp;"; r.insertBefore(c, r.children[ci + 1] || null); }); }],
+          ["Delete Column", () => { table.querySelectorAll("tr").forEach(r => { if (r.children[ci]) r.children[ci].remove(); }); if (!table.querySelector("td,th")) table.remove(); }],
+          null, ["Delete Table", () => table.remove()]);
+      }
+      const img = e.target.closest("img");
+      if (img) { items.push(["Resize 25%", () => { img.style.width = "25%"; }], ["Resize 50%", () => { img.style.width = "50%"; }], ["Resize 75%", () => { img.style.width = "75%"; }], ["Resize 100%", () => { img.style.width = "100%"; }], null, ["Remove Image", () => img.remove()]); }
+      const link = e.target.closest("a");
+      if (link) { items.push(["Edit Link URL", () => { const u = prompt("Edit URL:", link.href); if (u) link.href = u; }], ["Open Link", () => window.open(link.href, "_blank")], ["Unlink", () => { link.replaceWith(document.createTextNode(link.textContent)); }]); }
+      if (e.target.closest("video")) items.push(["Remove Video", () => e.target.closest("video").remove()]);
+      if (e.target.closest("audio")) items.push(["Remove Audio", () => e.target.closest("audio").remove()]);
+      if (e.target.tagName === "HR" || e.target.closest("hr")) items.push(["Remove Horizontal Rule", () => (e.target.tagName === "HR" ? e.target : e.target.closest("hr")).remove()]);
+      const bq = e.target.closest("blockquote");
+      if (bq) items.push(["Remove Blockquote", () => { const p = document.createElement("p"); p.innerHTML = bq.innerHTML; bq.parentNode.replaceChild(p, bq); }]);
+      const pre = e.target.closest("pre");
+      if (pre) items.push(["Remove Code Block", () => { const p = document.createElement("p"); p.textContent = pre.textContent; pre.parentNode.replaceChild(p, pre); }]);
+      const li = e.target.closest("li");
+      if (li) { const list = li.closest("ul, ol"); if (list) items.push(["Remove List", () => { const f = document.createDocumentFragment(); Array.from(list.children).forEach(i => { const p = document.createElement("p"); p.innerHTML = i.innerHTML; f.appendChild(p); }); list.parentNode.replaceChild(f, list); }]); }
+      const cols = e.target.closest(".rte-pro-cols");
+      if (cols) items.push(["Remove Columns", () => { const f = document.createDocumentFragment(); cols.querySelectorAll(".rte-pro-col").forEach(col => { while (col.firstChild) f.appendChild(col.firstChild); }); cols.replaceWith(f); }]);
+      if (items.length) items.push(null);
+      items.push(["Select All", () => { const r = document.createRange(); r.selectNodeContents(content); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }],
+        ["Clear Formatting", () => exec("removeFormat")]);
+      e.preventDefault();
+      document.querySelectorAll(".rte-ctx-menu").forEach(m => m.remove());
+      const menu = el("div", { className: "rte-popup rte-ctx-menu show", style: { position: "fixed", left: e.clientX + "px", top: e.clientY + "px" } });
+      items.forEach(item => { if (!item) { menu.appendChild(el("div", { className: "rte-ctx-sep" })); return; } menu.appendChild(el("div", { className: "rte-ctx-item", onClick: () => { item[1](); menu.remove(); updateStatus(); } }, item[0])); });
       document.body.appendChild(menu);
-      setTimeout(() => { const close = e => { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener("click", close); } }; document.addEventListener("click", close); }, 0);
+      setTimeout(() => { const close = ev => { if (!menu.contains(ev.target)) { menu.remove(); document.removeEventListener("click", close); } }; document.addEventListener("click", close); }, 0);
     });
+
+    // ── Drag & drop ──
+    const _dragWrap = el("div", { style: { position: "relative" } });
+    let _dragEl = null, _dragTarget = null;
+    const _dragHandle = document.createElement("div");
+    _dragHandle.className = "rte-drag-handle"; _dragHandle.draggable = true; _dragHandle.contentEditable = "false"; _dragHandle.innerHTML = "⋮⋮";
+    const _dropLine = document.createElement("div"); _dropLine.className = "rte-drop-line"; _dropLine.contentEditable = "false";
+
+    // Show handle on hover over any direct child block
+    content.addEventListener("mousemove", e => {
+      if (_dragEl) return;
+      let node = e.target;
+      while (node && node !== content && node.parentNode !== content) node = node.parentNode;
+      if (!node || node === content || node === _dragHandle || node === _dropLine) return;
+      if (node === _dragTarget) return; _dragTarget = node;
+      const r = node.getBoundingClientRect(), cr = _dragWrap.getBoundingClientRect();
+      _dragHandle.style.top = (r.top - cr.top + _dragWrap.scrollTop) + "px";
+      _dragHandle.style.opacity = "0.4";
+      if (!_dragHandle.parentNode) _dragWrap.appendChild(_dragHandle);
+    });
+    content.addEventListener("mouseleave", () => { if (!_dragEl) { _dragHandle.remove(); _dragTarget = null; } });
+
+    // Drag start from handle
+    _dragHandle.addEventListener("dragstart", e => {
+      if (!_dragTarget) return; _dragEl = _dragTarget;
+      _dragEl.classList.add("rte-dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", "");
+    });
+
+    // Show drop indicator on dragover
+    _dragWrap.addEventListener("dragover", e => {
+      if (!_dragEl) return; e.preventDefault(); e.dataTransfer.dropEffect = "move";
+      const kids = Array.from(content.children).filter(c => c !== _dropLine && c !== _dragHandle);
+      let best = null, before = true, bestD = Infinity;
+      kids.forEach(k => { const r = k.getBoundingClientRect(), mid = r.top + r.height/2, d = Math.abs(e.clientY - mid);
+        if (d < bestD) { bestD = d; best = k; before = e.clientY < mid; } });
+      if (best) { if (before) content.insertBefore(_dropLine, best); else content.insertBefore(_dropLine, best.nextSibling); }
+    });
+
+    // Drop: move element to indicator position
+    _dragWrap.addEventListener("drop", e => {
+      if (!_dragEl) return; e.preventDefault(); e.stopPropagation();
+      if (_dropLine.parentNode) content.insertBefore(_dragEl, _dropLine);
+      _dragDone();
+    });
+    _dragWrap.addEventListener("dragend", _dragDone);
+    function _dragDone() {
+      if (_dragEl) _dragEl.classList.remove("rte-dragging");
+      _dragEl = null; _dragTarget = null;
+      _dropLine.remove(); _dragHandle.remove(); updateStatus();
+    }
 
     // ── Footnotes ──
     let footnoteCounter = 0;
@@ -920,6 +1012,62 @@
       wrap.appendChild(slashMenu);
     }
     function closeSlashMenu() { if (slashMenu) { slashMenu.remove(); slashMenu = null; } }
+    function editorCut() {
+      if (resizeImg) {
+        const html = resizeImg.outerHTML;
+        navigator.clipboard.write([new ClipboardItem({
+          "text/html": new Blob([html], {type:"text/html"}),
+          "text/plain": new Blob([resizeImg.alt||""], {type:"text/plain"})
+        })]);
+        resizeImg.remove(); clearImageResize(); updateStatus();
+      } else {
+        document.execCommand("cut");
+      }
+    }
+    function editorCopy() {
+      if (resizeImg) {
+        const html = resizeImg.outerHTML;
+        navigator.clipboard.write([new ClipboardItem({
+          "text/html": new Blob([html], {type:"text/html"}),
+          "text/plain": new Blob([resizeImg.alt||""], {type:"text/plain"})
+        })]);
+      } else {
+        document.execCommand("copy");
+      }
+    }
+    function editorPaste() {
+      navigator.clipboard.read().then(items => {
+        for (const item of items) {
+          if (item.types.includes("text/html")) {
+            item.getType("text/html").then(blob => blob.text()).then(html => exec("insertHTML", html));
+            return;
+          }
+          if (item.types.includes("text/plain")) {
+            item.getType("text/plain").then(blob => blob.text()).then(text => exec("insertText", text));
+            return;
+          }
+        }
+      });
+    }
+    function insertColumns(n) {
+      const sel = window.getSelection();
+      const anchor = sel.anchorNode;
+      const existing = anchor?.closest?.(".rte-pro-cols") || anchor?.parentElement?.closest?.(".rte-pro-cols");
+      if (existing) {
+        const frag = document.createDocumentFragment();
+        existing.querySelectorAll(".rte-pro-col").forEach(col => { while (col.firstChild) frag.appendChild(col.firstChild); });
+        existing.replaceWith(frag);
+        updateStatus(); return;
+      }
+      const grid = document.createElement("div");
+      grid.className = "rte-pro-cols rte-pro-cols-" + n;
+      grid.contentEditable = "false";
+      for (let i = 0; i < n; i++) {
+        if (i > 0) { const handle = document.createElement("div"); handle.className = "rte-pro-col-handle"; handle.contentEditable = "false"; grid.appendChild(handle); }
+        const col = document.createElement("div"); col.className = "rte-pro-col"; col.contentEditable = "true"; col.innerHTML = "<p><br></p>"; grid.appendChild(col);
+      }
+      exec("insertHTML", grid.outerHTML + "<p><br></p>");
+    }
     function executeSlashCommand(item, textNode, slashIdx, cursorOffset) {
       textNode.textContent = textNode.textContent.substring(0, slashIdx) + textNode.textContent.substring(cursorOffset);
       const sel = window.getSelection(), range = document.createRange(); range.setStart(textNode, slashIdx); range.collapse(true); sel.removeAllRanges(); sel.addRange(range);
@@ -931,8 +1079,8 @@
         case "table": exec("insertHTML","<table><tbody><tr><th>&nbsp;</th><th>&nbsp;</th></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table><p><br></p>"); break;
         case "image": togglePopup(imagePopup); break; case "pageBreak": exec("insertHTML",'<div class="rte-pro-page-break"></div><p><br></p>'); break;
         case "toc": insertTOC(); break; case "footnote": insertFootnote(); break;
-        case "columns2": content.classList.toggle("rte-pro-cols-2"); content.classList.remove("rte-pro-cols-3"); break;
-        case "columns3": content.classList.toggle("rte-pro-cols-3"); content.classList.remove("rte-pro-cols-2"); break;
+        case "columns2": insertColumns(2); break;
+        case "columns3": insertColumns(3); break;
       }
     }
 
@@ -1080,8 +1228,8 @@
         AI_LANGUAGES.forEach(lang => transRow.appendChild(el("button", { className:"rte-popup-btn secondary", style:{ fontSize:"11px", padding:"3px 6px" }, onClick:() => runAICommand("Translate the following text to "+lang+". Return only the translation:", body) }, lang)));
         transDiv.appendChild(transRow); body.appendChild(transDiv);
         // Custom prompt
-        body.appendChild(el("label", { style:{ fontSize:"12px", fontWeight:"600", color:"#475569" } }, "Custom Prompt:"));
-        const customPrompt = el("textarea", { style:{ width:"100%", minHeight:"60px", padding:"8px", border:"1px solid #d0d5dd", borderRadius:"6px", fontSize:"13px", fontFamily:"inherit", resize:"vertical", outline:"none", marginTop:"4px", boxSizing:"border-box" }, placeholder:"Enter a custom instruction for AI..." });
+        body.appendChild(el("label", { style:{ fontSize:"12px", fontWeight:"600", color:"#475569" } }, "Ask AI Anything:"));
+        const customPrompt = el("textarea", { style:{ width:"100%", minHeight:"60px", padding:"8px", border:"1px solid #d0d5dd", borderRadius:"6px", fontSize:"13px", fontFamily:"inherit", resize:"vertical", outline:"none", marginTop:"4px", boxSizing:"border-box" }, placeholder:"e.g. Make this more formal, Add bullet points..." });
         body.appendChild(customPrompt);
         body.appendChild(el("button", { className:"rte-popup-btn primary", style:{ marginTop:"8px", width:"100%" }, onClick:() => { if (customPrompt.value.trim()) runAICommand(customPrompt.value.trim(), body); } }, "\u{1F680} Run"));
         // Generate from prompt
@@ -1240,8 +1388,8 @@
         btn("\u{1F4BB}","Code Block",() => exec("formatBlock","<pre>")),
         btn("\u2796","Horizontal Rule",() => exec("insertHorizontalRule")),
         btn("\u{1F4C4}","Page Break",() => exec("insertHTML",'<div class="rte-pro-page-break"></div><p><br></p>')),
-        btn("\u258C\u258C","2 Columns",() => { content.classList.toggle("rte-pro-cols-2"); content.classList.remove("rte-pro-cols-3"); }),
-        btn("\u258C\u258C\u258C","3 Columns",() => { content.classList.toggle("rte-pro-cols-3"); content.classList.remove("rte-pro-cols-2"); })
+        btn("\u258C\u258C","2 Columns",() => insertColumns(2)),
+        btn("\u258C\u258C\u258C","3 Columns",() => insertColumns(3))
       ],
       style: [
         btn("AB","Uppercase",() => { const t=window.getSelection().toString(); if(t) exec("insertHTML",'<span style="text-transform:uppercase">'+t+'</span>'); }),
@@ -1259,6 +1407,9 @@
         btn("\u27A1\uFE0F","RTL",() => { const b=getContainingBlock(window.getSelection().anchorNode,content); if(b) b.setAttribute("dir","rtl"); })
       ],
       tools: [
+        btn("\u2702\uFE0F","Cut (Ctrl+X)",() => editorCut()),
+        btn("\u{1F4CB}","Copy (Ctrl+C)",() => editorCopy()),
+        btn("\u{1F4CC}","Paste (Ctrl+V)",() => editorPaste()),
         btn("\u{1F50D}","Find & Replace (Ctrl+F)",() => toggleFindBar()),
         btn("&lt;/&gt;","Source View (Ctrl+/)",() => toggleSourceView()),
         btn("\u24C2","Markdown Toggle",() => toggleMarkdown()),
@@ -1340,7 +1491,8 @@
     // ── Assemble ──
     wrap.append(toolbar);
     allPopups.forEach(p => wrap.appendChild(p));
-    wrap.append(content, panelContainer, exportBar, statusbar, toast);
+    _dragWrap.append(content);
+    wrap.append(_dragWrap, panelContainer, exportBar, statusbar, toast);
     target.appendChild(wrap);
 
     // ── Status updates ──
@@ -1420,6 +1572,8 @@
           case "f": if (!e.shiftKey) { e.preventDefault(); toggleFindBar(); } else { e.preventDefault(); toggleFullscreen(); } break;
           case "/": e.preventDefault(); toggleSourceView(); break;
           case "z": e.preventDefault(); if (e.shiftKey) { customRedo(); } else { customUndo(); } break;
+          case "x": if (resizeImg) { e.preventDefault(); editorCut(); } break;
+          case "c": if (resizeImg) { e.preventDefault(); editorCopy(); } break;
           case "y": e.preventDefault(); customRedo(); break;
         }
         if (e.shiftKey) { if (e.key.toLowerCase() === "m") { e.preventDefault(); toggleMarkdown(); } if (e.key.toLowerCase() === "a") { e.preventDefault(); togglePanel("ai"); } }
@@ -1463,6 +1617,176 @@
     document.addEventListener("keydown", e => { if (!resizeImg) return; if (e.key === "Escape") clearImageResize(); else if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); resizeImg.remove(); clearImageResize(); updateStatus(); } });
 
     updateStatus();
+
+    // ── Table Resize System ─────────────────────────────────
+    let tableResizing = false;
+    let tableResizeType = null; // "col" or "row"
+    let tableResizeStart = 0;
+    let tableResizeCell = null;
+    let tableResizeStartSize = 0;
+    let tableResizeColIndex = -1;
+    let tableResizeTable = null;
+
+    const TABLE_BORDER_THRESHOLD = 4;
+
+    function getTableBorderHit(e) {
+      const target = e.target.closest ? e.target.closest("td, th") : null;
+      if (!target) return null;
+      const rect = target.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+      // Check right edge for column resize
+      if (Math.abs(x - rect.right) <= TABLE_BORDER_THRESHOLD) {
+        return { type: "col", cell: target };
+      }
+      // Check left edge (resize previous column)
+      if (Math.abs(x - rect.left) <= TABLE_BORDER_THRESHOLD) {
+        const row = target.parentElement;
+        const idx = Array.from(row.children).indexOf(target);
+        if (idx > 0) {
+          return { type: "col", cell: row.children[idx - 1] };
+        }
+        return null;
+      }
+      // Check bottom edge for row resize
+      if (Math.abs(y - rect.bottom) <= TABLE_BORDER_THRESHOLD) {
+        return { type: "row", cell: target };
+      }
+      // Check top edge (resize previous row)
+      if (Math.abs(y - rect.top) <= TABLE_BORDER_THRESHOLD) {
+        const row = target.parentElement;
+        const prevRow = row.previousElementSibling;
+        if (prevRow) {
+          const idx = Array.from(row.children).indexOf(target);
+          const prevCell = prevRow.children[idx] || prevRow.lastElementChild;
+          if (prevCell) return { type: "row", cell: prevCell };
+        }
+        return null;
+      }
+      return null;
+    }
+
+    content.addEventListener("mousemove", (e) => {
+      if (tableResizing) return;
+      const hit = getTableBorderHit(e);
+      content.classList.remove("rte-col-resize", "rte-row-resize");
+      if (hit) {
+        content.classList.add(hit.type === "col" ? "rte-col-resize" : "rte-row-resize");
+      }
+    });
+
+    content.addEventListener("mousedown", (e) => {
+      const hit = getTableBorderHit(e);
+      if (!hit) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      tableResizing = true;
+      tableResizeType = hit.type;
+      tableResizeCell = hit.cell;
+      tableResizeTable = hit.cell.closest("table");
+
+      if (hit.type === "col") {
+        tableResizeStart = e.clientX;
+        tableResizeStartSize = hit.cell.getBoundingClientRect().width;
+        tableResizeColIndex = Array.from(hit.cell.parentElement.children).indexOf(hit.cell);
+      } else {
+        tableResizeStart = e.clientY;
+        tableResizeStartSize = hit.cell.getBoundingClientRect().height;
+      }
+
+      content.classList.add("rte-table-resizing");
+      content.classList.add(hit.type === "col" ? "rte-col-resize" : "rte-row-resize");
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!tableResizing) return;
+
+      if (tableResizeType === "col") {
+        const delta = e.clientX - tableResizeStart;
+        const newWidth = Math.max(30, tableResizeStartSize + delta);
+        // Set table to fixed layout on first resize
+        if (tableResizeTable.style.tableLayout !== "fixed") {
+          // Snapshot all column widths before switching to fixed layout
+          const firstRow = tableResizeTable.querySelector("tr");
+          if (firstRow) {
+            Array.from(firstRow.children).forEach((cell) => {
+              cell.style.width = cell.getBoundingClientRect().width + "px";
+            });
+          }
+          tableResizeTable.style.tableLayout = "fixed";
+        }
+        // Apply width to all cells in the same column
+        const rows = tableResizeTable.querySelectorAll("tr");
+        rows.forEach((row) => {
+          const cell = row.children[tableResizeColIndex];
+          if (cell) cell.style.width = newWidth + "px";
+        });
+        // Update table width to sum of columns
+        const firstRow = tableResizeTable.querySelector("tr");
+        if (firstRow) {
+          let totalWidth = 0;
+          Array.from(firstRow.children).forEach((cell) => {
+            totalWidth += cell.getBoundingClientRect().width;
+          });
+          tableResizeTable.style.width = totalWidth + "px";
+        }
+      } else {
+        const delta = e.clientY - tableResizeStart;
+        const newHeight = Math.max(20, tableResizeStartSize + delta);
+        // Apply height to all cells in the same row
+        const row = tableResizeCell.parentElement;
+        Array.from(row.children).forEach((cell) => {
+          cell.style.height = newHeight + "px";
+        });
+      }
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (tableResizing) {
+        tableResizing = false;
+        tableResizeCell = null;
+        tableResizeTable = null;
+        content.classList.remove("rte-table-resizing", "rte-col-resize", "rte-row-resize");
+        updateStatus();
+      }
+    });
+
+    // ── Column layout resize ──
+    let _colResizing = false, _colHandle = null, _colGrid = null, _colStartX = 0, _colWidths = [];
+    content.addEventListener("mousedown", e => {
+      const handle = e.target.closest(".rte-pro-col-handle");
+      if (!handle) return;
+      e.preventDefault(); e.stopPropagation();
+      _colResizing = true; _colHandle = handle; _colGrid = handle.closest(".rte-pro-cols");
+      handle.classList.add("active");
+      _colStartX = e.clientX;
+      const cols = Array.from(_colGrid.querySelectorAll(".rte-pro-col"));
+      _colWidths = cols.map(c => c.getBoundingClientRect().width);
+      const kids = Array.from(_colGrid.children);
+      const hIdx = kids.indexOf(handle);
+      _colHandle._leftIdx = kids.slice(0, hIdx).filter(k => k.classList.contains("rte-pro-col")).length - 1;
+      _colHandle._rightIdx = _colHandle._leftIdx + 1;
+    });
+    document.addEventListener("mousemove", e => {
+      if (!_colResizing) return;
+      const delta = e.clientX - _colStartX;
+      const li = _colHandle._leftIdx, ri = _colHandle._rightIdx;
+      const newLeft = Math.max(60, _colWidths[li] + delta);
+      const newRight = Math.max(60, _colWidths[ri] - delta);
+      const widths = [..._colWidths];
+      widths[li] = newLeft; widths[ri] = newRight;
+      const parts = [];
+      widths.forEach((w, i) => { if (i > 0) parts.push("6px"); parts.push(w + "px"); });
+      _colGrid.style.gridTemplateColumns = parts.join(" ");
+    });
+    document.addEventListener("mouseup", () => {
+      if (!_colResizing) return;
+      _colResizing = false;
+      if (_colHandle) _colHandle.classList.remove("active");
+      _colHandle = null; _colGrid = null;
+      updateStatus();
+    });
 
     // ── Public API ──
     const api = {

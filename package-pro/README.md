@@ -55,7 +55,7 @@ RTEPro.init('#editor', {
 
 ## Features
 
-- **AI Panel** — Rewrite, summarize, expand, fix grammar, change tone, translate (10 languages), continue writing, generate from prompt. Powered by Anthropic Claude with SSE streaming.
+- **AI Panel** — Rewrite, summarize, expand, fix grammar, change tone, translate (10 languages), continue writing, generate from prompt. Powered by Anthropic Claude with SSE streaming. **Ask AI Anything** lets you type any freeform instruction using the editor's current content as context — e.g. "Make this more formal", "Add bullet points", "Explain this in simpler terms".
 - **Slash Commands** — Type `/` for headings, lists, quotes, code, tables, images, dividers, and more.
 - **@ Mentions** — Type `@` to search and insert mentions from a configurable list.
 - **Find & Replace** — Ctrl+F with regex support, match highlighting, and replace all.

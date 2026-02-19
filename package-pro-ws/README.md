@@ -98,7 +98,7 @@ ws.socket        // Raw WebSocket instance
 
 All features from [rte-rich-text-editor-pro](https://www.npmjs.com/package/rte-rich-text-editor-pro):
 
-- 16 toolbar groups, AI panel (Anthropic Claude), slash commands, @ mentions
+- 16 toolbar groups, AI panel (Anthropic Claude), slash commands, @ mentions. **Ask AI Anything** lets you type any freeform instruction using the editor's current content as context — e.g. "Make this more formal", "Add bullet points", "Explain this in simpler terms".
 - Find & Replace, source view, markdown toggle, fullscreen
 - 50-state undo/redo, version history, auto-save
 - Content analysis (readability, SEO, accessibility)

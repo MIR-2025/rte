@@ -2,6 +2,14 @@
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
 
+## [1.0.11] - 2026-02-18
+- Added Cut/Copy/Paste toolbar buttons and Ctrl+X/C support for selected images
+- Fixed color picker losing text selection on click (mousedown preventDefault)
+- Fixed gradient text overwriting existing styles (now preserves bold, italic, etc.)
+- Fixed columns not allowing new content below (added trailing paragraph)
+- Added "Remove Columns" to right-click context menu
+- Fixed toolbar tooltip z-index (tooltips no longer hidden behind next row of buttons)
+
 ## [1.0.10] - 2026-02-18
 - Added Find & Replace screenshot to README
 
