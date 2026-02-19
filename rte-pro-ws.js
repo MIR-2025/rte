@@ -509,7 +509,7 @@
 
     // ── Link popup ──
     const linkPopup = el("div", { className:"rte-popup" });
-    linkPopup.innerHTML = '<label>\u{1F517} Insert Link</label><input type="url" class="rte-link-url" placeholder="https://example.com"><div class="rte-popup-actions"><button class="rte-popup-btn secondary rte-link-cancel">Cancel</button><button class="rte-popup-btn primary rte-link-ok">Insert</button></div>';
+    linkPopup.innerHTML = '<label>\u{1F517} Insert Link</label><input type="text" class="rte-link-text" placeholder="Link Text"><input type="url" class="rte-link-url" placeholder="https://example.com"><div class="rte-popup-actions"><button class="rte-popup-btn secondary rte-link-cancel">Cancel</button><button class="rte-popup-btn primary rte-link-ok">Insert</button></div>';
     allPopups.push(linkPopup);
 
     // ── Media popups ──
@@ -613,7 +613,7 @@
 
     // ── Link popup wiring ──
     linkPopup.querySelector(".rte-link-cancel").addEventListener("click", () => linkPopup.classList.remove("show"));
-    linkPopup.querySelector(".rte-link-ok").addEventListener("click", () => { const url = linkPopup.querySelector(".rte-link-url").value; if (url) { restoreSelection(savedRange); exec("createLink", url); linkPopup.classList.remove("show"); linkPopup.querySelector(".rte-link-url").value = ""; } });
+    linkPopup.querySelector(".rte-link-ok").addEventListener("click", () => { const url = linkPopup.querySelector(".rte-link-url").value; const text = linkPopup.querySelector(".rte-link-text").value.trim(); if (url) { restoreSelection(savedRange); if (text) { exec("insertHTML", '<a href="' + url.replace(/"/g, '&quot;') + '">' + text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</a>'); } else { exec("createLink", url); } linkPopup.classList.remove("show"); linkPopup.querySelector(".rte-link-url").value = ""; linkPopup.querySelector(".rte-link-text").value = ""; } });
 
     // ── Format buttons ──
     const boldBtn = fmtBtn("B", "Bold (Ctrl+B)", () => exec("bold"), "fmt-bold"); formatButtons.bold = boldBtn;

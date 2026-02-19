@@ -697,6 +697,7 @@
     const linkPopup = el("div", { className: "rte-popup" });
     linkPopup.innerHTML = `
       <label>\ud83d\udd17 Insert Link</label>
+      <input type="text" class="rte-link-text" placeholder="Link Text">
       <input type="url" class="rte-link-url" placeholder="https://example.com">
       <div class="rte-popup-actions">
         <button class="rte-popup-btn secondary rte-link-cancel">Cancel</button>
@@ -834,11 +835,18 @@
     linkPopup.querySelector(".rte-link-cancel").addEventListener("click", () => linkPopup.classList.remove("show"));
     linkPopup.querySelector(".rte-link-ok").addEventListener("click", () => {
       const url = linkPopup.querySelector(".rte-link-url").value;
+      const text = linkPopup.querySelector(".rte-link-text").value.trim();
       if (url) {
         restoreSelection(savedRange);
-        exec("createLink", url);
+        if (text) {
+          const a = '<a href="' + url.replace(/"/g, "&quot;") + '">' + text.replace(/</g, "&lt;").replace(/>/g, "&gt;") + '</a>';
+          exec("insertHTML", a);
+        } else {
+          exec("createLink", url);
+        }
         linkPopup.classList.remove("show");
         linkPopup.querySelector(".rte-link-url").value = "";
+        linkPopup.querySelector(".rte-link-text").value = "";
       }
     });
 

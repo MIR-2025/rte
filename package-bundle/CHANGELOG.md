@@ -2,6 +2,9 @@
 
 All notable changes to `rte-rich-text-editor-bundle` will be documented in this file.
 
+## [1.0.17] - 2026-02-18
+- Added "Link Text" field to Insert Link popup — set custom anchor text or leave blank to wrap selection
+
 ## [1.0.16] - 2026-02-18
 - Added cleanHTML() for clean exports (strips resize classes, image overlays, contenteditable attributes)
 

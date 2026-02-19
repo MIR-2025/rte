@@ -186,6 +186,9 @@ MIT
 
 All notable changes to `rte-rich-text-editor-ws` will be documented in this file.
 
+## [1.0.9] - 2026-02-18
+- Version bump (no code changes — WebSocket wrapper only)
+
 ## [1.0.8] - 2026-02-18
 - Version bump (no code changes — WebSocket wrapper only)
 

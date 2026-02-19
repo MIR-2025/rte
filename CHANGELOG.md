@@ -4,6 +4,9 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-pro
 
+#### [1.0.14] - 2026-02-18
+- Added "Link Text" field to Insert Link popup — set custom anchor text or leave blank to wrap selection
+
 #### [1.0.13] - 2026-02-18
 - Fixed HTML export stripping column layout classes (columns, page breaks, mentions now preserved)
 - Fixed drag handle and column handle elements leaking into exports
@@ -68,6 +71,9 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-pro-ws
 
+#### [1.0.9] - 2026-02-18
+- Added "Link Text" field to Insert Link popup — set custom anchor text or leave blank to wrap selection
+
 #### [1.0.8] - 2026-02-18
 - Fixed HTML export stripping column layout classes (columns, page breaks, mentions now preserved)
 - Fixed drag handle and column handle elements leaking into exports
@@ -105,6 +111,9 @@ All notable changes will be documented in this file.
 - Initial release — RTEPro editor + WebSocket connector bundled in a single file
 
 ## rte-rich-text-editor
+
+### [1.0.26] - 2026-02-18
+- Added "Link Text" field to Insert Link popup — set custom anchor text or leave blank to wrap selection
 
 ### [1.0.25] - 2026-02-18
 - Added cleanHTML() for clean exports (strips resize classes, image overlays, contenteditable attributes)
@@ -207,6 +216,9 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-bundle
 
+#### [1.0.17] - 2026-02-18
+- Added "Link Text" field to Insert Link popup — set custom anchor text or leave blank to wrap selection
+
 #### [1.0.16] - 2026-02-18
 - Added cleanHTML() for clean exports (strips resize classes, image overlays, contenteditable attributes)
 
@@ -264,6 +276,9 @@ All notable changes will be documented in this file.
 - Available at `https://rte.whitneys.co/rte-bundle.js`
 
 ## rte-rich-text-editor-ws
+
+#### [1.0.9] - 2026-02-18
+- Version bump (no code changes — WebSocket wrapper only)
 
 #### [1.0.8] - 2026-02-18
 - Version bump (no code changes — WebSocket wrapper only)
