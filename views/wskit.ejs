@@ -351,8 +351,25 @@ const ws2 = WSKit.connect(url, {
         <section id="backend-examples" class="mb-5">
           <h2>Backend Examples</h2>
 
-          <h5 class="mt-4">Node.js (ws)</h5>
-          <pre class="code-block"><code>import { WebSocketServer } from 'ws';
+          <ul class="nav nav-tabs mt-4" id="backendTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-nodejs" data-bs-toggle="tab" data-bs-target="#be-nodejs" type="button" role="tab">Node.js</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-python" data-bs-toggle="tab" data-bs-target="#be-python" type="button" role="tab">Python</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-go" data-bs-toggle="tab" data-bs-target="#be-go" type="button" role="tab">Go</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-php" data-bs-toggle="tab" data-bs-target="#be-php" type="button" role="tab">PHP</button>
+            </li>
+          </ul>
+          <div class="tab-content border border-top-0 rounded-bottom">
+
+            <!-- Node.js -->
+            <div class="tab-pane fade show active p-0" id="be-nodejs" role="tabpanel">
+              <pre class="code-block" style="margin:0;border-radius:0 0 10px 10px"><code>import { WebSocketServer } from 'ws';
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -385,9 +402,11 @@ wss.on('connection', (socket) =&gt; {
     }
   });
 });</code></pre>
+            </div>
 
-          <h5 class="mt-4">Python (websockets)</h5>
-          <pre class="code-block"><code>import asyncio, json, websockets
+            <!-- Python -->
+            <div class="tab-pane fade p-0" id="be-python" role="tabpanel">
+              <pre class="code-block" style="margin:0;border-radius:0 0 10px 10px"><code>import asyncio, json, websockets
 
 connected = set()
 
@@ -415,9 +434,11 @@ async def handler(ws):
         connected.discard(ws)
 
 asyncio.run(websockets.serve(handler, "0.0.0.0", 8080))</code></pre>
+            </div>
 
-          <h5 class="mt-4">Go (gorilla/websocket)</h5>
-          <pre class="code-block"><code>package main
+            <!-- Go -->
+            <div class="tab-pane fade p-0" id="be-go" role="tabpanel">
+              <pre class="code-block" style="margin:0;border-radius:0 0 10px 10px"><code>package main
 
 import (
     "encoding/json"
@@ -459,6 +480,77 @@ func main() {
     http.HandleFunc("/ws", handler)
     log.Fatal(http.ListenAndServe(":8080", nil))
 }</code></pre>
+            </div>
+
+            <!-- PHP -->
+            <div class="tab-pane fade p-0" id="be-php" role="tabpanel">
+              <pre class="code-block" style="margin:0;border-radius:0 0 10px 10px"><code>&lt;?php
+// composer require ratchet/pawl react/event-loop
+
+use Ratchet\MessageComponentInterface;
+use Ratchet\ConnectionInterface;
+use Ratchet\Server\IoServer;
+use Ratchet\Http\HttpServer;
+use Ratchet\WebSocket\WsServer;
+
+require __DIR__ . '/vendor/autoload.php';
+
+class Handler implements MessageComponentInterface {
+    protected $clients;
+
+    public function __construct() {
+        $this-&gt;clients = new \SplObjectStorage;
+    }
+
+    public function onOpen(ConnectionInterface $conn) {
+        $this-&gt;clients-&gt;attach($conn);
+    }
+
+    public function onMessage(ConnectionInterface $from, $raw) {
+        $msg = json_decode($raw, true);
+
+        switch ($msg['type'] ?? '') {
+            case 'chat':
+                // Broadcast to all other clients
+                foreach ($this-&gt;clients as $client) {
+                    if ($client !== $from) {
+                        $client-&gt;send(json_encode($msg));
+                    }
+                }
+                break;
+
+            case 'getUser':
+                // Request/response — echo back _id
+                $from-&gt;send(json_encode([
+                    '_id'   =&gt; $msg['_id'],
+                    'name'  =&gt; 'John',
+                    'email' =&gt; 'john@example.com',
+                ]));
+                break;
+
+            case 'ping':
+                $from-&gt;send(json_encode(['type' =&gt; 'pong']));
+                break;
+        }
+    }
+
+    public function onClose(ConnectionInterface $conn) {
+        $this-&gt;clients-&gt;detach($conn);
+    }
+
+    public function onError(ConnectionInterface $conn, \Exception $e) {
+        $conn-&gt;close();
+    }
+}
+
+$server = IoServer::factory(
+    new HttpServer(new WsServer(new Handler())),
+    8080
+);
+$server-&gt;run();</code></pre>
+            </div>
+
+          </div>
         </section>
 
         <!-- npm -->
