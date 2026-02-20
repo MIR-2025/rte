@@ -65,6 +65,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Block browser navigation to /api/ai (GET returns 404)
+app.get('/api/ai', (req, res) => res.status(404).render('404', { page: '404' }));
+
 // AI proxy endpoint (keeps API key server-side)
 app.post('/api/ai', async (req, res) => {
   const key = process.env.ANTHROPIC_API_KEY;
@@ -214,6 +217,11 @@ app.post('/donate/create-session', async (req, res) => {
     console.error('Stripe session error:', err);
     res.status(500).json({ error: 'Failed to create checkout session' });
   }
+});
+
+// 404 catch-all (must be last route)
+app.use((req, res) => {
+  res.status(404).render('404', { page: '404' });
 });
 
 app.listen(PORT, () => {
