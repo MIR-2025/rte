@@ -1,6 +1,6 @@
 {
   "name": "wskit-client",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Universal WebSocket client. Auto-reconnect, message queue, channels, request/response, heartbeat. Zero dependencies.",
   "main": "wskit.js",
   "module": "wskit.js",

@@ -117,7 +117,7 @@ console.log(ws.queueSize); // 2
 ws.clearQueue();
 ```
 
-## Configuration
+## Front-End Configuration
 
 ```js
 const ws = WSKit.connect('wss://yourserver.com/ws', {
@@ -173,7 +173,9 @@ const ws = WSKit.connect('wss://yourserver.com/ws', {
 | `ws.url` | The WebSocket URL |
 | `ws.reconnectAttempts` | Current reconnect attempt count |
 
-## Backend Example (Node.js)
+## Backend Examples
+
+### Node.js (ws)
 
 ```js
 import { WebSocketServer } from 'ws';
@@ -209,6 +211,155 @@ wss.on('connection', (socket) => {
     }
   });
 });
+```
+
+### Python (websockets)
+
+```python
+import asyncio, json, websockets
+
+connected = set()
+
+async def handler(ws):
+    connected.add(ws)
+    try:
+        async for raw in ws:
+            msg = json.loads(raw)
+
+            if msg.get("type") == "chat":
+                for client in connected:
+                    if client != ws:
+                        await client.send(json.dumps(msg))
+
+            elif msg.get("type") == "getUser":
+                await ws.send(json.dumps({
+                    "_id": msg["_id"],
+                    "name": "John",
+                    "email": "john@example.com",
+                }))
+
+            elif msg.get("type") == "ping":
+                await ws.send(json.dumps({"type": "pong"}))
+    finally:
+        connected.discard(ws)
+
+asyncio.run(websockets.serve(handler, "0.0.0.0", 8080))
+```
+
+### Go (gorilla/websocket)
+
+```go
+package main
+
+import (
+    "encoding/json"
+    "log"
+    "net/http"
+    "github.com/gorilla/websocket"
+)
+
+var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    conn, _ := upgrader.Upgrade(w, r, nil)
+    defer conn.Close()
+
+    for {
+        _, raw, err := conn.ReadMessage()
+        if err != nil { break }
+
+        var msg map[string]interface{}
+        json.Unmarshal(raw, &msg)
+
+        switch msg["type"] {
+        case "getUser":
+            resp, _ := json.Marshal(map[string]interface{}{
+                "_id":   msg["_id"],
+                "name":  "John",
+                "email": "john@example.com",
+            })
+            conn.WriteMessage(websocket.TextMessage, resp)
+
+        case "ping":
+            resp, _ := json.Marshal(map[string]string{"type": "pong"})
+            conn.WriteMessage(websocket.TextMessage, resp)
+        }
+    }
+}
+
+func main() {
+    http.HandleFunc("/ws", handler)
+    log.Fatal(http.ListenAndServe(":8080", nil))
+}
+```
+
+### PHP (Ratchet)
+
+```php
+<?php
+// composer require cboden/ratchet
+
+use Ratchet\MessageComponentInterface;
+use Ratchet\ConnectionInterface;
+use Ratchet\Server\IoServer;
+use Ratchet\Http\HttpServer;
+use Ratchet\WebSocket\WsServer;
+
+require __DIR__ . '/vendor/autoload.php';
+
+class Handler implements MessageComponentInterface {
+    protected $clients;
+
+    public function __construct() {
+        $this->clients = new \SplObjectStorage;
+    }
+
+    public function onOpen(ConnectionInterface $conn) {
+        $this->clients->attach($conn);
+    }
+
+    public function onMessage(ConnectionInterface $from, $raw) {
+        $msg = json_decode($raw, true);
+
+        switch ($msg['type'] ?? '') {
+            case 'chat':
+                // Broadcast to all other clients
+                foreach ($this->clients as $client) {
+                    if ($client !== $from) {
+                        $client->send(json_encode($msg));
+                    }
+                }
+                break;
+
+            case 'getUser':
+                // Request/response — echo back _id
+                $from->send(json_encode([
+                    '_id'   => $msg['_id'],
+                    'name'  => 'John',
+                    'email' => 'john@example.com',
+                ]));
+                break;
+
+            case 'ping':
+                $from->send(json_encode(['type' => 'pong']));
+                break;
+        }
+    }
+
+    public function onClose(ConnectionInterface $conn) {
+        $this->clients->detach($conn);
+    }
+
+    public function onError(ConnectionInterface $conn, \Exception $e) {
+        $conn->close();
+    }
+}
+
+$server = IoServer::factory(
+    new HttpServer(new WsServer(new Handler())),
+    8080
+);
+$server->run();
 ```
 
 ## Related Packages
