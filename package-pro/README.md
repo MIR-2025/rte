@@ -161,6 +161,11 @@ Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](ht
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
 
+## [1.0.16] - 2026-02-19
+- Added `aiProxy` option to proxy AI requests through your server (keeps API key secret)
+- API key no longer required in browser when using `aiProxy`
+- Updated README with security warning about direct `apiKey` usage in production
+
 ## [1.0.14] - 2026-02-18
 - Added "Link Text" field to Insert Link popup — set custom anchor text or leave blank to wrap selection
 
