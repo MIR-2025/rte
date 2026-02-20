@@ -35,7 +35,19 @@ Or via CDN:
 
 ## AI Integration
 
-Pass an Anthropic API key to enable AI features (rewrite, summarize, expand, fix grammar, translate, generate content):
+> **Warning:** Never use `apiKey` in production web apps — it exposes your Anthropic API key in the browser where anyone can steal it. Use `aiProxy` to route requests through your own server, which keeps the key secret.
+
+**Recommended: Server-side proxy (keeps your key safe)**
+
+```js
+const editor = RTEPro.init('#editor', {
+  aiProxy: '/api/ai',  // your server endpoint that forwards to Anthropic
+});
+```
+
+Your proxy endpoint receives the same JSON body the editor would send to Anthropic and should forward it to `https://api.anthropic.com/v1/messages` with your API key attached server-side. For streaming requests (`stream: true`), pipe the SSE response back; for non-streaming requests, return the JSON response.
+
+**Direct API key (only for local dev / internal tools)**
 
 ```js
 const editor = RTEPro.init('#editor', {
@@ -82,7 +94,8 @@ RTEPro.init('#editor', {
 |---|---|---|---|
 | `placeholder` | string | `''` | Placeholder text |
 | `height` | string | `'300px'` | Editor height |
-| `apiKey` | string | `null` | Anthropic API key for AI features |
+| `apiKey` | string | `null` | Anthropic API key (direct, **not recommended for production**) |
+| `aiProxy` | string | `null` | Server proxy URL for AI requests (recommended) |
 | `aiModel` | string | `'claude-sonnet-4-5-20250929'` | AI model |
 | `toolbar` | string[] | `null` | Toolbar groups to show (null = all) |
 | `autosave` | boolean/number | `false` | Auto-save interval (true = 30s, or ms) |

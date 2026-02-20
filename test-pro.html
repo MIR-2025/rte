@@ -27,19 +27,12 @@
 
   <script src="rte-pro.js"></script>
   <script>
-    (async function() {
-      // Fetch API key from server (loaded from .env)
-      let apiKey = null;
-      try {
-        const resp = await fetch('/api/ai-key');
-        if (resp.ok) { const data = await resp.json(); apiKey = data.key; }
-      } catch(e) { console.log('No AI key available (running as static file?)'); }
-
+    (function() {
       const editor = RTEPro.init('#editor', {
         placeholder: 'Start typing... Try / for slash commands, @ for mentions',
         height: '350px',
         wordGoal: 500,
-        apiKey: apiKey,
+        aiProxy: '/api/ai',
         mentions: [
           { name: 'Alice Johnson', id: 'alice', avatar: '👩' },
           { name: 'Bob Smith', id: 'bob', avatar: '👨' },

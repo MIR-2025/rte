@@ -432,7 +432,7 @@
     options = Object.assign({
       placeholder: "Start typing something amazing\u2026",
       height: null, exportCSS: null, exportTemplate: null,
-      apiKey: null, aiModel: "claude-sonnet-4-5-20250929",
+      apiKey: null, aiProxy: null, aiModel: "claude-sonnet-4-5-20250929",
       toolbar: null, autosave: false, autosaveKey: "rte-pro-autosave",
       wordGoal: 0, charGoal: 0, spellcheck: true, direction: "ltr",
       mentions: [], hashtagUrl: null, printMargins: null,
@@ -452,8 +452,8 @@
     const wordCountEl = el("span", {}, "\u{1F4DD} Words: 0");
     const charCountEl = el("span", {}, "\u{1F524} Chars: 0");
     const readingTimeEl = el("span", {}, "\u{1F4D6} ~0 min read");
-    const aiStatusEl = el("span", { className: "rte-pro-ai-status" }, options.apiKey ? "AI: Ready" : "AI: No key");
-    if (options.apiKey) aiStatusEl.style.color = "#22c55e";
+    const aiStatusEl = el("span", { className: "rte-pro-ai-status" }, (options.apiKey || options.aiProxy) ? "AI: Ready" : "AI: No key");
+    if (options.apiKey || options.aiProxy) aiStatusEl.style.color = "#22c55e";
     statusbar.append(wordCountEl, charCountEl, readingTimeEl, aiStatusEl);
 
     const formatButtons = {};
@@ -1208,7 +1208,7 @@
     let aiAbortController = null;
     function openAIPanel() {
       openPanel("ai", "\u{1F916} AI Assistant", body => {
-        if (!options.apiKey) { body.innerHTML = '<p style="color:#64748b;font-size:13px">No API key configured. Pass <code>apiKey</code> in options to enable AI features.</p>'; return; }
+        if (!options.apiKey && !options.aiProxy) { body.innerHTML = '<p style="color:#64748b;font-size:13px">No API key configured. Pass <code>apiKey</code> or <code>aiProxy</code> in options to enable AI features.</p>'; return; }
         const commands = el("div", { style:{ display:"flex", flexWrap:"wrap", gap:"4px", marginBottom:"12px" } });
         [["\u270D\uFE0F Rewrite","Rewrite the following text, improving clarity and flow while preserving meaning:"],
          ["\u{1F4DD} Summarize","Summarize the following text concisely:"],
@@ -1282,9 +1282,12 @@
       aiStatusEl.textContent = "AI: Generating..."; aiStatusEl.style.color = "#f59e0b"; savedRange = saveSelection();
       try {
         aiAbortController = new AbortController();
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
+        const aiUrl = options.aiProxy || "https://api.anthropic.com/v1/messages";
+        const aiHeaders = { "Content-Type":"application/json" };
+        if (!options.aiProxy) { aiHeaders["x-api-key"] = options.apiKey; aiHeaders["anthropic-version"] = "2023-06-01"; aiHeaders["anthropic-dangerous-direct-browser-access"] = "true"; }
+        const response = await fetch(aiUrl, {
           method:"POST", signal: aiAbortController.signal,
-          headers:{ "Content-Type":"application/json", "x-api-key":options.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
+          headers: aiHeaders,
           body: JSON.stringify({ model:options.aiModel, max_tokens:4096, stream:true, system:AI_SYSTEM, messages:[{ role:"user", content:systemPrompt+"\n\n"+textToProcess }] })
         });
         if (!response.ok) throw new Error("API error: " + response.status);
@@ -1321,9 +1324,12 @@
       aiStatusEl.textContent = "AI: Generating..."; aiStatusEl.style.color = "#f59e0b"; savedRange = saveSelection();
       try {
         aiAbortController = new AbortController();
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
+        const aiUrl2 = options.aiProxy || "https://api.anthropic.com/v1/messages";
+        const aiHeaders2 = { "Content-Type":"application/json" };
+        if (!options.aiProxy) { aiHeaders2["x-api-key"] = options.apiKey; aiHeaders2["anthropic-version"] = "2023-06-01"; aiHeaders2["anthropic-dangerous-direct-browser-access"] = "true"; }
+        const response = await fetch(aiUrl2, {
           method:"POST", signal:aiAbortController.signal,
-          headers:{ "Content-Type":"application/json", "x-api-key":options.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
+          headers: aiHeaders2,
           body: JSON.stringify({ model:options.aiModel, max_tokens:4096, stream:true, system:AI_SYSTEM, messages:[{ role:"user", content:prompt }] })
         });
         if (!response.ok) throw new Error("API error: " + response.status);
@@ -1841,7 +1847,7 @@
       getSEOIssues: () => { const issues=[]; const h1s=content.querySelectorAll("h1"); if(!h1s.length)issues.push("No H1"); if(h1s.length>1)issues.push("Multiple H1s"); Array.from(content.querySelectorAll("img")).filter(i=>!i.alt||i.alt==="image").forEach(()=>issues.push("Image missing alt text")); if((content.innerText.trim()?content.innerText.trim().split(/\s+/).length:0)<300)issues.push("Content too short"); return issues; },
       getAccessibilityIssues: () => { const issues=[]; content.querySelectorAll("img").forEach(i=>{if(!i.alt||i.alt==="image")issues.push("Image missing alt text");}); content.querySelectorAll("a").forEach(a=>{const t=a.textContent.trim().toLowerCase();if(["click here","here","link","read more"].includes(t))issues.push("Non-descriptive link: "+t);}); return issues; },
       ai: {
-        run: async (prompt, text) => { if(!options.apiKey)throw new Error("No API key"); const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":options.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:options.aiModel,max_tokens:4096,messages:[{role:"user",content:prompt+"\n\n"+(text||content.innerText)}]})}); if(!resp.ok)throw new Error("API error: "+resp.status); const data=await resp.json(); return data.content[0]?.text||""; },
+        run: async (prompt, text) => { if(!options.apiKey&&!options.aiProxy)throw new Error("No API key"); const aiU=options.aiProxy||"https://api.anthropic.com/v1/messages"; const aiH={"Content-Type":"application/json"}; if(!options.aiProxy){aiH["x-api-key"]=options.apiKey;aiH["anthropic-version"]="2023-06-01";aiH["anthropic-dangerous-direct-browser-access"]="true";} const resp=await fetch(aiU,{method:"POST",headers:aiH,body:JSON.stringify({model:options.aiModel,max_tokens:4096,messages:[{role:"user",content:prompt+"\n\n"+(text||content.innerText)}]})}); if(!resp.ok)throw new Error("API error: "+resp.status); const data=await resp.json(); return data.content[0]?.text||""; },
         cancel: () => { if (aiAbortController) aiAbortController.abort(); }
       },
       onChange: null,

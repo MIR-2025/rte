@@ -12,6 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+app.set('trust proxy', true);
 app.use(morgan('combined'));
 const PORT = 26216;
 
@@ -64,11 +65,35 @@ app.use((req, res, next) => {
   next();
 });
 
-// Anthropic API key endpoint (for RTEPro AI features)
-app.get('/api/ai-key', (req, res) => {
+// AI proxy endpoint (keeps API key server-side)
+app.post('/api/ai', async (req, res) => {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return res.status(404).json({ error: 'No API key configured' });
-  res.json({ key });
+  if (!key) return res.status(500).json({ error: 'No API key configured' });
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify(req.body)
+    });
+
+    res.status(resp.status);
+    if (req.body.stream) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      resp.body.pipe(res);
+    } else {
+      res.setHeader('Content-Type', 'application/json');
+      const data = await resp.text();
+      res.send(data);
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'AI proxy error' });
+  }
 });
 
 // Static files — serves rte.js from project root

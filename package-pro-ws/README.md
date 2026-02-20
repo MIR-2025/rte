@@ -29,7 +29,7 @@ Or via CDN:
   const editor = RTEPro.init('#editor', {
     placeholder: 'Start typing...',
     height: '400px',
-    apiKey: 'sk-ant-...',
+    aiProxy: '/api/ai',  // recommended — see AI Integration below
   });
 
   const ws = RTEProWS.connect(editor, 'wss://yourserver.com/ws', {
@@ -94,6 +94,28 @@ ws.socket        // Raw WebSocket instance
 { "type": "change", "docId": "...", "userId": "...", "html": "...", "text": "...", "words": 42, "chars": 256 }
 { "type": "save",   "docId": "...", "userId": "...", "html": "...", "text": "...", "words": 42, "chars": 256 }
 { "type": "ping" }
+```
+
+## AI Integration
+
+> **Warning:** Never use `apiKey` in production web apps — it exposes your Anthropic API key in the browser where anyone can steal it. Use `aiProxy` to route requests through your own server, which keeps the key secret.
+
+**Recommended: Server-side proxy (keeps your key safe)**
+
+```js
+const editor = RTEPro.init('#editor', {
+  aiProxy: '/api/ai',  // your server endpoint that forwards to Anthropic
+});
+```
+
+Your proxy endpoint receives the same JSON body the editor would send to Anthropic and should forward it to `https://api.anthropic.com/v1/messages` with your API key attached server-side. For streaming requests (`stream: true`), pipe the SSE response back; for non-streaming requests, return the JSON response.
+
+**Direct API key (only for local dev / internal tools)**
+
+```js
+const editor = RTEPro.init('#editor', {
+  apiKey: 'sk-ant-...',
+});
 ```
 
 ## RTEPro Features
