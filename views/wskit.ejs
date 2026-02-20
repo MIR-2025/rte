@@ -15,7 +15,7 @@
             <a class="nav-link px-0 py-1" href="#channels">Channels</a>
             <a class="nav-link px-0 py-1" href="#request-response">Request / Response</a>
             <a class="nav-link px-0 py-1" href="#message-queue">Message Queue</a>
-            <a class="nav-link px-0 py-1" href="#configuration">Configuration</a>
+            <a class="nav-link px-0 py-1" href="#configuration">Front-End Configuration</a>
             <a class="nav-link px-0 py-1" href="#api">API Reference</a>
             <a class="nav-link px-0 py-1" href="#reconnect">Reconnection</a>
             <a class="nav-link px-0 py-1" href="#heartbeat">Heartbeat</a>
@@ -202,9 +202,9 @@ ws.clearQueue();</code></pre>
           <p class="mt-3"><code class="inline">ws.send()</code> returns <code class="inline">true</code> if the message was sent immediately, or <code class="inline">false</code> if it was queued. When the queue is full, new messages are dropped.</p>
         </section>
 
-        <!-- Configuration -->
+        <!-- Front-End Configuration -->
         <section id="configuration" class="mb-5">
-          <h2>Configuration</h2>
+          <h2>Front-End Configuration</h2>
           <p>Pass an options object as the second argument to <code class="inline">WSKit.connect()</code>:</p>
 
           <pre class="code-block"><code>const ws = WSKit.connect('wss://yourserver.com/ws', {
