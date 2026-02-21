@@ -13,6 +13,7 @@ const __dirname = dirname(__filename);
 
 const app = express();
 app.set('trust proxy', true);
+morgan.token('date', () => new Date().toLocaleString('en-US', { timeZone: 'America/Phoenix' }));
 app.use(morgan('combined'));
 const PORT = 26216;
 
