@@ -1022,7 +1022,7 @@
       }),
 
       exportBtn("\u2709\ufe0f", "Email", "Copy rich HTML to clipboard for pasting into email", () => {
-        const htmlStr = content.innerHTML;
+        const htmlStr = cleanHTML();
         const textStr = content.innerText;
         if (navigator.clipboard && navigator.clipboard.write) {
           const blob = new Blob([htmlStr], { type: "text/html" });

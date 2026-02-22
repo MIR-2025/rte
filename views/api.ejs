@@ -64,7 +64,7 @@
               <tr><td><code>saveText(filename)</code></td><td>void</td><td>Trigger a file download of plain text</td></tr>
               <tr><td><code>copyHTML()</code></td><td>Promise</td><td>Copy rich HTML to clipboard</td></tr>
               <tr><td><code>copyText()</code></td><td>Promise</td><td>Copy plain text to clipboard</td></tr>
-              <tr><td><code>email(to, subject)</code></td><td>void</td><td>Open email client with content</td></tr>
+              <tr><td><code>email()</code></td><td>Promise</td><td>Copy rich HTML to clipboard for pasting into email</td></tr>
               <tr><td><code>print()</code></td><td>void</td><td>Open print preview</td></tr>
               <tr><td><code>focus()</code></td><td>void</td><td>Focus the editor</td></tr>
               <tr><td><code>destroy()</code></td><td>void</td><td>Remove the editor from the DOM</td></tr>
@@ -194,10 +194,10 @@ alert('Copied! Paste into your email.');</code></pre>
 
           <div class="card mb-3">
             <div class="card-body">
-              <h5><code>editor.email(to?, subject?)</code></h5>
-              <p>Opens the user's default email client with the editor content in the email body.</p>
-              <pre class="code-block"><code>editor.email();                              // blank recipient
-editor.email('team@example.com', 'Meeting Notes'); // pre-filled</code></pre>
+              <h5><code>editor.email()</code></h5>
+              <p>Copies the editor content as rich HTML to the clipboard. When pasted into Gmail, Outlook, or any email client, formatting is preserved. Returns a Promise.</p>
+              <pre class="code-block"><code>await editor.email();
+alert('Copied! Paste into your email with Ctrl+V.');</code></pre>
             </div>
           </div>
 
@@ -331,8 +331,9 @@ editor.element.addEventListener('blur', () => console.log('Editor blurred'));</c
     });
 
     // Email button
-    document.getElementById('email').addEventListener('click', () =&gt; {
-      editor.email('editor@example.com', 'New Article');
+    document.getElementById('email').addEventListener('click', async () =&gt; {
+      await editor.email();
+      alert('Copied! Paste into your email.');
     });
   &lt;/script&gt;
 &lt;/body&gt;
