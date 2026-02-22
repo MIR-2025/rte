@@ -432,7 +432,7 @@
     options = Object.assign({
       placeholder: "Start typing something amazing\u2026",
       height: null, exportCSS: null, exportTemplate: null,
-      apiKey: null, aiProxy: null, aiModel: "claude-sonnet-4-5-20250929",
+      apiKey: null, aiProxy: null, aiModel: "claude-sonnet-4-5-20250929", aiProvider: "anthropic",
       toolbar: null, autosave: false, autosaveKey: "rte-pro-autosave",
       wordGoal: 0, charGoal: 0, spellcheck: true, direction: "ltr",
       mentions: [], hashtagUrl: null, printMargins: null,
@@ -1248,6 +1248,32 @@
 
     const AI_SYSTEM = "You are an AI writing assistant embedded in a rich text editor. IMPORTANT: Always respond with clean, raw HTML suitable for a WYSIWYG editor contenteditable div. Use semantic HTML tags: <h1>-<h4>, <p>, <strong>, <em>, <ul>, <ol>, <li>, <blockquote>, <pre>, <a>, <table>, <tr>, <td>, <th>, <img>, <hr>, <br>, <span style=\"...\">. Do NOT use markdown formatting. Do NOT wrap your response in ```html code fences. Do NOT include <html>, <head>, <body>, or <style> tags — only inner content HTML. For layouts, use inline styles on divs/sections. Output ONLY the HTML content, no explanations.";
 
+
+    const AI_PROVIDERS = {
+      anthropic: {
+        url(o) { return o.aiProxy || "https://api.anthropic.com/v1/messages"; },
+        headers(o) { const h={"Content-Type":"application/json"}; if(!o.aiProxy){h["x-api-key"]=o.apiKey;h["anthropic-version"]="2023-06-01";h["anthropic-dangerous-direct-browser-access"]="true";} return h; },
+        body(o, sys, user, stream) { const b={model:o.aiModel,max_tokens:4096,messages:[{role:"user",content:user}]}; if(sys)b.system=sys; if(stream)b.stream=true; return b; },
+        extractStreamText(p) { return (p.type==="content_block_delta"&&p.delta?.text)?p.delta.text:null; },
+        extractResponseText(d) { return d.content?.[0]?.text||""; }
+      },
+      openai: {
+        url(o) { return o.aiProxy || "https://api.openai.com/v1/chat/completions"; },
+        headers(o) { const h={"Content-Type":"application/json"}; if(!o.aiProxy) h["Authorization"]="Bearer "+o.apiKey; return h; },
+        body(o, sys, user, stream) { const m=[]; if(sys)m.push({role:"system",content:sys}); m.push({role:"user",content:user}); const b={model:o.aiModel,max_tokens:4096,messages:m}; if(stream)b.stream=true; return b; },
+        extractStreamText(p) { return p.choices?.[0]?.delta?.content||null; },
+        extractResponseText(d) { return d.choices?.[0]?.message?.content||""; }
+      },
+      gemini: {
+        url(o) { if(o.aiProxy) return o.aiProxy; return "https://generativelanguage.googleapis.com/v1beta/models/"+o.aiModel+":streamGenerateContent?alt=sse&key="+encodeURIComponent(o.apiKey); },
+        urlNonStream(o) { if(o.aiProxy) return o.aiProxy; return "https://generativelanguage.googleapis.com/v1beta/models/"+o.aiModel+":generateContent?key="+encodeURIComponent(o.apiKey); },
+        headers(o) { return {"Content-Type":"application/json"}; },
+        body(o, sys, user, stream) { const b={contents:[{role:"user",parts:[{text:user}]}]}; if(sys)b.systemInstruction={parts:[{text:sys}]}; if(o.aiProxy){b.model=o.aiModel; if(stream)b.stream=true;} return b; },
+        extractStreamText(p) { return p.candidates?.[0]?.content?.parts?.[0]?.text||null; },
+        extractResponseText(d) { return d.candidates?.[0]?.content?.parts?.[0]?.text||""; }
+      }
+    };
+
     function stripDocumentTags(html) {
       // Remove code fences
       html = html.replace(/^```html?\s*\n?/i, "").replace(/\n?```\s*$/,"");
@@ -1283,13 +1309,13 @@
       aiStatusEl.textContent = "AI: Generating..."; aiStatusEl.style.color = "#f59e0b"; savedRange = saveSelection();
       try {
         aiAbortController = new AbortController();
-        const aiUrl = options.aiProxy || "https://api.anthropic.com/v1/messages";
-        const aiHeaders = { "Content-Type":"application/json" };
-        if (!options.aiProxy) { aiHeaders["x-api-key"] = options.apiKey; aiHeaders["anthropic-version"] = "2023-06-01"; aiHeaders["anthropic-dangerous-direct-browser-access"] = "true"; }
-        const response = await fetch(aiUrl, {
+        const provider = AI_PROVIDERS[options.aiProvider] || AI_PROVIDERS.anthropic;
+        const bodyObj = provider.body(options, AI_SYSTEM, systemPrompt+"\n\n"+textToProcess, true);
+        if (options.aiProxy) bodyObj._provider = options.aiProvider || "anthropic";
+        const response = await fetch(provider.url(options), {
           method:"POST", signal: aiAbortController.signal,
-          headers: aiHeaders,
-          body: JSON.stringify({ model:options.aiModel, max_tokens:4096, stream:true, system:AI_SYSTEM, messages:[{ role:"user", content:systemPrompt+"\n\n"+textToProcess }] })
+          headers: provider.headers(options),
+          body: JSON.stringify(bodyObj)
         });
         if (!response.ok) throw new Error("API error: " + response.status);
         const reader = response.body.getReader(); const decoder = new TextDecoder(); let fullText = ""; responseArea.textContent = "";
@@ -1298,7 +1324,7 @@
           const chunk = decoder.decode(value, { stream:true });
           for (const line of chunk.split("\n")) {
             if (line.startsWith("data: ")) { const data = line.slice(6); if (data === "[DONE]") break;
-              try { const p = JSON.parse(data); if (p.type === "content_block_delta" && p.delta?.text) { fullText += p.delta.text; responseArea.textContent = fullText; responseArea.scrollTop = responseArea.scrollHeight; } } catch(e) {} }
+              try { const p = JSON.parse(data); const text = provider.extractStreamText(p); if (text) { fullText += text; responseArea.textContent = fullText; responseArea.scrollTop = responseArea.scrollHeight; } } catch(e) {} }
           }
         }
         aiStatusEl.textContent = "AI: Ready"; aiStatusEl.style.color = "#22c55e";
@@ -1325,13 +1351,13 @@
       aiStatusEl.textContent = "AI: Generating..."; aiStatusEl.style.color = "#f59e0b"; savedRange = saveSelection();
       try {
         aiAbortController = new AbortController();
-        const aiUrl2 = options.aiProxy || "https://api.anthropic.com/v1/messages";
-        const aiHeaders2 = { "Content-Type":"application/json" };
-        if (!options.aiProxy) { aiHeaders2["x-api-key"] = options.apiKey; aiHeaders2["anthropic-version"] = "2023-06-01"; aiHeaders2["anthropic-dangerous-direct-browser-access"] = "true"; }
-        const response = await fetch(aiUrl2, {
+        const provider = AI_PROVIDERS[options.aiProvider] || AI_PROVIDERS.anthropic;
+        const bodyObj = provider.body(options, AI_SYSTEM, prompt, true);
+        if (options.aiProxy) bodyObj._provider = options.aiProvider || "anthropic";
+        const response = await fetch(provider.url(options), {
           method:"POST", signal:aiAbortController.signal,
-          headers: aiHeaders2,
-          body: JSON.stringify({ model:options.aiModel, max_tokens:4096, stream:true, system:AI_SYSTEM, messages:[{ role:"user", content:prompt }] })
+          headers: provider.headers(options),
+          body: JSON.stringify(bodyObj)
         });
         if (!response.ok) throw new Error("API error: " + response.status);
         const reader = response.body.getReader(); const decoder = new TextDecoder(); let fullText = ""; responseArea.textContent = "";
@@ -1340,7 +1366,7 @@
           const chunk = decoder.decode(value, { stream:true });
           for (const line of chunk.split("\n")) {
             if (line.startsWith("data: ")) { const data = line.slice(6); if (data === "[DONE]") break;
-              try { const p = JSON.parse(data); if (p.type === "content_block_delta" && p.delta?.text) { fullText += p.delta.text; responseArea.textContent = fullText; responseArea.scrollTop = responseArea.scrollHeight; } } catch(e) {} }
+              try { const p = JSON.parse(data); const text = provider.extractStreamText(p); if (text) { fullText += text; responseArea.textContent = fullText; responseArea.scrollTop = responseArea.scrollHeight; } } catch(e) {} }
           }
         }
         aiStatusEl.textContent = "AI: Ready"; aiStatusEl.style.color = "#22c55e";
@@ -1851,7 +1877,7 @@
       getSEOIssues: () => { const issues=[]; const h1s=content.querySelectorAll("h1"); if(!h1s.length)issues.push("No H1"); if(h1s.length>1)issues.push("Multiple H1s"); Array.from(content.querySelectorAll("img")).filter(i=>!i.alt||i.alt==="image").forEach(()=>issues.push("Image missing alt text")); if((content.innerText.trim()?content.innerText.trim().split(/\s+/).length:0)<300)issues.push("Content too short"); return issues; },
       getAccessibilityIssues: () => { const issues=[]; content.querySelectorAll("img").forEach(i=>{if(!i.alt||i.alt==="image")issues.push("Image missing alt text");}); content.querySelectorAll("a").forEach(a=>{const t=a.textContent.trim().toLowerCase();if(["click here","here","link","read more"].includes(t))issues.push("Non-descriptive link: "+t);}); return issues; },
       ai: {
-        run: async (prompt, text) => { if(!options.apiKey&&!options.aiProxy)throw new Error("No API key"); const aiU=options.aiProxy||"https://api.anthropic.com/v1/messages"; const aiH={"Content-Type":"application/json"}; if(!options.aiProxy){aiH["x-api-key"]=options.apiKey;aiH["anthropic-version"]="2023-06-01";aiH["anthropic-dangerous-direct-browser-access"]="true";} const resp=await fetch(aiU,{method:"POST",headers:aiH,body:JSON.stringify({model:options.aiModel,max_tokens:4096,messages:[{role:"user",content:prompt+"\n\n"+(text||content.innerText)}]})}); if(!resp.ok)throw new Error("API error: "+resp.status); const data=await resp.json(); return data.content[0]?.text||""; },
+        run: async (prompt, text) => { if(!options.apiKey&&!options.aiProxy)throw new Error("No API key"); const provider=AI_PROVIDERS[options.aiProvider]||AI_PROVIDERS.anthropic; const url=(provider.urlNonStream||provider.url)(options); const bodyObj=provider.body(options,null,prompt+"\n\n"+(text||content.innerText),false); if(options.aiProxy)bodyObj._provider=options.aiProvider||"anthropic"; const resp=await fetch(url,{method:"POST",headers:provider.headers(options),body:JSON.stringify(bodyObj)}); if(!resp.ok)throw new Error("API error: "+resp.status); const data=await resp.json(); return provider.extractResponseText(data); },
         cancel: () => { if (aiAbortController) aiAbortController.abort(); }
       },
       onChange: null,

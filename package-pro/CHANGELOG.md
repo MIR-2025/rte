@@ -2,6 +2,12 @@
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
 
+## [1.0.19] - 2026-02-22
+- Added multi-provider AI support (OpenAI, Gemini, Anthropic) via `aiProvider` option
+- Added `AI_PROVIDERS` adapter pattern for provider-agnostic AI calls
+- Refactored `runAICommand`, `runAIGenerate`, and `api.ai.run` to use provider adapters
+- Default provider remains `"anthropic"` — zero change for existing users
+
 ## [1.0.16] - 2026-02-21
 - Fixed editor background color not included in exported/rendered HTML
 

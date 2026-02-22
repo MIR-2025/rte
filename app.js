@@ -69,27 +69,50 @@ app.use((req, res, next) => {
 // Block browser navigation to /api/ai (GET returns 404)
 app.get('/api/ai', (req, res) => res.status(404).render('404', { page: '404' }));
 
-// AI proxy endpoint (keeps API key server-side)
+// AI proxy endpoint (keeps API key server-side, multi-provider)
 app.post('/api/ai', async (req, res) => {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return res.status(500).json({ error: 'No API key configured' });
+  const body = { ...req.body };
+  const provider = body._provider || 'anthropic';
+  delete body._provider;
+  const isStream = !!body.stream;
+
+  let url, headers;
+
+  if (provider === 'openai') {
+    const key = process.env.OPENAI_API_KEY;
+    if (!key) return res.status(500).json({ error: 'No OpenAI API key configured' });
+    url = 'https://api.openai.com/v1/chat/completions';
+    headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key };
+  } else if (provider === 'gemini') {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) return res.status(500).json({ error: 'No Gemini API key configured' });
+    const model = body.model || 'gemini-2.0-flash';
+    delete body.model;
+    delete body.stream;
+    const endpoint = isStream ? 'streamGenerateContent?alt=sse' : 'generateContent';
+    url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':' + endpoint + (isStream ? '&' : '?') + 'key=' + encodeURIComponent(key);
+    headers = { 'Content-Type': 'application/json' };
+  } else {
+    const key = process.env.ANTHROPIC_API_KEY;
+    if (!key) return res.status(500).json({ error: 'No Anthropic API key configured' });
+    url = 'https://api.anthropic.com/v1/messages';
+    headers = { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' };
+  }
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify(req.body)
+      headers,
+      body: JSON.stringify(body)
     });
 
     res.status(resp.status);
-    if (req.body.stream) {
+    if (isStream) {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
-      resp.body.pipe(res);
+      const reader = resp.body.getReader();
+      const pump = async () => { while (true) { const { done, value } = await reader.read(); if (done) { res.end(); break; } res.write(value); } };
+      pump().catch(() => res.end());
     } else {
       res.setHeader('Content-Type', 'application/json');
       const data = await resp.text();

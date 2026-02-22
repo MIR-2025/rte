@@ -4,6 +4,13 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-pro
 
+#### [1.0.19] - 2026-02-22
+- Added multi-provider AI support (OpenAI, Gemini, Anthropic) via `aiProvider` option
+- Added `AI_PROVIDERS` adapter pattern — each provider has url, headers, body, and stream/response text extractors
+- Refactored `runAICommand`, `runAIGenerate`, and `api.ai.run` to use provider adapters
+- Updated server proxy (`app.js`) with multi-provider routing via `_provider` field
+- Supported env vars: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`
+
 #### [1.0.14] - 2026-02-18
 - Added "Link Text" field to Insert Link popup — set custom anchor text or leave blank to wrap selection
 
