@@ -161,6 +161,9 @@ Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](ht
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
 
+## [1.0.17] - 2026-02-21
+- Added Editor Background color button — changes entire editor content area background color
+
 ## [1.0.16] - 2026-02-19
 - Added `aiProxy` option to proxy AI requests through your server (keeps API key secret)
 - API key no longer required in browser when using `aiProxy`
@@ -233,7 +236,7 @@ All notable changes to `rte-rich-text-editor-pro` will be documented in this fil
 - Word/character count goals with progress bars
 - Code syntax highlighting (keywords, strings, comments, numbers)
 - Special characters popup (currency, math, arrows, Greek, symbols)
-- Text shadow, gradient text, borders, block background popups
+- Text shadow, gradient text, borders, block background, editor background popups
 - Anchor/bookmark and Math/LaTeX insertion
 - Columns layout (1/2/3), page break, text transform, line/letter spacing
 - LTR/RTL direction toggle

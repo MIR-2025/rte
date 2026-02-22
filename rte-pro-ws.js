@@ -506,6 +506,7 @@
     const textColorPopup = buildColorPopup("\u{1F3A8} Text Color", c => { restoreSelection(savedRange); exec("foreColor", c); }); allPopups.push(textColorPopup);
     const bgColorPopup = buildColorPopup("\u{1F58D}\uFE0F Highlight Color", c => { restoreSelection(savedRange); exec("hiliteColor", c); }); allPopups.push(bgColorPopup);
     const blockBgPopup = buildColorPopup("\u{1F3A8} Block Background", c => { restoreSelection(savedRange); const b = getContainingBlock(window.getSelection().anchorNode, content); if (b) b.style.backgroundColor = c; }); allPopups.push(blockBgPopup);
+    const editorBgPopup = buildColorPopup("Editor Background", c => { content.style.backgroundColor = c; }); allPopups.push(editorBgPopup);
 
     // ── Link popup ──
     const linkPopup = el("div", { className:"rte-popup" });
@@ -1365,7 +1366,8 @@
       color: [
         btn("\u{1F3A8}","Text Color",() => togglePopup(textColorPopup)),
         btn("\u{1F58D}\uFE0F","Highlight",() => togglePopup(bgColorPopup)),
-        btn("\u{1FA63}","Block Background",() => togglePopup(blockBgPopup))
+        btn("\u{1FA63}","Block Background",() => togglePopup(blockBgPopup)),
+        btn("\u{1F5BC}\uFE0F","Editor Background",() => togglePopup(editorBgPopup))
       ],
       align: [
         btn(alignIcon("left"),"Align Left",() => exec("justifyLeft")),

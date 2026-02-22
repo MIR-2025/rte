@@ -2,6 +2,9 @@
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
 
+## [1.0.15] - 2026-02-21
+- Added Editor Background color button — changes entire editor content area background color
+
 ## [1.0.14] - 2026-02-18
 - Added "Link Text" field to Insert Link popup — set custom anchor text or leave blank to wrap selection
 

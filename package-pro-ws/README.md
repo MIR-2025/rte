@@ -151,6 +151,9 @@ Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](ht
 
 All notable changes to `rte-rich-text-editor-pro-ws` will be documented in this file.
 
+## [1.0.12] - 2026-02-21
+- Added Editor Background color button — changes entire editor content area background color
+
 ## [1.0.11] - 2026-02-19
 - Added `aiProxy` option to proxy AI requests through your server (keeps API key secret)
 - API key no longer required in browser when using `aiProxy`
