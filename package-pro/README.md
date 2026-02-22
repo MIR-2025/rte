@@ -161,6 +161,9 @@ Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](ht
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
 
+## [1.0.18] - 2026-02-21
+- Fixed editor background color not included in exported/rendered HTML
+
 ## [1.0.17] - 2026-02-21
 - Added Editor Background color button — changes entire editor content area background color
 

@@ -1485,7 +1485,9 @@
       clone.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
       clone.querySelectorAll("[data-rte-tag]").forEach(el => el.removeAttribute("data-rte-tag"));
       clone.querySelectorAll("mark.rte-pro-highlight-match, mark.rte-pro-highlight-current").forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
-      return stripDocumentTags(clone.innerHTML);
+      var html = stripDocumentTags(clone.innerHTML);
+      if (content.style.backgroundColor) html = '<div style="background-color:'+content.style.backgroundColor+'">'+html+'</div>';
+      return html;
     }
     function cleanText() {
       const clone = content.cloneNode(true);
