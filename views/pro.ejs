@@ -96,7 +96,7 @@
   const editor = RTEPro.init('#editor', {
     placeholder: 'Start typing...',
     height: '400px',
-    apiKey: 'sk-ant-...',          // optional — enables AI features
+    aiProxy: '/api/ai',            // recommended — keeps API key server-side
     toolbar: null,                  // null = all 16 groups
     mentions: [
       { name: 'Alice', id: 'alice', avatar: '👩' },
