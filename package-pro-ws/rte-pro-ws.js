@@ -296,6 +296,53 @@
 .rte-pro-gridlines .rte-content ul, .rte-pro-gridlines .rte-content ol,
 .rte-pro-gridlines .rte-content li,
 .rte-pro-gridlines .rte-content table { position: relative; }
+/* Checklists */
+.rte-content ul.rte-checklist { list-style: none; padding-left: 4px; }
+.rte-content ul.rte-checklist li {
+  display: flex; align-items: flex-start; gap: 8px; padding: 2px 0; cursor: pointer;
+}
+.rte-content ul.rte-checklist li::before {
+  content: ""; display: inline-block; width: 18px; height: 18px; min-width: 18px;
+  margin-top: 3px; border: 2px solid #94a3b8; border-radius: 4px;
+  background: #fff; cursor: pointer; transition: background .15s, border-color .15s;
+}
+.rte-content ul.rte-checklist li.checked::before {
+  background: var(--rte-accent); border-color: var(--rte-accent);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 8l3 3 5-6' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 14px; background-position: center; background-repeat: no-repeat;
+}
+.rte-content ul.rte-checklist li.checked { text-decoration: line-through; color: #94a3b8; }
+/* Floating / Bubble Toolbar */
+.rte-bubble-toolbar {
+  position: absolute; display: flex; align-items: center; gap: 2px;
+  padding: 4px 6px; background: #1e293b; border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.25); z-index: 9999;
+  opacity: 0; transform: translateY(4px); pointer-events: none;
+  transition: opacity .15s, transform .15s;
+}
+.rte-bubble-toolbar.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.rte-bubble-toolbar::after {
+  content: ""; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+  border-left: 6px solid transparent; border-right: 6px solid transparent;
+  border-top: 6px solid #1e293b;
+}
+.rte-bubble-toolbar button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 30px; height: 28px; padding: 0 6px; border: none; border-radius: 5px;
+  background: transparent; color: #e2e8f0; cursor: pointer; font-size: 14px;
+  font-weight: 600; font-family: Georgia, "Times New Roman", serif;
+  transition: background .12s;
+}
+.rte-bubble-toolbar button:hover { background: rgba(255,255,255,.15); }
+/* AI Ghost Text */
+.rte-pro-ghost {
+  color: #94a3b8; font-style: italic; user-select: none; pointer-events: none;
+}
+.rte-pro-ghost-hint {
+  display: inline-block; margin-left: 6px; padding: 1px 6px; background: #e2e8f0;
+  color: #64748b; font-size: 11px; font-style: normal; border-radius: 3px;
+  user-select: none; pointer-events: none; vertical-align: middle;
+}
 @media (max-width: 580px) {
   .rte-btn { min-width: 28px; height: 28px; font-size: 16px; }
   .rte-btn-text { font-size: 13px; }
@@ -364,6 +411,7 @@
     { cmd:"footnote", icon:"\u00B9", label:"Footnote", description:"Add a footnote" },
     { cmd:"columns2", icon:"\u2016", label:"2 Columns", description:"Two-column layout" },
     { cmd:"columns3", icon:"\u2AF6", label:"3 Columns", description:"Three-column layout" },
+    { cmd:"checklist", icon:"\u2611", label:"Checklist", description:"Interactive checklist" },
   ];
   const AI_TONES = ["Professional","Casual","Academic","Creative","Concise"];
   const AI_LANGUAGES = ["Spanish","French","German","Italian","Portuguese","Chinese","Japanese","Korean","Arabic","Hindi"];
@@ -437,6 +485,7 @@
       wordGoal: 0, charGoal: 0, spellcheck: true, direction: "ltr",
       mentions: [], hashtagUrl: null, printMargins: null,
       watermark: null, stickyToolbar: true, focusMode: false, maxVersions: 20,
+      aiAutocomplete: false,
     }, options);
 
     const wrap = el("div", { className: "rte-wrap" + (options.stickyToolbar ? " rte-pro-sticky" : "") });
@@ -862,6 +911,10 @@
 
     // ── Footnotes ──
     let footnoteCounter = 0;
+    function insertChecklist() {
+      exec("insertHTML", '<ul class="rte-checklist"><li>Item 1</li></ul><p><br></p>');
+    }
+
     function insertFootnote() {
       footnoteCounter++; const id = "fn-" + footnoteCounter;
       exec("insertHTML", '<sup class="rte-pro-footnote-ref" data-fn="'+id+'">['+footnoteCounter+']</sup>');
@@ -1082,6 +1135,7 @@
         case "toc": insertTOC(); break; case "footnote": insertFootnote(); break;
         case "columns2": insertColumns(2); break;
         case "columns3": insertColumns(3); break;
+        case "checklist": insertChecklist(); break;
       }
     }
 
@@ -1248,7 +1302,6 @@
 
     const AI_SYSTEM = "You are an AI writing assistant embedded in a rich text editor. IMPORTANT: Always respond with clean, raw HTML suitable for a WYSIWYG editor contenteditable div. Use semantic HTML tags: <h1>-<h4>, <p>, <strong>, <em>, <ul>, <ol>, <li>, <blockquote>, <pre>, <a>, <table>, <tr>, <td>, <th>, <img>, <hr>, <br>, <span style=\"...\">. Do NOT use markdown formatting. Do NOT wrap your response in ```html code fences. Do NOT include <html>, <head>, <body>, or <style> tags — only inner content HTML. For layouts, use inline styles on divs/sections. Output ONLY the HTML content, no explanations.";
 
-
     const AI_PROVIDERS = {
       anthropic: {
         url(o) { return o.aiProxy || "https://api.anthropic.com/v1/messages"; },
@@ -1404,6 +1457,7 @@
       list: [
         btn("\u{1F4DD}","Bullet List",() => exec("insertUnorderedList")),
         btn("\u{1F522}","Numbered List",() => exec("insertOrderedList")),
+        btn("\u2611\uFE0F","Checklist",() => insertChecklist()),
         btn("\u27A1\uFE0F","Indent",() => exec("indent")),
         btn("\u2B05\uFE0F","Outdent",() => exec("outdent"))
       ],
@@ -1487,12 +1541,154 @@
       if (index < enabledGroups.length - 1) toolbar.appendChild(sep());
     });
 
+    // ── Floating / Bubble Toolbar ──
+    const bubbleToolbar = el("div", { className: "rte-bubble-toolbar" });
+    function bubbleBtn(label, tip, cmd) {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = label; b.title = tip;
+      b.addEventListener("click", () => { exec(cmd); });
+      return b;
+    }
+    const bubbleLinkBtn = document.createElement("button");
+    bubbleLinkBtn.type = "button"; bubbleLinkBtn.textContent = "\u{1F517}"; bubbleLinkBtn.title = "Link";
+    bubbleLinkBtn.style.fontFamily = "inherit";
+    bubbleLinkBtn.addEventListener("click", () => {
+      const url = prompt("Enter URL:");
+      if (url) exec("createLink", url);
+    });
+    const bubbleHighBtn = document.createElement("button");
+    bubbleHighBtn.type = "button"; bubbleHighBtn.textContent = "\u{1F58D}"; bubbleHighBtn.title = "Highlight";
+    bubbleHighBtn.style.fontFamily = "inherit";
+    bubbleHighBtn.addEventListener("click", () => { exec("hiliteColor", "#fef08a"); });
+    bubbleToolbar.append(
+      bubbleBtn("B", "Bold", "bold"),
+      bubbleBtn("I", "Italic", "italic"),
+      bubbleBtn("U", "Underline", "underline"),
+      bubbleLinkBtn,
+      bubbleHighBtn
+    );
+    // Style the B/I/U buttons
+    bubbleToolbar.children[0].style.fontWeight = "900";
+    bubbleToolbar.children[1].style.fontStyle = "italic";
+    bubbleToolbar.children[2].style.textDecoration = "underline";
+    // Prevent mousedown from collapsing selection
+    bubbleToolbar.addEventListener("mousedown", e => e.preventDefault());
+
+    function showBubbleToolbar() {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || !sel.rangeCount) { hideBubbleToolbar(); return; }
+      // Only show if selection is inside our content area
+      const anchor = sel.anchorNode;
+      if (!anchor || !content.contains(anchor)) { hideBubbleToolbar(); return; }
+      const range = sel.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      const wrapRect = wrap.getBoundingClientRect();
+      if (rect.width === 0) { hideBubbleToolbar(); return; }
+      const left = rect.left - wrapRect.left + rect.width / 2 - bubbleToolbar.offsetWidth / 2;
+      const top = rect.top - wrapRect.top - bubbleToolbar.offsetHeight - 8;
+      bubbleToolbar.style.left = Math.max(4, left) + "px";
+      bubbleToolbar.style.top = Math.max(4, top) + "px";
+      bubbleToolbar.classList.add("show");
+    }
+    function hideBubbleToolbar() { bubbleToolbar.classList.remove("show"); }
+
+    // ── AI Ghost Text Autocomplete ──
+    let ghostSpan = null, ghostTimeout = null, ghostSuppressed = false, ghostAbortController = null;
+    function dismissGhost() {
+      if (ghostSpan) { ghostSpan.remove(); ghostSpan = null; }
+      const hint = content.querySelector(".rte-pro-ghost-hint");
+      if (hint) hint.remove();
+      if (ghostAbortController) { ghostAbortController.abort(); ghostAbortController = null; }
+    }
+    function acceptGhost() {
+      if (!ghostSpan) return;
+      const text = ghostSpan.textContent;
+      const parent = ghostSpan.parentNode;
+      const textNode = document.createTextNode(text);
+      parent.replaceChild(textNode, ghostSpan);
+      ghostSpan = null;
+      const hint = content.querySelector(".rte-pro-ghost-hint");
+      if (hint) hint.remove();
+      // Place cursor after inserted text
+      const sel = window.getSelection();
+      const range = document.createRange();
+      range.setStartAfter(textNode);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      updateStatus();
+    }
+    function fetchGhostSuggestion() {
+      console.log("RTEPro ghost: triggered", { aiAutocomplete: options.aiAutocomplete, hasProxy: !!options.aiProxy, hasKey: !!options.apiKey, suppressed: ghostSuppressed });
+      if (!options.aiAutocomplete || (!options.apiKey && !options.aiProxy)) return;
+      if (ghostSuppressed) return;
+      dismissGhost();
+      // Get paragraph context around cursor
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount || !sel.isCollapsed) { console.log("RTEPro ghost: no valid selection"); return; }
+      // Make sure cursor is inside our editor
+      const anchorEl = sel.anchorNode && (sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode);
+      if (!anchorEl || !content.contains(anchorEl)) { console.log("RTEPro ghost: cursor not in editor"); return; }
+      const block = getContainingBlock(sel.anchorNode, content) || content;
+      const blockText = block.textContent.trim();
+      if (blockText.length < 10) { console.log("RTEPro ghost: block too short:", blockText.length); return; }
+      console.log("RTEPro ghost: fetching, context length:", blockText.length);
+      // Save cursor position for later insertion
+      const savedGhostRange = sel.getRangeAt(0).cloneRange();
+      // Get broader context (previous blocks too)
+      let context = "";
+      let prev = block.previousElementSibling;
+      let count = 0;
+      while (prev && count < 3) { context = prev.textContent.trim() + "\n" + context; prev = prev.previousElementSibling; count++; }
+      context += blockText;
+      ghostAbortController = new AbortController();
+      const provider = AI_PROVIDERS[options.aiProvider] || AI_PROVIDERS.anthropic;
+      const url = (provider.urlNonStream || provider.url)(options);
+      const sysPrompt = "You are an inline text autocomplete assistant. Given the text context, suggest a brief natural continuation (1-2 short sentences max). Reply ONLY with the continuation text, no quotes, no explanation, no markdown.";
+      const bodyObj = provider.body(options, sysPrompt, "Continue this text naturally:\n\n" + context, false);
+      if (options.aiProxy) bodyObj._provider = options.aiProvider || "anthropic";
+      console.log("RTEPro ghost: sending fetch to", url);
+      fetch(url, { method: "POST", headers: provider.headers(options), body: JSON.stringify(bodyObj), signal: ghostAbortController.signal })
+        .then(resp => { console.log("RTEPro ghost: response status", resp.status); if (!resp.ok) throw new Error("API " + resp.status); return resp.json(); })
+        .then(data => {
+          const suggestion = provider.extractResponseText(data).trim();
+          console.log("RTEPro ghost: suggestion", suggestion ? suggestion.substring(0, 50) + "..." : "(empty)");
+          if (!suggestion) return;
+          // Use saved range to insert ghost — cursor may have moved but if editor still focused, insert
+          try {
+            ghostSpan = document.createElement("span");
+            ghostSpan.className = "rte-pro-ghost";
+            ghostSpan.contentEditable = "false";
+            ghostSpan.textContent = " " + suggestion;
+            // Try current cursor first, fall back to saved range
+            const currentSel = window.getSelection();
+            const insertRange = (currentSel && currentSel.rangeCount && currentSel.isCollapsed && content.contains(currentSel.anchorNode))
+              ? currentSel.getRangeAt(0) : savedGhostRange;
+            insertRange.insertNode(ghostSpan);
+            // Add hint label
+            const hint = document.createElement("span");
+            hint.className = "rte-pro-ghost-hint";
+            hint.contentEditable = "false";
+            hint.textContent = "Tab";
+            ghostSpan.parentNode.insertBefore(hint, ghostSpan.nextSibling);
+            // Move cursor before ghost span
+            const newRange = document.createRange();
+            newRange.setStartBefore(ghostSpan);
+            newRange.collapse(true);
+            if (currentSel) { currentSel.removeAllRanges(); currentSel.addRange(newRange); }
+          } catch(e) { dismissGhost(); }
+        })
+        .catch(err => { if (err.name !== "AbortError") console.warn("RTEPro ghost autocomplete:", err.message); });
+    }
+    const debouncedGhostFetch = debounce(fetchGhostSuggestion, 1500);
+
     // ── Export helpers ──
     function cleanHTML() {
       const clone = content.cloneNode(true);
+      clone.querySelectorAll(".rte-pro-ghost, .rte-pro-ghost-hint").forEach(h => h.remove());
       clone.querySelectorAll(".rte-pro-drag-handle, .rte-pro-col-handle").forEach(h => h.remove());
       clone.querySelectorAll("[class]").forEach(el => {
-        const keep = new Set(["rte-pro-cols","rte-pro-cols-2","rte-pro-cols-3","rte-pro-col","rte-pro-page-break","rte-pro-mention"]);
+        const keep = new Set(["rte-pro-cols","rte-pro-cols-2","rte-pro-cols-3","rte-pro-col","rte-pro-page-break","rte-pro-mention","rte-checklist","checked"]);
         const classes = Array.from(el.classList).filter(c => keep.has(c) || (!c.startsWith("rte-pro-") && c !== "rte-img-resizing" && c !== "active-block"));
         if (!classes.length) el.removeAttribute("class"); else el.className = classes.join(" ");
       });
@@ -1507,6 +1703,17 @@
       });
       clone.querySelectorAll(".rte-pro-mention").forEach(el => {
         el.style.cssText = "background:#ede9fe;color:#6366f1;padding:1px 4px;border-radius:3px;font-weight:500";
+      });
+      clone.querySelectorAll("ul.rte-checklist").forEach(el => {
+        el.style.cssText = "list-style:none;padding-left:4px";
+      });
+      clone.querySelectorAll("ul.rte-checklist li").forEach(el => {
+        el.style.cssText = "display:flex;align-items:flex-start;gap:8px;padding:2px 0";
+        const isChecked = el.classList.contains("checked");
+        const box = document.createElement("span");
+        box.style.cssText = "display:inline-block;width:18px;height:18px;min-width:18px;margin-top:3px;border:2px solid "+(isChecked?"#6366f1":"#94a3b8")+";border-radius:4px;background:"+(isChecked?"#6366f1":"#fff");
+        if (isChecked) { el.style.textDecoration = "line-through"; el.style.color = "#94a3b8"; box.textContent = "\u2713"; box.style.color = "#fff"; box.style.textAlign = "center"; box.style.fontSize = "12px"; box.style.lineHeight = "18px"; }
+        el.insertBefore(box, el.firstChild);
       });
       clone.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
       clone.querySelectorAll("[data-rte-tag]").forEach(el => el.removeAttribute("data-rte-tag"));
@@ -1540,11 +1747,12 @@
       exportBtn("\u{1F4DD}","Copy Text","Copy plain text",() => { navigator.clipboard.writeText(cleanText()).then(()=>showToast("\u2705 Text copied")); }),
       exportBtn("\u2709\uFE0F","Email","Copy for email",() => { const h=cleanHTML(),t=cleanText(); if(navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]).then(()=>showToast("\u2705 Content copied \u2014 paste into email"));}else{navigator.clipboard.writeText(t).then(()=>showToast("\u2705 Text copied"));} }),
       exportBtn("\u{1F5A8}\uFE0F","Print","Print or save as PDF",() => { const w=window.open("","_blank"); w.document.write(getFullHTML()); w.document.close(); w.print(); }),
-      exportBtn("\u{1F4BE}","JSON","Copy as JSON",() => { const t=cleanText(); const json=JSON.stringify({ html:cleanHTML(), text:t, wordCount:(t.trim()?t.trim().split(/\s+/).length:0), charCount:t.length, createdAt:new Date().toISOString() },null,2); navigator.clipboard.writeText(json).then(()=>showToast("\u2705 JSON copied")); })
+      exportBtn("\u{1F4BE}","JSON","Copy as JSON",() => { const json=JSON.stringify({ html:cleanHTML(), text:cleanText(), wordCount:(cleanText().trim()?cleanText().trim().split(/\s+/).length:0), charCount:cleanText().length, createdAt:new Date().toISOString() },null,2); navigator.clipboard.writeText(json).then(()=>showToast("\u2705 JSON copied")); })
     );
 
     // ── Assemble ──
     wrap.append(toolbar);
+    wrap.appendChild(bubbleToolbar);
     allPopups.forEach(p => wrap.appendChild(p));
     _dragWrap.append(content);
     wrap.append(_dragWrap, panelContainer, exportBar, statusbar, toast);
@@ -1559,9 +1767,11 @@
       if (options.charGoal > 0) { const pct = Math.min(100, Math.round(chars/options.charGoal*100)); const bar = wrap.querySelector(".rte-pro-char-progress"); if (bar) bar.style.width = pct+"%"; const lbl = wrap.querySelector(".rte-pro-char-goal-label"); if (lbl) lbl.textContent = chars+"/"+options.charGoal+" chars ("+pct+"%)"; }
       try { if (typeof api !== "undefined" && typeof api.onChange === "function") api.onChange({ html:content.innerHTML, text:text, words:words, chars:chars }); } catch(e) {}
     }
-    content.addEventListener("input", updateStatus);
+    content.addEventListener("input", () => { updateStatus(); ghostSuppressed = false; if (options.aiAutocomplete) debouncedGhostFetch(); });
     content.addEventListener("keyup", () => { updateStatus(); updateActiveStates(); });
-    content.addEventListener("mouseup", updateActiveStates);
+    content.addEventListener("keydown", hideBubbleToolbar);
+    content.addEventListener("mousedown", hideBubbleToolbar);
+    content.addEventListener("mouseup", () => { updateActiveStates(); setTimeout(showBubbleToolbar, 10); });
     new MutationObserver(updateStatus).observe(content, { childList:true, subtree:true, characterData:true, attributes:true });
 
     // ── Word/char goal progress bars ──
@@ -1578,6 +1788,12 @@
 
     // ── Keyboard shortcuts ──
     content.addEventListener("keydown", e => {
+      // AI ghost text: Tab to accept
+      if (e.key === "Tab" && ghostSpan) {
+        e.preventDefault();
+        acceptGhost();
+        return;
+      }
       // Tab navigation inside tables
       if (e.key === "Tab") {
         const sel = window.getSelection();
@@ -1634,7 +1850,38 @@
         if (e.shiftKey) { if (e.key.toLowerCase() === "m") { e.preventDefault(); toggleMarkdown(); } if (e.key.toLowerCase() === "a") { e.preventDefault(); togglePanel("ai"); } }
       }
       if (e.key === "F11") { e.preventDefault(); toggleFullscreen(); }
-      if (e.key === "Escape") { if (isFullscreen) toggleFullscreen(); closeSlashMenu(); closeMentionMenu(); closeFindBar(); closePanel(); }
+      if (e.key === "Escape") { if (isFullscreen) toggleFullscreen(); closeSlashMenu(); closeMentionMenu(); closeFindBar(); closePanel(); dismissGhost(); ghostSuppressed = true; }
+      // Dismiss ghost on any non-Tab key
+      if (ghostSpan && e.key !== "Tab" && e.key !== "Escape") { dismissGhost(); }
+      // Checklist Enter key handling
+      if (e.key === "Enter" && !e.shiftKey) {
+        const sel = window.getSelection();
+        const li = sel && sel.anchorNode ? (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement).closest("ul.rte-checklist > li") : null;
+        if (li) {
+          e.preventDefault();
+          const text = li.textContent.trim();
+          if (!text) {
+            // Empty li: exit checklist, insert paragraph after
+            const ul = li.closest("ul.rte-checklist");
+            li.remove();
+            const p = document.createElement("p");
+            p.innerHTML = "<br>";
+            ul.parentNode.insertBefore(p, ul.nextSibling);
+            const range = document.createRange();
+            range.setStart(p, 0); range.collapse(true);
+            sel.removeAllRanges(); sel.addRange(range);
+          } else {
+            // New checklist item
+            const newLi = document.createElement("li");
+            newLi.innerHTML = "<br>";
+            li.parentNode.insertBefore(newLi, li.nextSibling);
+            const range = document.createRange();
+            range.setStart(newLi, 0); range.collapse(true);
+            sel.removeAllRanges(); sel.addRange(range);
+          }
+          updateStatus();
+        }
+      }
     });
 
     // ── Drag & Drop media ──
@@ -1665,7 +1912,20 @@
       ["nw","ne","sw","se"].forEach(pos => { const h = document.createElement("div"); h.className = "rte-img-resize-handle "+pos; h.addEventListener("mousedown", e => { e.preventDefault(); e.stopPropagation(); resizeDragging = true; resizeStartX = e.clientX; resizeStartWidth = resizeImg.getBoundingClientRect().width; }); resizeOverlay.appendChild(h); });
       wrap.appendChild(resizeOverlay); positionOverlay();
     }
-    content.addEventListener("click", e => { if (e.target.tagName === "IMG") { e.preventDefault(); selectImageForResize(e.target); } });
+    content.addEventListener("click", e => {
+      if (e.target.tagName === "IMG") { e.preventDefault(); selectImageForResize(e.target); }
+      // Checklist toggle: click on <li> inside .rte-checklist toggles checked
+      const checkLi = e.target.closest("ul.rte-checklist > li");
+      if (checkLi) {
+        // Only toggle if clicking the li itself or the checkbox area (left side)
+        const liRect = checkLi.getBoundingClientRect();
+        if (e.clientX < liRect.left + 30) {
+          e.preventDefault();
+          checkLi.classList.toggle("checked");
+          updateStatus();
+        }
+      }
+    });
     document.addEventListener("mousemove", e => { if (!resizeDragging || !resizeImg) return; const nw = Math.max(20, resizeStartWidth + (e.clientX - resizeStartX)); resizeImg.style.width = nw+"px"; resizeImg.style.height = "auto"; positionOverlay(); });
     document.addEventListener("mouseup", () => { if (resizeDragging) { resizeDragging = false; updateStatus(); } });
     content.addEventListener("scroll", positionOverlay); content.addEventListener("input", positionOverlay);
@@ -1849,7 +2109,7 @@
       setHTML: html => { content.innerHTML = html; updateStatus(); },
       getText: () => cleanText(),
       getFullHTML: getFullHTML,
-      getJSON: () => { const t=cleanText(); return { html:cleanHTML(), text:t, wordCount:(t.trim()?t.trim().split(/\s+/).length:0), charCount:t.length, createdAt:new Date().toISOString() }; },
+      getJSON: () => ({ html:cleanHTML(), text:cleanText(), wordCount:(cleanText().trim()?cleanText().trim().split(/\s+/).length:0), charCount:cleanText().length, createdAt:new Date().toISOString() }),
       getMarkdown: () => htmlToMarkdown(content.innerHTML),
       setMarkdown: md => { content.innerHTML = markdownToHtml(md); updateStatus(); },
       saveHTML: filename => { const b=new Blob([getFullHTML()],{type:"text/html"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||getFilename(".html"); a.click(); URL.revokeObjectURL(a.href); },
@@ -1881,6 +2141,266 @@
         cancel: () => { if (aiAbortController) aiAbortController.abort(); }
       },
       onChange: null,
+      setAiAutocomplete: (enabled) => { options.aiAutocomplete = enabled; if (!enabled) dismissGhost(); },
+      focus: () => content.focus(),
+      destroy: () => { clearImageResize(); if(autosaveTimer)clearInterval(autosaveTimer); wrap.remove(); },
+      element: content,
+      wrapper: wrap,
+    };
+    return api;
+  }
+
+  return { init };
+});
+      element: content,
+      wrapper: wrap,
+    };
+    return api;
+  }
+
+  return { init };
+});
+
+    // ── Image Resize ──
+    let resizeOverlay = null, resizeImg = null, resizeDragging = false, resizeStartX = 0, resizeStartWidth = 0;
+    function clearImageResize() { if (resizeOverlay) { resizeOverlay.remove(); resizeOverlay = null; } if (resizeImg) { resizeImg.classList.remove("rte-img-resizing"); resizeImg = null; } resizeDragging = false; }
+    function positionOverlay() { if (!resizeOverlay || !resizeImg) return; const ir = resizeImg.getBoundingClientRect(), wr = wrap.getBoundingClientRect(); resizeOverlay.style.top=(ir.top-wr.top)+"px"; resizeOverlay.style.left=(ir.left-wr.left)+"px"; resizeOverlay.style.width=ir.width+"px"; resizeOverlay.style.height=ir.height+"px"; }
+    function selectImageForResize(img) {
+      clearImageResize(); resizeImg = img; img.classList.add("rte-img-resizing");
+      resizeOverlay = document.createElement("div"); resizeOverlay.className = "rte-img-resize-overlay";
+      ["nw","ne","sw","se"].forEach(pos => { const h = document.createElement("div"); h.className = "rte-img-resize-handle "+pos; h.addEventListener("mousedown", e => { e.preventDefault(); e.stopPropagation(); resizeDragging = true; resizeStartX = e.clientX; resizeStartWidth = resizeImg.getBoundingClientRect().width; }); resizeOverlay.appendChild(h); });
+      wrap.appendChild(resizeOverlay); positionOverlay();
+    }
+    content.addEventListener("click", e => {
+      if (e.target.tagName === "IMG") { e.preventDefault(); selectImageForResize(e.target); }
+      // Checklist toggle: click on <li> inside .rte-checklist toggles checked
+      const checkLi = e.target.closest("ul.rte-checklist > li");
+      if (checkLi) {
+        // Only toggle if clicking the li itself or the checkbox area (left side)
+        const liRect = checkLi.getBoundingClientRect();
+        if (e.clientX < liRect.left + 30) {
+          e.preventDefault();
+          checkLi.classList.toggle("checked");
+          updateStatus();
+        }
+      }
+    });
+    document.addEventListener("mousemove", e => { if (!resizeDragging || !resizeImg) return; const nw = Math.max(20, resizeStartWidth + (e.clientX - resizeStartX)); resizeImg.style.width = nw+"px"; resizeImg.style.height = "auto"; positionOverlay(); });
+    document.addEventListener("mouseup", () => { if (resizeDragging) { resizeDragging = false; updateStatus(); } });
+    content.addEventListener("scroll", positionOverlay); content.addEventListener("input", positionOverlay);
+    document.addEventListener("keydown", e => { if (!resizeImg) return; if (e.key === "Escape") clearImageResize(); else if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); resizeImg.remove(); clearImageResize(); updateStatus(); } });
+
+    updateStatus();
+
+    // ── Table Resize System ─────────────────────────────────
+    let tableResizing = false;
+    let tableResizeType = null; // "col" or "row"
+    let tableResizeStart = 0;
+    let tableResizeCell = null;
+    let tableResizeStartSize = 0;
+    let tableResizeColIndex = -1;
+    let tableResizeTable = null;
+
+    const TABLE_BORDER_THRESHOLD = 4;
+
+    function getTableBorderHit(e) {
+      const target = e.target.closest ? e.target.closest("td, th") : null;
+      if (!target) return null;
+      const rect = target.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+      // Check right edge for column resize
+      if (Math.abs(x - rect.right) <= TABLE_BORDER_THRESHOLD) {
+        return { type: "col", cell: target };
+      }
+      // Check left edge (resize previous column)
+      if (Math.abs(x - rect.left) <= TABLE_BORDER_THRESHOLD) {
+        const row = target.parentElement;
+        const idx = Array.from(row.children).indexOf(target);
+        if (idx > 0) {
+          return { type: "col", cell: row.children[idx - 1] };
+        }
+        return null;
+      }
+      // Check bottom edge for row resize
+      if (Math.abs(y - rect.bottom) <= TABLE_BORDER_THRESHOLD) {
+        return { type: "row", cell: target };
+      }
+      // Check top edge (resize previous row)
+      if (Math.abs(y - rect.top) <= TABLE_BORDER_THRESHOLD) {
+        const row = target.parentElement;
+        const prevRow = row.previousElementSibling;
+        if (prevRow) {
+          const idx = Array.from(row.children).indexOf(target);
+          const prevCell = prevRow.children[idx] || prevRow.lastElementChild;
+          if (prevCell) return { type: "row", cell: prevCell };
+        }
+        return null;
+      }
+      return null;
+    }
+
+    content.addEventListener("mousemove", (e) => {
+      if (tableResizing) return;
+      const hit = getTableBorderHit(e);
+      content.classList.remove("rte-col-resize", "rte-row-resize");
+      if (hit) {
+        content.classList.add(hit.type === "col" ? "rte-col-resize" : "rte-row-resize");
+      }
+    });
+
+    content.addEventListener("mousedown", (e) => {
+      const hit = getTableBorderHit(e);
+      if (!hit) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      tableResizing = true;
+      tableResizeType = hit.type;
+      tableResizeCell = hit.cell;
+      tableResizeTable = hit.cell.closest("table");
+
+      if (hit.type === "col") {
+        tableResizeStart = e.clientX;
+        tableResizeStartSize = hit.cell.getBoundingClientRect().width;
+        tableResizeColIndex = Array.from(hit.cell.parentElement.children).indexOf(hit.cell);
+      } else {
+        tableResizeStart = e.clientY;
+        tableResizeStartSize = hit.cell.getBoundingClientRect().height;
+      }
+
+      content.classList.add("rte-table-resizing");
+      content.classList.add(hit.type === "col" ? "rte-col-resize" : "rte-row-resize");
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!tableResizing) return;
+
+      if (tableResizeType === "col") {
+        const delta = e.clientX - tableResizeStart;
+        const newWidth = Math.max(30, tableResizeStartSize + delta);
+        // Set table to fixed layout on first resize
+        if (tableResizeTable.style.tableLayout !== "fixed") {
+          // Snapshot all column widths before switching to fixed layout
+          const firstRow = tableResizeTable.querySelector("tr");
+          if (firstRow) {
+            Array.from(firstRow.children).forEach((cell) => {
+              cell.style.width = cell.getBoundingClientRect().width + "px";
+            });
+          }
+          tableResizeTable.style.tableLayout = "fixed";
+        }
+        // Apply width to all cells in the same column
+        const rows = tableResizeTable.querySelectorAll("tr");
+        rows.forEach((row) => {
+          const cell = row.children[tableResizeColIndex];
+          if (cell) cell.style.width = newWidth + "px";
+        });
+        // Update table width to sum of columns
+        const firstRow = tableResizeTable.querySelector("tr");
+        if (firstRow) {
+          let totalWidth = 0;
+          Array.from(firstRow.children).forEach((cell) => {
+            totalWidth += cell.getBoundingClientRect().width;
+          });
+          tableResizeTable.style.width = totalWidth + "px";
+        }
+      } else {
+        const delta = e.clientY - tableResizeStart;
+        const newHeight = Math.max(20, tableResizeStartSize + delta);
+        // Apply height to all cells in the same row
+        const row = tableResizeCell.parentElement;
+        Array.from(row.children).forEach((cell) => {
+          cell.style.height = newHeight + "px";
+        });
+      }
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (tableResizing) {
+        tableResizing = false;
+        tableResizeCell = null;
+        tableResizeTable = null;
+        content.classList.remove("rte-table-resizing", "rte-col-resize", "rte-row-resize");
+        updateStatus();
+      }
+    });
+
+    // ── Column layout resize ──
+    let _colResizing = false, _colHandle = null, _colGrid = null, _colStartX = 0, _colWidths = [];
+    content.addEventListener("mousedown", e => {
+      const handle = e.target.closest(".rte-pro-col-handle");
+      if (!handle) return;
+      e.preventDefault(); e.stopPropagation();
+      _colResizing = true; _colHandle = handle; _colGrid = handle.closest(".rte-pro-cols");
+      handle.classList.add("active");
+      _colStartX = e.clientX;
+      const cols = Array.from(_colGrid.querySelectorAll(".rte-pro-col"));
+      _colWidths = cols.map(c => c.getBoundingClientRect().width);
+      const kids = Array.from(_colGrid.children);
+      const hIdx = kids.indexOf(handle);
+      _colHandle._leftIdx = kids.slice(0, hIdx).filter(k => k.classList.contains("rte-pro-col")).length - 1;
+      _colHandle._rightIdx = _colHandle._leftIdx + 1;
+    });
+    document.addEventListener("mousemove", e => {
+      if (!_colResizing) return;
+      const delta = e.clientX - _colStartX;
+      const li = _colHandle._leftIdx, ri = _colHandle._rightIdx;
+      const newLeft = Math.max(60, _colWidths[li] + delta);
+      const newRight = Math.max(60, _colWidths[ri] - delta);
+      const widths = [..._colWidths];
+      widths[li] = newLeft; widths[ri] = newRight;
+      const parts = [];
+      widths.forEach((w, i) => { if (i > 0) parts.push("6px"); parts.push(w + "px"); });
+      _colGrid.style.gridTemplateColumns = parts.join(" ");
+    });
+    document.addEventListener("mouseup", () => {
+      if (!_colResizing) return;
+      _colResizing = false;
+      if (_colHandle) _colHandle.classList.remove("active");
+      _colHandle = null; _colGrid = null;
+      updateStatus();
+    });
+
+    // ── Public API ──
+    const api = {
+      getHTML: () => cleanHTML(),
+      setHTML: html => { content.innerHTML = html; updateStatus(); },
+      getText: () => cleanText(),
+      getFullHTML: getFullHTML,
+      getJSON: () => ({ html:cleanHTML(), text:cleanText(), wordCount:(cleanText().trim()?cleanText().trim().split(/\s+/).length:0), charCount:cleanText().length, createdAt:new Date().toISOString() }),
+      getMarkdown: () => htmlToMarkdown(content.innerHTML),
+      setMarkdown: md => { content.innerHTML = markdownToHtml(md); updateStatus(); },
+      saveHTML: filename => { const b=new Blob([getFullHTML()],{type:"text/html"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||getFilename(".html"); a.click(); URL.revokeObjectURL(a.href); },
+      saveText: filename => { const b=new Blob([cleanText()],{type:"text/plain"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||getFilename(".txt"); a.click(); URL.revokeObjectURL(a.href); },
+      copyHTML: () => { const h=cleanHTML(),t=cleanText(); if(navigator.clipboard&&navigator.clipboard.write) return navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]); return navigator.clipboard.writeText(h); },
+      copyText: () => navigator.clipboard.writeText(cleanText()),
+      email: () => { const h=cleanHTML(),t=cleanText(); if(navigator.clipboard&&navigator.clipboard.write) return navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]); return navigator.clipboard.writeText(t); },
+      print: () => { const w=window.open("","_blank"); w.document.write(getFullHTML()); w.document.close(); w.print(); },
+      toggleSource: () => toggleSourceView(),
+      toggleFullscreen: () => toggleFullscreen(),
+      toggleMarkdown: () => toggleMarkdown(),
+      toggleFocusMode: () => toggleFocusMode(),
+      toggleGridlines: () => toggleGridlines(),
+      toggleFindBar: () => toggleFindBar(),
+      insertFootnote: () => insertFootnote(),
+      insertTOC: () => insertTOC(),
+      saveVersion: label => saveVersion(label),
+      getVersions: () => versions.slice(),
+      restoreVersion: idx => { if (versions[idx]) { content.innerHTML = versions[idx].html; updateStatus(); } },
+      getReadability: () => {
+        const text=content.innerText||""; const words=text.trim()?text.trim().split(/\s+/):[]; const sentences=text.split(/[.!?]+/).filter(s=>s.trim().length>0);
+        const syl=words.reduce((s,w)=>s+countSyllables(w),0); const wc=words.length,sc=Math.max(sentences.length,1);
+        return { fleschReadingEase:parseFloat((206.835-1.015*(wc/sc)-84.6*(syl/Math.max(wc,1))).toFixed(1)), gradeLevel:parseFloat((0.39*(wc/sc)+11.8*(syl/Math.max(wc,1))-15.59).toFixed(1)), wordCount:wc, sentenceCount:sc, syllableCount:syl };
+      },
+      getSEOIssues: () => { const issues=[]; const h1s=content.querySelectorAll("h1"); if(!h1s.length)issues.push("No H1"); if(h1s.length>1)issues.push("Multiple H1s"); Array.from(content.querySelectorAll("img")).filter(i=>!i.alt||i.alt==="image").forEach(()=>issues.push("Image missing alt text")); if((content.innerText.trim()?content.innerText.trim().split(/\s+/).length:0)<300)issues.push("Content too short"); return issues; },
+      getAccessibilityIssues: () => { const issues=[]; content.querySelectorAll("img").forEach(i=>{if(!i.alt||i.alt==="image")issues.push("Image missing alt text");}); content.querySelectorAll("a").forEach(a=>{const t=a.textContent.trim().toLowerCase();if(["click here","here","link","read more"].includes(t))issues.push("Non-descriptive link: "+t);}); return issues; },
+      ai: {
+        run: async (prompt, text) => { if(!options.apiKey&&!options.aiProxy)throw new Error("No API key"); const provider=AI_PROVIDERS[options.aiProvider]||AI_PROVIDERS.anthropic; const url=(provider.urlNonStream||provider.url)(options); const bodyObj=provider.body(options,null,prompt+"\n\n"+(text||content.innerText),false); if(options.aiProxy)bodyObj._provider=options.aiProvider||"anthropic"; const resp=await fetch(url,{method:"POST",headers:provider.headers(options),body:JSON.stringify(bodyObj)}); if(!resp.ok)throw new Error("API error: "+resp.status); const data=await resp.json(); return provider.extractResponseText(data); },
+        cancel: () => { if (aiAbortController) aiAbortController.abort(); }
+      },
+      onChange: null,
+      setAiAutocomplete: (enabled) => { options.aiAutocomplete = enabled; if (!enabled) dismissGhost(); },
       focus: () => content.focus(),
       destroy: () => { clearImageResize(); if(autosaveTimer)clearInterval(autosaveTimer); wrap.remove(); },
       element: content,

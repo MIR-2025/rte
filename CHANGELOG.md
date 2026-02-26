@@ -4,6 +4,13 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-pro
 
+#### [1.0.21] - 2026-02-25
+- Added interactive checklists: `/checklist` slash command, toolbar button, click-to-toggle, Enter key handling
+- Added floating/bubble toolbar on text selection (Bold, Italic, Underline, Link, Highlight)
+- Added AI autocomplete ghost text with Tab-to-accept (`aiAutocomplete` option)
+- Added `setAiAutocomplete()` API method
+- Checklist export with inline styles for email compatibility
+
 #### [1.0.19] - 2026-02-22
 - Added multi-provider AI support (OpenAI, Gemini, Anthropic) via `aiProvider` option
 - Added `AI_PROVIDERS` adapter pattern — each provider has url, headers, body, and stream/response text extractors

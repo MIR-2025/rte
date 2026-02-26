@@ -33,6 +33,7 @@
         height: '350px',
         wordGoal: 500,
         aiProxy: '/api/ai',
+        aiAutocomplete: true,
         mentions: [
           { name: 'Alice Johnson', id: 'alice', avatar: '👩' },
           { name: 'Bob Smith', id: 'bob', avatar: '👨' },
@@ -48,7 +49,7 @@
       };
 
       window.editor = editor;
-      console.log('RTEPro loaded. AI:', apiKey ? 'Ready' : 'No key');
+      console.log('RTEPro loaded. AI: Proxy mode');
       console.log('API methods:', Object.keys(editor).join(', '));
     })();
   </script>
