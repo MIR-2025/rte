@@ -35,23 +35,42 @@ Or via CDN:
 
 ## AI Integration
 
-> **Warning:** Never use `apiKey` in production web apps — it exposes your Anthropic API key in the browser where anyone can steal it. Use `aiProxy` to route requests through your own server, which keeps the key secret.
+Supports **Anthropic Claude** (default), **OpenAI GPT**, and **Google Gemini**. Set `aiProvider` to switch providers.
+
+> **Warning:** Never use `apiKey` in production web apps — it exposes your API key in the browser where anyone can steal it. Use `aiProxy` to route requests through your own server, which keeps the key secret.
 
 **Recommended: Server-side proxy (keeps your key safe)**
 
 ```js
+// Anthropic (default)
 const editor = RTEPro.init('#editor', {
-  aiProxy: '/api/ai',  // your server endpoint that forwards to Anthropic
+  aiProxy: '/api/ai',
+});
+
+// OpenAI
+const editor = RTEPro.init('#editor', {
+  aiProvider: 'openai',
+  aiModel: 'gpt-4o',
+  aiProxy: '/api/ai',
+});
+
+// Gemini
+const editor = RTEPro.init('#editor', {
+  aiProvider: 'gemini',
+  aiModel: 'gemini-2.0-flash',
+  aiProxy: '/api/ai',
 });
 ```
 
-Your proxy endpoint receives the same JSON body the editor would send to Anthropic and should forward it to `https://api.anthropic.com/v1/messages` with your API key attached server-side. For streaming requests (`stream: true`), pipe the SSE response back; for non-streaming requests, return the JSON response.
+Your proxy endpoint receives the JSON body from the editor with a `_provider` field indicating which provider to route to. Set the corresponding API key server-side (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY`).
 
 **Direct API key (only for local dev / internal tools)**
 
 ```js
 const editor = RTEPro.init('#editor', {
-  apiKey: 'sk-ant-...',
+  aiProvider: 'openai',
+  aiModel: 'gpt-4o',
+  apiKey: 'sk-...',
 });
 ```
 
@@ -69,7 +88,7 @@ RTEPro.init('#editor', {
 
 ## Features
 
-- **AI Panel** — Rewrite, summarize, expand, fix grammar, change tone, translate (10 languages), continue writing, generate from prompt. Powered by Anthropic Claude with SSE streaming. **Ask AI Anything** lets you type any freeform instruction using the editor's current content as context — e.g. "Make this more formal", "Add bullet points", "Explain this in simpler terms".
+- **AI Panel** — Rewrite, summarize, expand, fix grammar, change tone, translate (10 languages), continue writing, generate from prompt. Supports Anthropic Claude, OpenAI GPT, and Google Gemini with SSE streaming. **Ask AI Anything** lets you type any freeform instruction using the editor's current content as context — e.g. "Make this more formal", "Add bullet points", "Explain this in simpler terms".
 - **Slash Commands** — Type `/` for headings, lists, quotes, code, tables, images, dividers, and more.
 - **@ Mentions** — Type `@` to search and insert mentions from a configurable list.
 - **Find & Replace** — Ctrl+F with regex support, match highlighting, and replace all.
@@ -94,9 +113,10 @@ RTEPro.init('#editor', {
 |---|---|---|---|
 | `placeholder` | string | `''` | Placeholder text |
 | `height` | string | `'300px'` | Editor height |
-| `apiKey` | string | `null` | Anthropic API key (direct, **not recommended for production**) |
+| `apiKey` | string | `null` | API key (direct, **not recommended for production**) |
 | `aiProxy` | string | `null` | Server proxy URL for AI requests (recommended) |
-| `aiModel` | string | `'claude-sonnet-4-5-20250929'` | AI model |
+| `aiProvider` | string | `'anthropic'` | AI provider: `'anthropic'`, `'openai'`, or `'gemini'` |
+| `aiModel` | string | `'claude-sonnet-4-5-20250929'` | AI model (provider-specific) |
 | `toolbar` | string[] | `null` | Toolbar groups to show (null = all) |
 | `autosave` | boolean/number | `false` | Auto-save interval (true = 30s, or ms) |
 | `wordGoal` | number | `0` | Word count goal |
@@ -139,6 +159,14 @@ editor.destroy()
 editor.onChange = ({ words, chars }) => { ... }
 ```
 
+## Security
+
+> **Treat editor output as untrusted** if any untrusted users can write content.
+
+- **Sanitize server-side** before storing or rendering. The editor outputs raw HTML — always run it through a sanitizer (e.g. [DOMPurify](https://github.com/cure53/DOMPurify), [sanitize-html](https://www.npmjs.com/package/sanitize-html)) before persisting or displaying to other users.
+- **Disallow dangerous patterns**: `javascript:` links, inline event handlers (`onclick`, `onerror`, etc.), `<iframe>`, `<script>`, `<object>`, `<embed>`, and `<form>` tags.
+- **Never use `apiKey` in production** — use `aiProxy` to keep API keys server-side.
+
 ## License
 
 MIT — phpMyDEV, LLC
@@ -160,6 +188,19 @@ Website: [rte.whitneys.co](https://rte.whitneys.co) · GitHub: [MIR-2025/rte](ht
 # Changelog
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
+
+## [1.0.21] - 2026-02-25
+- Added interactive checklists: `/checklist` slash command, toolbar button, click-to-toggle, Enter key handling
+- Added floating/bubble toolbar on text selection (Bold, Italic, Underline, Link, Highlight)
+- Added AI autocomplete ghost text with Tab-to-accept (`aiAutocomplete` option)
+- Added `setAiAutocomplete()` API method
+- Checklist inline styles for email-compatible export
+
+## [1.0.20] - 2026-02-23
+- Added multi-provider AI support: OpenAI (`gpt-4o`) and Google Gemini (`gemini-2.0-flash`) alongside Anthropic Claude
+- Added `aiProvider` option (`'anthropic'` | `'openai'` | `'gemini'`)
+- Server proxy now routes via `_provider` field to the correct upstream API
+- Updated README with multi-provider examples and `aiProvider` option docs
 
 ## [1.0.18] - 2026-02-21
 - Fixed editor background color not included in exported/rendered HTML

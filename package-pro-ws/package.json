@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor-pro-ws",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "RTEPro + WebSocket connector bundled in a single file. Full-featured WYSIWYG editor with AI integration, real-time collaboration, auto-save. Zero dependencies.",
   "main": "rte-pro-ws.js",
   "browser": "rte-pro-ws.js",

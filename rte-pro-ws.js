@@ -1619,20 +1619,18 @@
       updateStatus();
     }
     function fetchGhostSuggestion() {
-      console.log("RTEPro ghost: triggered", { aiAutocomplete: options.aiAutocomplete, hasProxy: !!options.aiProxy, hasKey: !!options.apiKey, suppressed: ghostSuppressed });
       if (!options.aiAutocomplete || (!options.apiKey && !options.aiProxy)) return;
       if (ghostSuppressed) return;
       dismissGhost();
       // Get paragraph context around cursor
       const sel = window.getSelection();
-      if (!sel || !sel.rangeCount || !sel.isCollapsed) { console.log("RTEPro ghost: no valid selection"); return; }
+      if (!sel || !sel.rangeCount || !sel.isCollapsed) return;
       // Make sure cursor is inside our editor
       const anchorEl = sel.anchorNode && (sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode);
-      if (!anchorEl || !content.contains(anchorEl)) { console.log("RTEPro ghost: cursor not in editor"); return; }
+      if (!anchorEl || !content.contains(anchorEl)) return;
       const block = getContainingBlock(sel.anchorNode, content) || content;
       const blockText = block.textContent.trim();
-      if (blockText.length < 10) { console.log("RTEPro ghost: block too short:", blockText.length); return; }
-      console.log("RTEPro ghost: fetching, context length:", blockText.length);
+      if (blockText.length < 10) return;
       // Save cursor position for later insertion
       const savedGhostRange = sel.getRangeAt(0).cloneRange();
       // Get broader context (previous blocks too)
@@ -1647,12 +1645,10 @@
       const sysPrompt = "You are an inline text autocomplete assistant. Given the text context, suggest a brief natural continuation (1-2 short sentences max). Reply ONLY with the continuation text, no quotes, no explanation, no markdown.";
       const bodyObj = provider.body(options, sysPrompt, "Continue this text naturally:\n\n" + context, false);
       if (options.aiProxy) bodyObj._provider = options.aiProvider || "anthropic";
-      console.log("RTEPro ghost: sending fetch to", url);
       fetch(url, { method: "POST", headers: provider.headers(options), body: JSON.stringify(bodyObj), signal: ghostAbortController.signal })
-        .then(resp => { console.log("RTEPro ghost: response status", resp.status); if (!resp.ok) throw new Error("API " + resp.status); return resp.json(); })
+        .then(resp => { if (!resp.ok) throw new Error("API " + resp.status); return resp.json(); })
         .then(data => {
           const suggestion = provider.extractResponseText(data).trim();
-          console.log("RTEPro ghost: suggestion", suggestion ? suggestion.substring(0, 50) + "..." : "(empty)");
           if (!suggestion) return;
           // Use saved range to insert ghost — cursor may have moved but if editor still focused, insert
           try {
@@ -2142,6 +2138,16 @@
       },
       onChange: null,
       setAiAutocomplete: (enabled) => { options.aiAutocomplete = enabled; if (!enabled) dismissGhost(); },
+      focus: () => content.focus(),
+      destroy: () => { clearImageResize(); if(autosaveTimer)clearInterval(autosaveTimer); wrap.remove(); },
+      element: content,
+      wrapper: wrap,
+    };
+    return api;
+  }
+
+  return { init };
+});
       focus: () => content.focus(),
       destroy: () => { clearImageResize(); if(autosaveTimer)clearInterval(autosaveTimer); wrap.remove(); },
       element: content,
