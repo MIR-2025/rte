@@ -938,7 +938,6 @@
       btn("\u21a9\ufe0f", "Undo (Ctrl+Z)", () => exec("undo")),
       btn("\u21aa\ufe0f", "Redo (Ctrl+Y)", () => exec("redo")),
       btn("\ud83e\uddf9", "Clear Formatting", () => exec("removeFormat")),
-      btn("\u{1F441}", "Preview", () => openPreview()),
       btn("\ud83d\uddd1\ufe0f", "Clear All", () => { if (confirm("Clear all content?")) { content.innerHTML = ""; updateStatus(); } }),
     );
 
@@ -1064,6 +1063,8 @@
             .then(() => showToast("\u2705 Text copied — paste into your email with Ctrl+V"));
         }
       }),
+
+      exportBtn("\u{1F441}", "Preview", "Preview in modal", () => openPreview()),
 
       exportBtn("\ud83d\udda8\ufe0f", "Print", "Print or save as PDF", () => {
         const win = window.open("", "_blank");

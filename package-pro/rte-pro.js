@@ -454,7 +454,7 @@
     return '<svg viewBox="0 0 18 18"><line x1="'+l[0]+'" y1="'+y[0]+'" x2="'+l[1]+'" y2="'+y[0]+'"/><line x1="'+l[2]+'" y1="'+y[1]+'" x2="'+l[3]+'" y2="'+y[1]+'"/><line x1="'+l[4]+'" y1="'+y[2]+'" x2="'+l[5]+'" y2="'+y[2]+'"/></svg>';
   }
   function saveSelection() { const sel = window.getSelection(); if (sel.rangeCount > 0) return sel.getRangeAt(0).cloneRange(); return null; }
-  function restoreSelection(range) { if (!range) return; const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
+  function restoreSelection(range) { if (!range) return; try { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } catch(e) {} }
   function debounce(fn, ms) { let t; return function() { const a = arguments, c = this; clearTimeout(t); t = setTimeout(() => fn.apply(c, a), ms); }; }
   const BLOCK_TAGS = ["P","H1","H2","H3","H4","H5","H6","DIV","BLOCKQUOTE","PRE","LI","TABLE","UL","OL"];
   function getContainingBlock(node, container) {
@@ -558,6 +558,7 @@
     }
 
     let savedRange = null;
+    function insertIntoEditor(html) { content.focus(); restoreSelection(savedRange); const sel = window.getSelection(); if (!sel.rangeCount || !content.contains(sel.anchorNode)) { const r = document.createRange(); r.selectNodeContents(content); r.collapse(false); sel.removeAllRanges(); sel.addRange(r); } document.execCommand("insertHTML", false, html); }
     const allPopups = [];
     const textColorPopup = buildColorPopup("\u{1F3A8} Text Color", c => { restoreSelection(savedRange); exec("foreColor", c); }); allPopups.push(textColorPopup);
     const bgColorPopup = buildColorPopup("\u{1F58D}\uFE0F Highlight Color", c => { restoreSelection(savedRange); exec("hiliteColor", c); }); allPopups.push(bgColorPopup);
@@ -1441,7 +1442,7 @@
         responseArea.innerHTML = htmlToInsert;
         actionBar.style.display = "flex"; actionBar.innerHTML = "";
         actionBar.append(
-          el("button", { className:"rte-popup-btn primary", onClick:() => { restoreSelection(savedRange); exec("insertHTML", htmlToInsert); responseArea.style.display="none"; actionBar.style.display="none"; showToast("AI content accepted"); } }, "\u2705 Accept"),
+          el("button", { className:"rte-popup-btn primary", onClick:() => { insertIntoEditor(htmlToInsert); responseArea.style.display="none"; actionBar.style.display="none"; showToast("AI content accepted"); } }, "\u2705 Accept"),
           el("button", { className:"rte-popup-btn secondary", onClick:() => { responseArea.style.display="none"; actionBar.style.display="none"; } }, "\u274C Reject"),
           el("button", { className:"rte-popup-btn secondary", onClick:() => { responseArea.textContent = fullText; } }, "\u{1F4C4} Raw"),
           el("button", { className:"rte-popup-btn secondary", onClick:() => runAICommand(systemPrompt, panelBodyRef) }, "\u{1F504} Retry")
@@ -1482,7 +1483,7 @@
         responseArea.innerHTML = htmlToInsert;
         actionBar.style.display = "flex"; actionBar.innerHTML = "";
         actionBar.append(
-          el("button", { className:"rte-popup-btn primary", onClick:() => { restoreSelection(savedRange); exec("insertHTML", htmlToInsert); responseArea.style.display="none"; actionBar.style.display="none"; showToast("AI content inserted"); } }, "\u2705 Insert"),
+          el("button", { className:"rte-popup-btn primary", onClick:() => { insertIntoEditor(htmlToInsert); responseArea.style.display="none"; actionBar.style.display="none"; showToast("AI content inserted"); } }, "\u2705 Insert"),
           el("button", { className:"rte-popup-btn secondary", onClick:() => { responseArea.style.display="none"; actionBar.style.display="none"; } }, "\u274C Discard"),
           el("button", { className:"rte-popup-btn secondary", onClick:() => { responseArea.textContent = fullText; } }, "\u{1F4C4} Raw"),
           el("button", { className:"rte-popup-btn secondary", onClick:() => runAIGenerate(prompt, panelBodyRef) }, "\u{1F504} Retry")
@@ -1556,7 +1557,6 @@
         btn("\u{1F50D}","Find & Replace (Ctrl+F)",() => toggleFindBar()),
         btn("&lt;/&gt;","Source View (Ctrl+/)",() => toggleSourceView()),
         btn("\u24C2","Markdown Toggle",() => toggleMarkdown()),
-        btn("\u{1F441}","Preview",() => openPreview()),
         btn("\u26F6","Fullscreen (F11)",() => toggleFullscreen())
       ],
       history: [
@@ -1798,6 +1798,7 @@
       exportBtn("\u{1F4CB}","Copy HTML","Copy rich HTML",() => { const h=cleanHTML(),t=cleanText(); if(navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]).then(()=>showToast("\u2705 HTML copied"));}else{navigator.clipboard.writeText(h).then(()=>showToast("\u2705 HTML copied"));} }),
       exportBtn("\u{1F4DD}","Copy Text","Copy plain text",() => { navigator.clipboard.writeText(cleanText()).then(()=>showToast("\u2705 Text copied")); }),
       exportBtn("\u2709\uFE0F","Email","Copy for email",() => { const h=cleanHTML(),t=cleanText(); if(navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]).then(()=>showToast("\u2705 Content copied \u2014 paste into email"));}else{navigator.clipboard.writeText(t).then(()=>showToast("\u2705 Text copied"));} }),
+      exportBtn("\u{1F441}","Preview","Preview in modal",() => openPreview()),
       exportBtn("\u{1F5A8}\uFE0F","Print","Print or save as PDF",() => { const w=window.open("","_blank"); w.document.write(getFullHTML()); w.document.close(); w.print(); }),
       exportBtn("\u{1F4BE}","JSON","Copy as JSON",() => { const json=JSON.stringify({ html:cleanHTML(), text:cleanText(), wordCount:(cleanText().trim()?cleanText().trim().split(/\s+/).length:0), charCount:cleanText().length, createdAt:new Date().toISOString() },null,2); navigator.clipboard.writeText(json).then(()=>showToast("\u2705 JSON copied")); })
     );

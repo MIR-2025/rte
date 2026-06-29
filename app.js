@@ -69,6 +69,7 @@ app.use((req, res, next) => {
   res.locals.siteName = 'RTE';
   res.locals.siteTagline = 'Rich Text Editor';
   res.locals.stripeEnabled = !!process.env.STRIPE_PUBLISHABLE_KEY;
+  res.locals.v = process.env.npm_package_version || Date.now();
   next();
 });
 
