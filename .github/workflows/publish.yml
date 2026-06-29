@@ -19,7 +19,6 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: NPM_TOKEN
     strategy:
       matrix:
         package:
