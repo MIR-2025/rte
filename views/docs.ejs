@@ -20,6 +20,7 @@
             <a class="nav-link px-0 py-1" href="#tables">Tables</a>
             <a class="nav-link px-0 py-1" href="#export">Saving & Exporting</a>
             <a class="nav-link px-0 py-1" href="#integration">Backend Integration</a>
+            <a class="nav-link px-0 py-1" href="#security">Security</a>
             <a class="nav-link px-0 py-1" href="#styling">Custom Styling</a>
           </nav>
         </div>
@@ -227,6 +228,39 @@ editor.onChange = (data) => {
   console.log(data.chars, 'characters');
   // debounce and save...
 };</code></pre>
+        </section>
+
+        <!-- Security -->
+        <section id="security" class="mb-5">
+          <h2>Security</h2>
+          <div class="alert alert-danger">
+            <i class="bi bi-shield-exclamation"></i> <strong>Treat editor output as untrusted</strong> if any untrusted users can write content.
+          </div>
+          <p>RTE outputs raw HTML. If your application allows untrusted users to create or edit content, you <strong>must sanitize the output server-side</strong> before storing or rendering it to other users.</p>
+
+          <h5 class="mt-4">Sanitize Before Storing or Rendering</h5>
+          <p>Use a proven HTML sanitizer such as <a href="https://github.com/cure53/DOMPurify" target="_blank">DOMPurify</a> (client-side) or <a href="https://www.npmjs.com/package/sanitize-html" target="_blank">sanitize-html</a> (server-side):</p>
+          <pre class="code-block"><code>// Server-side (Node.js)
+const sanitizeHtml = require('sanitize-html');
+const clean = sanitizeHtml(editor.getHTML(), {
+  allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'h1', 'h2']),
+  allowedAttributes: { ...sanitizeHtml.defaults.allowedAttributes, img: ['src', 'alt'] },
+});
+
+// Client-side
+const clean = DOMPurify.sanitize(editor.getHTML());</code></pre>
+
+          <h5 class="mt-4">Disallow Dangerous Patterns</h5>
+          <p>Your sanitizer should strip or reject:</p>
+          <ul>
+            <li><code>javascript:</code> links (e.g. <code>&lt;a href="javascript:..."&gt;</code>)</li>
+            <li>Inline event handlers (<code>onclick</code>, <code>onerror</code>, <code>onload</code>, etc.)</li>
+            <li><code>&lt;script&gt;</code>, <code>&lt;iframe&gt;</code>, <code>&lt;object&gt;</code>, <code>&lt;embed&gt;</code>, and <code>&lt;form&gt;</code> tags</li>
+            <li><code>data:</code> URIs in links (except for embedded images if intended)</li>
+          </ul>
+
+          <h5 class="mt-4">Keep API Keys Server-Side</h5>
+          <p>Never ship API keys in client-side code. Use the <code>aiProxy</code> option to route AI requests through your own server, which keeps the key secret. See the <a href="/pro">Pro documentation</a> for details.</p>
         </section>
 
         <!-- Styling -->

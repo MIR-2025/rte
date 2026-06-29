@@ -185,6 +185,13 @@
 /* ── RTEPro-specific ── */
 .rte-pro-fullscreen { position: fixed; inset: 0; z-index: 9999; border-radius: 0; max-width: none; }
 .rte-pro-fullscreen .rte-content { height: calc(100vh - 200px); max-height: none; }
+.rte-preview-overlay { position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; }
+.rte-preview-modal { background: #fff; border-radius: 12px; width: 90vw; height: 85vh; max-width: 1200px; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+.rte-preview-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; }
+.rte-preview-header span { font-weight: 600; font-size: 14px; color: #334155; }
+.rte-preview-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #64748b; padding: 2px 8px; border-radius: 6px; }
+.rte-preview-close:hover { background: #f1f5f9; color: #1e293b; }
+.rte-preview-frame { flex: 1; border: none; border-radius: 0 0 12px 12px; }
 .rte-pro-source { width: 100%; min-height: 300px; font-family: "Fira Code", Consolas, monospace; font-size: 13px; padding: 16px 20px; border: none; outline: none; resize: vertical; background: var(--rte-bg); color: #1e293b; line-height: 1.7; box-sizing: border-box; }
 .rte-pro-findbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 12px; background: var(--rte-toolbar-bg); border-bottom: 1px solid var(--rte-border); align-items: center; }
 .rte-pro-findbar input { padding: 4px 8px; border: 1px solid var(--rte-border); border-radius: 6px; font-size: 13px; font-family: var(--rte-font); outline: none; }
@@ -506,7 +513,7 @@
     statusbar.append(wordCountEl, charCountEl, readingTimeEl, aiStatusEl);
 
     const formatButtons = {};
-    function exec(cmd, val) { content.focus(); document.execCommand(cmd, false, val || null); updateStatus(); updateActiveStates(); }
+    function exec(cmd, val) { if (!wrap.contains(document.activeElement) || document.activeElement === wrap) content.focus(); document.execCommand(cmd, false, val || null); updateStatus(); updateActiveStates(); }
     function updateActiveStates() {
       const cmds = { bold:"bold", italic:"italic", underline:"underline", strikeThrough:"strike", superscript:"sup", subscript:"sub" };
       Object.entries(cmds).forEach(([cmd, key]) => { if (formatButtons[key]) formatButtons[key].classList.toggle("active", document.queryCommandState(cmd)); });
@@ -686,6 +693,25 @@
     let isFullscreen = false;
     function toggleFullscreen() { isFullscreen = !isFullscreen; wrap.classList.toggle("rte-pro-fullscreen", isFullscreen); document.body.style.overflow = isFullscreen ? "hidden" : ""; showToast(isFullscreen ? "Fullscreen mode" : "Normal mode"); }
 
+    // ── Preview ──
+    function openPreview() {
+      const overlay = el("div", { className: "rte-preview-overlay" });
+      const modal = el("div", { className: "rte-preview-modal" });
+      const header = el("div", { className: "rte-preview-header" });
+      header.appendChild(el("span", {}, "Preview"));
+      const closeBtn = el("button", { className: "rte-preview-close", onClick: () => { document.body.style.overflow = ""; overlay.remove(); } });
+      closeBtn.innerHTML = "&times;";
+      header.appendChild(closeBtn);
+      const iframe = el("iframe", { className: "rte-preview-frame" });
+      modal.append(header, iframe);
+      overlay.appendChild(modal);
+      overlay.addEventListener("click", e => { if (e.target === overlay) { document.body.style.overflow = ""; overlay.remove(); } });
+      document.body.style.overflow = "hidden";
+      document.body.appendChild(overlay);
+      const doc = iframe.contentDocument;
+      doc.open(); doc.write(getFullHTML()); doc.close();
+    }
+
     // ── Focus mode ──
     let isFocusMode = options.focusMode;
     function toggleFocusMode() { isFocusMode = !isFocusMode; wrap.classList.toggle("rte-pro-focus-mode", isFocusMode); showToast(isFocusMode ? "Focus mode on" : "Focus mode off"); }
@@ -716,9 +742,38 @@
 
     // ── Source view ──
     let isSourceView = false, sourceArea = null;
+    function formatHTML(html) {
+      const BLOCK = /^(html|head|body|div|p|h[1-6]|ul|ol|li|table|thead|tbody|tfoot|tr|th|td|blockquote|pre|section|article|nav|header|footer|form|fieldset|hr|br|canvas|video|audio|figure|figcaption)$/i;
+      const VOID = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
+      const tmp = document.createElement("div"); tmp.innerHTML = html.trim();
+      let out = "", indent = 0;
+      function pad() { return "  ".repeat(indent); }
+      function walk(node) {
+        if (node.nodeType === 3) {
+          const t = node.textContent; if (!t.trim()) return;
+          out += pad() + t.trim() + "\n";
+          return;
+        }
+        if (node.nodeType !== 1) return;
+        const tag = node.tagName.toLowerCase();
+        const attrs = Array.from(node.attributes).map(a => " " + a.name + (a.value ? '="' + a.value.replace(/"/g, "&quot;") + '"' : "")).join("");
+        if (VOID.test(tag)) { out += pad() + "<" + tag + attrs + ">\n"; return; }
+        const isBlock = BLOCK.test(tag);
+        const kids = Array.from(node.childNodes);
+        const isInline = !isBlock && kids.length <= 1 && kids.every(k => k.nodeType === 3);
+        if (isInline) { out += pad() + "<" + tag + attrs + ">" + node.innerHTML.trim() + "</" + tag + ">\n"; return; }
+        out += pad() + "<" + tag + attrs + ">\n";
+        indent++;
+        kids.forEach(walk);
+        indent--;
+        out += pad() + "</" + tag + ">\n";
+      }
+      Array.from(tmp.childNodes).forEach(walk);
+      return out.trimEnd();
+    }
     function toggleSourceView() {
       isSourceView = !isSourceView;
-      if (isSourceView) { sourceArea = el("textarea", { className:"rte-pro-source" }); sourceArea.value = content.innerHTML; content.style.display = "none"; content.parentNode.insertBefore(sourceArea, content); }
+      if (isSourceView) { sourceArea = el("textarea", { className:"rte-pro-source" }); sourceArea.value = formatHTML(content.innerHTML); content.style.display = "none"; content.parentNode.insertBefore(sourceArea, content); }
       else { if (sourceArea) { content.innerHTML = sourceArea.value; sourceArea.remove(); sourceArea = null; } content.style.display = ""; updateStatus(); }
       showToast(isSourceView ? "Source view" : "Visual view");
     }
@@ -1501,6 +1556,7 @@
         btn("\u{1F50D}","Find & Replace (Ctrl+F)",() => toggleFindBar()),
         btn("&lt;/&gt;","Source View (Ctrl+/)",() => toggleSourceView()),
         btn("\u24C2","Markdown Toggle",() => toggleMarkdown()),
+        btn("\u{1F441}","Preview",() => openPreview()),
         btn("\u26F6","Fullscreen (F11)",() => toggleFullscreen())
       ],
       history: [
@@ -1895,7 +1951,7 @@
     // ── Paste image ──
     content.addEventListener("paste", e => {
       const items = (e.clipboardData || {}).items; if (!items) return;
-      for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) { e.preventDefault(); const file = items[i].getAsFile(); const reader = new FileReader(); reader.onload = () => exec("insertHTML",'<img src="'+reader.result+'" alt="pasted image">'); reader.readAsDataURL(file); break; } }
+      for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) { e.preventDefault(); const file = items[i].getAsFile(); const reader = new FileReader(); reader.onload = () => { document.execCommand("insertHTML", false, '<img src="'+reader.result+'" alt="pasted image">'); updateStatus(); }; reader.readAsDataURL(file); break; } }
     });
 
     // ── Image Resize ──
@@ -2117,6 +2173,7 @@
       toggleSource: () => toggleSourceView(),
       toggleFullscreen: () => toggleFullscreen(),
       toggleMarkdown: () => toggleMarkdown(),
+      preview: () => openPreview(),
       toggleFocusMode: () => toggleFocusMode(),
       toggleGridlines: () => toggleGridlines(),
       toggleFindBar: () => toggleFindBar(),

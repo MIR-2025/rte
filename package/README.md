@@ -300,6 +300,13 @@ All notable changes to `rte-rich-text-editor` will be documented in this file.
 - CSS custom properties for theming
 - TypeScript declarations included
 
+## Security
+
+> **Treat editor output as untrusted** if any untrusted users can write content.
+
+- **Sanitize server-side** before storing or rendering. The editor outputs raw HTML — always run it through a sanitizer (e.g. [DOMPurify](https://github.com/cure53/DOMPurify), [sanitize-html](https://www.npmjs.com/package/sanitize-html)) before persisting or displaying to other users.
+- **Disallow dangerous patterns**: `javascript:` links, inline event handlers (`onclick`, `onerror`, etc.), `<iframe>`, `<script>`, `<object>`, `<embed>`, and `<form>` tags.
+
 ## License
 
 MIT

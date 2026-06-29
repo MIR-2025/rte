@@ -181,8 +181,8 @@
 /* Editor area */
 .rte-content {
   min-height: 260px;
-  max-height: 70vh;
-  overflow-y: auto;
+  overflow: auto;
+  resize: vertical;
   padding: 16px 20px;
   outline: none;
   font-size: 15px;
@@ -219,6 +219,7 @@
 }
 .rte-content img, .rte-content video, .rte-content audio {
   max-width: 100%;
+  height: auto;
   border-radius: 8px;
   margin: 8px 0;
   display: block;
@@ -441,6 +442,14 @@
   outline-offset: 1px;
 }
 
+.rte-preview-overlay { position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; }
+.rte-preview-modal { background: #fff; border-radius: 12px; width: 90vw; height: 85vh; max-width: 1200px; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+.rte-preview-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; }
+.rte-preview-header span { font-weight: 600; font-size: 14px; color: #334155; }
+.rte-preview-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #64748b; padding: 2px 8px; border-radius: 6px; }
+.rte-preview-close:hover { background: #f1f5f9; color: #1e293b; }
+.rte-preview-frame { flex: 1; border: none; border-radius: 0 0 12px 12px; }
+
 /* Responsive */
 @media (max-width: 580px) {
   .rte-btn { min-width: 28px; height: 28px; font-size: 16px; }
@@ -493,6 +502,7 @@
   // ── Helpers ──────────────────────────────────────────────
   function el(tag, attrs, children) {
     const e = document.createElement(tag);
+    if (tag === "button") e.type = "button";
     if (attrs) Object.entries(attrs).forEach(([k, v]) => {
       if (k === "className") e.className = v;
       else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
@@ -508,11 +518,12 @@
   }
 
   function btn(emoji, tip, onClick, extraClass) {
-    return el("button", { className: "rte-btn" + (extraClass ? " " + extraClass : ""), "data-tip": tip, onClick }, emoji);
+    return el("button", { type: "button", className: "rte-btn" + (extraClass ? " " + extraClass : ""), "data-tip": tip, onClick }, emoji);
   }
 
   function fmtBtn(label, tip, onClick, fmtClass) {
     return el("button", {
+      type: "button",
       className: "rte-btn rte-btn-text " + fmtClass,
       "data-tip": tip,
       onClick
@@ -559,6 +570,8 @@
     options = Object.assign({
       placeholder: "Start typing something amazing\u2026",
       height: null,
+      exportCSS: null,
+      exportTemplate: null,
     }, options);
 
     const wrap = el("div", { className: "rte-wrap" });
@@ -821,8 +834,9 @@
     }
 
     // Close popups when clicking inside editor
-    content.addEventListener("mousedown", () => {
+    content.addEventListener("mousedown", (e) => {
       allPopups.forEach(p => p.classList.remove("show"));
+      if (e.target.tagName !== "IMG") clearImageResize();
     });
 
     // ── Link popup wiring ──
@@ -924,6 +938,7 @@
       btn("\u21a9\ufe0f", "Undo (Ctrl+Z)", () => exec("undo")),
       btn("\u21aa\ufe0f", "Redo (Ctrl+Y)", () => exec("redo")),
       btn("\ud83e\uddf9", "Clear Formatting", () => exec("removeFormat")),
+      btn("\u{1F441}", "Preview", () => openPreview()),
       btn("\ud83d\uddd1\ufe0f", "Clear All", () => { if (confirm("Clear all content?")) { content.innerHTML = ""; updateStatus(); } }),
     );
 
@@ -943,8 +958,33 @@
       clone.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
       return clone.innerHTML;
     }
+
+    // ── Full HTML document wrapper for export/email ────────
     function getFullHTML() {
-      return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;line-height:1.7;color:#1e293b;max-width:800px;margin:0 auto}img,video{max-width:100%;border-radius:8px}audio{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d5dd;padding:8px 12px;text-align:left}th{background:#f8f9fb;font-weight:600}blockquote{border-left:4px solid #6366f1;margin:.6em 0;padding:.4em .8em;background:#f1f5f9}pre{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;overflow-x:auto;font-size:13px}a{color:#6366f1}hr{border:none;border-top:2px dashed #d0d5dd;margin:1em 0}</style></head><body>' + cleanHTML() + '</body></html>';
+      if (options.exportTemplate) {
+        return options.exportTemplate.replace('{{content}}', cleanHTML());
+      }
+      var css = 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:24px 32px;line-height:1.7;color:#1e293b;max-width:800px;margin:0 auto}img,video{max-width:100%;border-radius:8px}audio{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d5dd;padding:8px 12px;text-align:left}th{background:#f8f9fb;font-weight:600}blockquote{border-left:4px solid #6366f1;margin:.6em 0;padding:.4em .8em;background:#f1f5f9}pre{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;overflow-x:auto;font-size:13px}a{color:#6366f1}hr{border:none;border-top:2px dashed #d0d5dd;margin:1em 0}';
+      if (options.exportCSS) css += options.exportCSS;
+      return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>' + css + '</style></head><body>' + cleanHTML() + '</body></html>';
+    }
+
+    function openPreview() {
+      const overlay = el("div", { className: "rte-preview-overlay" });
+      const modal = el("div", { className: "rte-preview-modal" });
+      const header = el("div", { className: "rte-preview-header" });
+      header.appendChild(el("span", {}, "Preview"));
+      const closeBtn = el("button", { className: "rte-preview-close", onClick: () => { document.body.style.overflow = ""; overlay.remove(); } });
+      closeBtn.innerHTML = "&times;";
+      header.appendChild(closeBtn);
+      const iframe = el("iframe", { className: "rte-preview-frame" });
+      modal.append(header, iframe);
+      overlay.appendChild(modal);
+      overlay.addEventListener("click", e => { if (e.target === overlay) { document.body.style.overflow = ""; overlay.remove(); } });
+      document.body.style.overflow = "hidden";
+      document.body.appendChild(overlay);
+      const doc = iframe.contentDocument;
+      doc.open(); doc.write(getFullHTML()); doc.close();
     }
 
     // ── Export bar (save, copy, email, etc.) ────────────────
@@ -1595,12 +1635,13 @@
         win.document.close();
         win.print();
       },
+      preview: () => openPreview(),
       /** Assign a callback: editor.onChange = ({html, text, words, chars}) => {} */
       onChange: null,
       /** Focus the editor */
       focus: () => content.focus(),
       /** Destroy the editor */
-      destroy: () => { wrap.remove(); },
+      destroy: () => { clearImageResize(); wrap.remove(); },
       /** Direct access to the content element */
       element: content,
       /** Direct access to the wrapper */
@@ -1612,7 +1653,6 @@
   // ── Return public API ────────────────────────────────────
   return { init };
 });
-
 /**
  * RTE-WS — WebSocket Connector for RTE Rich Text Editor
  * Standalone companion file. Works with any WebSocket backend.

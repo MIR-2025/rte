@@ -52,5 +52,9 @@
   "bugs": {
     "url": "https://github.com/MIR-2025/rte/issues"
   },
-  "homepage": "https://rte.whitneys.co"
+  "homepage": "https://rte.whitneys.co",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }

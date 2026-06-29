@@ -14,7 +14,13 @@ const __dirname = dirname(__filename);
 const app = express();
 app.set('trust proxy', true);
 morgan.token('date', () => new Date().toLocaleString('en-US', { timeZone: 'America/Phoenix' }));
-app.use(morgan('combined'));
+app.use(morgan(':remote-addr [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer"'));
+
+app.use((req, res, next) => {
+  if (req.path.startsWith('/.git') || req.path.startsWith('/.env')) return res.status(404).end();
+  next();
+});
+
 const PORT = 26216;
 
 // Stripe

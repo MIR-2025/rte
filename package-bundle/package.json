@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor-bundle",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "RTE Rich Text Editor + WebSocket connector bundled in a single file. One script tag. Zero dependencies.",
   "main": "rte-bundle.js",
   "module": "rte-bundle.js",
@@ -45,5 +45,9 @@
   "bugs": {
     "url": "https://github.com/MIR-2025/rte/issues"
   },
-  "homepage": "https://rte.whitneys.co"
+  "homepage": "https://rte.whitneys.co",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }
