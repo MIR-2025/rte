@@ -15,7 +15,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   publish:
@@ -42,7 +41,7 @@ jobs:
         working-directory: ${{ matrix.package }}
         run: npm version ${{ inputs.bump }} --no-git-tag-version
 
-      - name: Publish with provenance
+      - name: Publish
         working-directory: ${{ matrix.package }}
         run: npm publish --access public
         env:
