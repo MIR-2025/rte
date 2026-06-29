@@ -54,7 +54,6 @@
   },
   "homepage": "https://rte.whitneys.co",
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   }
 }
