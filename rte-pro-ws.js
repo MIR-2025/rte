@@ -2206,8 +2206,7 @@
 
   return { init };
 });
-});
-});
+/**
  * RTEProWS — WebSocket Connector for RTEPro Rich Text Editor
  * Bundled companion. Works with any WebSocket backend.
  *
