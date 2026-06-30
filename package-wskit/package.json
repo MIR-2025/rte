@@ -44,5 +44,9 @@
   "bugs": {
     "url": "https://github.com/MIR-2025/rte/issues"
   },
-  "homepage": "https://github.com/MIR-2025/rte"
+  "homepage": "https://github.com/MIR-2025/rte",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }

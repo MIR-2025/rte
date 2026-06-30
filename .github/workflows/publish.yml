@@ -1,33 +1,54 @@
 name: Publish to npm
 
+# OIDC trusted publishing — no NPM_TOKEN secret required.
+# Each package must have a Trusted Publisher configured on npmjs.com:
+#   owner: MIR-2025  ·  repo: rte  ·  workflow: publish.yml  ·  environment: (blank)
+# Bump a package's version in its package.json, push to main, and only
+# packages whose version is not yet on npm get published (provenance-signed).
+
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         package:
           - package
           - package-bundle
           - package-pro
           - package-pro-ws
+          - package-ws
+          - package-wskit
+          - package-websocket-kit
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
 
-      - name: Configure npm auth
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+      - name: Update npm for OIDC trusted publishing
+        run: npm install -g npm@latest
 
-      - name: Publish
+      - name: Publish if version is new
         working-directory: ${{ matrix.package }}
-        run: npm publish --access public || true
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "$NAME@$VERSION already published — skipping"
+          else
+            echo "Publishing $NAME@$VERSION"
+            npm publish --provenance --access public
+          fi
