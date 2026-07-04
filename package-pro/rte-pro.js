@@ -583,9 +583,9 @@
       popup.append(el("label", {}, label + " \u2014 paste URL or upload file"), urlInput, el("div", { style:{ margin:"6px 0", display:"flex", gap:"6px" } }, [fileBtn]), actions);
       allPopups.push(popup); return popup;
     }
-    const imagePopup = buildMediaPopup("\u{1F5BC}\uFE0F Image", "image/*", src => exec("insertHTML", '<img src="'+src+'" alt="image">'));
-    const videoPopup = buildMediaPopup("\u{1F3AC} Video", "video/*", src => exec("insertHTML", '<video src="'+src+'" controls></video>'));
-    const audioPopup = buildMediaPopup("\u{1F50A} Audio", "audio/*", src => exec("insertHTML", '<audio src="'+src+'" controls></audio>'));
+    const imagePopup = buildMediaPopup("\u{1F5BC}\uFE0F Image", "image/*", src => insertIntoEditor('<img src="'+src+'" alt="image">'));
+    const videoPopup = buildMediaPopup("\u{1F3AC} Video", "video/*", src => insertIntoEditor('<video src="'+src+'" controls></video>'));
+    const audioPopup = buildMediaPopup("\u{1F50A} Audio", "audio/*", src => insertIntoEditor('<audio src="'+src+'" controls></audio>'));
 
     // ── Emoji popup ──
     const emojiPopup = el("div", { className:"rte-popup" }); emojiPopup.appendChild(el("label", {}, "\u{1F600} Insert Emoji"));
