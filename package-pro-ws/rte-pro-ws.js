@@ -235,6 +235,8 @@
 .rte-pro-col-handle:hover::after, .rte-pro-col-handle.active::after { background: #6366f1; height: 48px; }
 .rte-pro-page-break { border-top: 2px dashed #94a3b8; margin: 16px 0; page-break-after: always; position: relative; }
 .rte-pro-page-break::after { content: "Page Break"; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--rte-bg); padding: 0 8px; font-size: 11px; color: #94a3b8; }
+.rte-pro-hero { position: relative; width: 100%; box-sizing: border-box; }
+.rte-pro-hero::before { content: "Full-width hero"; position: absolute; top: 6px; right: 10px; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; opacity: .5; pointer-events: none; }
 .rte-pro-version-item { padding: 10px 12px; border-bottom: 1px solid var(--rte-border); cursor: pointer; }
 .rte-pro-version-item:hover { background: var(--rte-hover); }
 .rte-pro-version-date { font-size: 11px; color: #64748b; }
@@ -419,6 +421,7 @@
     { cmd:"columns2", icon:"\u2016", label:"2 Columns", description:"Two-column layout" },
     { cmd:"columns3", icon:"\u2AF6", label:"3 Columns", description:"Three-column layout" },
     { cmd:"checklist", icon:"\u2611", label:"Checklist", description:"Interactive checklist" },
+    { cmd:"hero", icon:"\u{1F9B8}", label:"Hero", description:"Full-width hero section" },
   ];
   const AI_TONES = ["Professional","Casual","Academic","Creative","Concise"];
   const AI_LANGUAGES = ["Spanish","French","German","Italian","Portuguese","Chinese","Japanese","Korean","Arabic","Hindi"];
@@ -970,6 +973,9 @@
     function insertChecklist() {
       exec("insertHTML", '<ul class="rte-checklist"><li>Item 1</li></ul><p><br></p>');
     }
+    function insertHero() {
+      insertIntoEditor('<div class="rte-pro-hero" style="padding:80px 32px;text-align:center;background:#1e293b;color:#ffffff;margin:8px 0;border-radius:8px"><h1 style="margin:0 0 14px;font-size:2.6em;color:inherit">Your headline</h1><p style="margin:0;font-size:1.25em;opacity:.85;color:inherit">A supporting subtitle for your full-width hero</p></div><p><br></p>');
+    }
 
     function insertFootnote() {
       footnoteCounter++; const id = "fn-" + footnoteCounter;
@@ -1192,6 +1198,7 @@
         case "columns2": insertColumns(2); break;
         case "columns3": insertColumns(3); break;
         case "checklist": insertChecklist(); break;
+        case "hero": insertHero(); break;
       }
     }
 
@@ -1533,7 +1540,8 @@
         btn("\u2796","Horizontal Rule",() => exec("insertHorizontalRule")),
         btn("\u{1F4C4}","Page Break",() => exec("insertHTML",'<div class="rte-pro-page-break"></div><p><br></p>')),
         btn("\u258C\u258C","2 Columns",() => insertColumns(2)),
-        btn("\u258C\u258C\u258C","3 Columns",() => insertColumns(3))
+        btn("\u258C\u258C\u258C","3 Columns",() => insertColumns(3)),
+        btn("\u{1F9B8}","Full-width Hero",() => insertHero())
       ],
       style: [
         btn("AB","Uppercase",() => { const t=window.getSelection().toString(); if(t) exec("insertHTML",'<span style="text-transform:uppercase">'+t+'</span>'); }),
@@ -1740,7 +1748,7 @@
       clone.querySelectorAll(".rte-pro-ghost, .rte-pro-ghost-hint").forEach(h => h.remove());
       clone.querySelectorAll(".rte-pro-drag-handle, .rte-pro-col-handle").forEach(h => h.remove());
       clone.querySelectorAll("[class]").forEach(el => {
-        const keep = new Set(["rte-pro-cols","rte-pro-cols-2","rte-pro-cols-3","rte-pro-col","rte-pro-page-break","rte-pro-mention","rte-checklist","checked"]);
+        const keep = new Set(["rte-pro-cols","rte-pro-cols-2","rte-pro-cols-3","rte-pro-col","rte-pro-page-break","rte-pro-mention","rte-checklist","checked","rte-pro-hero"]);
         const classes = Array.from(el.classList).filter(c => keep.has(c) || (!c.startsWith("rte-pro-") && c !== "rte-img-resizing" && c !== "active-block"));
         if (!classes.length) el.removeAttribute("class"); else el.className = classes.join(" ");
       });
@@ -1752,6 +1760,15 @@
       });
       clone.querySelectorAll(".rte-pro-page-break").forEach(el => {
         el.style.cssText = "border-top:2px dashed #94a3b8;margin:16px 0;page-break-after:always";
+      });
+      clone.querySelectorAll(".rte-pro-hero").forEach(el => {
+        // Break out to full viewport width even inside a centered content column,
+        // and square the corners for an edge-to-edge hero. Author's inline
+        // background/padding/text-align are preserved.
+        el.style.width = "100vw";
+        el.style.marginLeft = "calc(50% - 50vw)";
+        el.style.marginRight = "calc(50% - 50vw)";
+        el.style.borderRadius = "0";
       });
       clone.querySelectorAll(".rte-pro-mention").forEach(el => {
         el.style.cssText = "background:#ede9fe;color:#6366f1;padding:1px 4px;border-radius:3px;font-weight:500";
@@ -2180,6 +2197,7 @@
       toggleFindBar: () => toggleFindBar(),
       insertFootnote: () => insertFootnote(),
       insertTOC: () => insertTOC(),
+      insertHero: () => insertHero(),
       saveVersion: label => saveVersion(label),
       getVersions: () => versions.slice(),
       restoreVersion: idx => { if (versions[idx]) { content.innerHTML = versions[idx].html; updateStatus(); } },
