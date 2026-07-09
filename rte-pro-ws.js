@@ -123,7 +123,8 @@
 .rte-ctx-item { padding: 6px 12px; cursor: pointer; font-size: 13px; border-radius: 4px; white-space: nowrap; }
 .rte-ctx-item:hover { background: var(--rte-hover); }
 .rte-ctx-sep { height: 1px; background: var(--rte-border); margin: 4px 0; }
-.rte-drag-handle { position: absolute; left: 2px; cursor: grab; z-index: 10; font-size: 10px; color: #94a3b8; user-select: none; opacity: 0; transition: opacity .15s; padding: 2px; border-radius: 3px; line-height: 1; }
+.rte-drag-handle { position: absolute; left: 2px; cursor: grab; z-index: 10; font-size: 13px; color: #94a3b8; user-select: none; opacity: 0; transition: opacity .15s; padding: 2px 3px; border-radius: 4px; line-height: 1; }
+.rte-drag-handle:active { cursor: grabbing; }
 .rte-drag-handle:hover { opacity: 1 !important; background: #f1f5f9; color: #64748b; }
 .rte-dragging { opacity: 0.3 !important; }
 .rte-drop-line { height: 3px; background: #6366f1; border: none; border-radius: 2px; margin: -2px 0; pointer-events: none; }
@@ -223,9 +224,6 @@
 .rte-pro-slash-icon { width: 28px; font-size: 16px; text-align: center; }
 .rte-pro-mention { background: #e0e7ff; color: #4338ca; padding: 1px 4px; border-radius: 4px; font-weight: 500; }
 .rte-pro-hashtag { color: #6366f1; font-weight: 500; text-decoration: none; }
-.rte-pro-drag-handle { position: absolute; left: -24px; top: 2px; width: 20px; cursor: grab; opacity: 0; transition: opacity .2s; font-size: 14px; color: #94a3b8; user-select: none; }
-.rte-content > *:hover > .rte-pro-drag-handle { opacity: 1; }
-.rte-pro-dragging { opacity: .5; }
 .rte-pro-cols { display: grid; gap: 0; margin: 8px 0; min-height: 60px; }
 .rte-pro-cols-2 { grid-template-columns: 1fr 6px 1fr; }
 .rte-pro-cols-3 { grid-template-columns: 1fr 6px 1fr 6px 1fr; }
@@ -237,6 +235,11 @@
 .rte-pro-page-break::after { content: "Page Break"; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--rte-bg); padding: 0 8px; font-size: 11px; color: #94a3b8; }
 .rte-pro-hero { position: relative; width: 100%; box-sizing: border-box; }
 .rte-pro-hero::before { content: "Full-width hero"; position: absolute; top: 6px; right: 10px; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; opacity: .5; pointer-events: none; }
+.rte-pro-fullwidth { display: block; width: 100%; max-width: none; margin-left: 0; margin-right: 0; box-sizing: border-box; }
+img.rte-pro-fullwidth { height: auto; }
+/* no-margin: content runs edge-to-edge inside the editor (no horizontal padding),
+   so full-width blocks/images fill the whole editing surface. */
+.rte-pro-no-margin .rte-content { padding-left: 0; padding-right: 0; }
 .rte-pro-version-item { padding: 10px 12px; border-bottom: 1px solid var(--rte-border); cursor: pointer; }
 .rte-pro-version-item:hover { background: var(--rte-hover); }
 .rte-pro-version-date { font-size: 11px; color: #64748b; }
@@ -496,9 +499,10 @@
       mentions: [], hashtagUrl: null, printMargins: null,
       watermark: null, stickyToolbar: true, focusMode: false, maxVersions: 20,
       aiAutocomplete: false,
+      noMargin: false,
     }, options);
 
-    const wrap = el("div", { className: "rte-wrap" + (options.stickyToolbar ? " rte-pro-sticky" : "") });
+    const wrap = el("div", { className: "rte-wrap" + (options.stickyToolbar ? " rte-pro-sticky" : "") + (options.noMargin ? " rte-pro-no-margin" : "") });
     const toolbar = el("div", { className: "rte-toolbar" });
     const content = el("div", {
       className: "rte-content", contenteditable: "true",
@@ -574,21 +578,29 @@
     allPopups.push(linkPopup);
 
     // ── Media popups ──
-    function buildMediaPopup(label, accept, embedFn) {
+    // htmlFor(src) returns the embed HTML for one source; multiple=true allows
+    // selecting several files at once (inserted together, in the chosen order).
+    function buildMediaPopup(label, accept, htmlFor, multiple) {
       const popup = el("div", { className:"rte-popup" });
       const urlInput = el("input", { type:"url", placeholder:"https://..." });
       const fileInput = el("input", { type:"file", accept });
-      const fileBtn = el("button", { className:"rte-popup-btn secondary", onClick:() => fileInput.click() }, "\u{1F4C2} Choose File");
-      const okBtn = el("button", { className:"rte-popup-btn primary", onClick:() => { if (urlInput.value) { restoreSelection(savedRange); embedFn(urlInput.value); popup.classList.remove("show"); urlInput.value=""; } } }, "Insert");
+      if (multiple) fileInput.multiple = true;
+      const fileBtn = el("button", { className:"rte-popup-btn secondary", onClick:() => fileInput.click() }, "\u{1F4C2} Choose File" + (multiple ? "s" : ""));
+      const okBtn = el("button", { className:"rte-popup-btn primary", onClick:() => { if (urlInput.value) { insertIntoEditor(htmlFor(urlInput.value)); popup.classList.remove("show"); urlInput.value=""; } } }, "Insert");
       const cancelBtn = el("button", { className:"rte-popup-btn secondary", onClick:() => popup.classList.remove("show") }, "Cancel");
-      fileInput.addEventListener("change", () => { const f = fileInput.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { restoreSelection(savedRange); embedFn(r.result); popup.classList.remove("show"); }; r.readAsDataURL(f); });
+      fileInput.addEventListener("change", () => {
+        const files = Array.from(fileInput.files); if (!files.length) return;
+        Promise.all(files.map(f => new Promise((res, rej) => {
+          const r = new FileReader(); r.onload = () => res(htmlFor(r.result)); r.onerror = rej; r.readAsDataURL(f);
+        }))).then(htmls => { insertIntoEditor(htmls.join("")); popup.classList.remove("show"); fileInput.value = ""; });
+      });
       const actions = el("div", { className:"rte-popup-actions" }); actions.append(cancelBtn, okBtn);
       popup.append(el("label", {}, label + " \u2014 paste URL or upload file"), urlInput, el("div", { style:{ margin:"6px 0", display:"flex", gap:"6px" } }, [fileBtn]), actions);
       allPopups.push(popup); return popup;
     }
-    const imagePopup = buildMediaPopup("\u{1F5BC}\uFE0F Image", "image/*", src => insertIntoEditor('<img src="'+src+'" alt="image">'));
-    const videoPopup = buildMediaPopup("\u{1F3AC} Video", "video/*", src => insertIntoEditor('<video src="'+src+'" controls></video>'));
-    const audioPopup = buildMediaPopup("\u{1F50A} Audio", "audio/*", src => insertIntoEditor('<audio src="'+src+'" controls></audio>'));
+    const imagePopup = buildMediaPopup("\u{1F5BC}\uFE0F Image", "image/*", src => '<img src="'+src+'" alt="image">', true);
+    const videoPopup = buildMediaPopup("\u{1F3AC} Video", "video/*", src => '<video src="'+src+'" controls></video>');
+    const audioPopup = buildMediaPopup("\u{1F50A} Audio", "audio/*", src => '<audio src="'+src+'" controls></audio>');
 
     // ── Emoji popup ──
     const emojiPopup = el("div", { className:"rte-popup" }); emojiPopup.appendChild(el("label", {}, "\u{1F600} Insert Emoji"));
@@ -920,8 +932,21 @@
     const _dragWrap = el("div", { style: { position: "relative" } });
     let _dragEl = null, _dragTarget = null;
     const _dragHandle = document.createElement("div");
-    _dragHandle.className = "rte-drag-handle"; _dragHandle.draggable = true; _dragHandle.contentEditable = "false"; _dragHandle.innerHTML = "⋮⋮";
+    _dragHandle.className = "rte-drag-handle"; _dragHandle.draggable = true; _dragHandle.contentEditable = "false"; _dragHandle.innerHTML = "⋮⋮"; _dragHandle.title = "Drag to reorder";
     const _dropLine = document.createElement("div"); _dropLine.className = "rte-drop-line"; _dropLine.contentEditable = "false";
+    // The handle lives in the DOM permanently — we only toggle its visibility.
+    // (Removing/re-adding a draggable node between drags wedges the browser's drag
+    // machinery, which made reordering work only once per block.)
+    _dragHandle.style.pointerEvents = "none";
+    _dragWrap.appendChild(_dragHandle);
+    function _showHandle(node) {
+      _dragTarget = node;
+      const r = node.getBoundingClientRect(), cr = _dragWrap.getBoundingClientRect();
+      _dragHandle.style.top = (r.top - cr.top + _dragWrap.scrollTop) + "px";
+      _dragHandle.style.opacity = "0.65";
+      _dragHandle.style.pointerEvents = "auto";
+    }
+    function _hideHandle() { _dragHandle.style.opacity = "0"; _dragHandle.style.pointerEvents = "none"; _dragTarget = null; }
 
     // Show handle on hover over any direct child block
     content.addEventListener("mousemove", e => {
@@ -929,13 +954,16 @@
       let node = e.target;
       while (node && node !== content && node.parentNode !== content) node = node.parentNode;
       if (!node || node === content || node === _dragHandle || node === _dropLine) return;
-      if (node === _dragTarget) return; _dragTarget = node;
-      const r = node.getBoundingClientRect(), cr = _dragWrap.getBoundingClientRect();
-      _dragHandle.style.top = (r.top - cr.top + _dragWrap.scrollTop) + "px";
-      _dragHandle.style.opacity = "0.4";
-      if (!_dragHandle.parentNode) _dragWrap.appendChild(_dragHandle);
+      if (node !== _dragTarget) _showHandle(node);
     });
-    content.addEventListener("mouseleave", () => { if (!_dragEl) { _dragHandle.remove(); _dragTarget = null; } });
+    // Hide the handle only when the pointer leaves the whole drag area — NOT when
+    // it moves from the text onto the handle (the handle overlays content's left
+    // padding, so a content-level mouseleave fires exactly when you reach for it).
+    _dragWrap.addEventListener("mouseleave", e => {
+      if (_dragEl) return;
+      if (e.relatedTarget === _dragHandle) return;
+      _hideHandle();
+    });
 
     // Drag start from handle
     _dragHandle.addEventListener("dragstart", e => {
@@ -945,27 +973,34 @@
       e.dataTransfer.setData("text/plain", "");
     });
 
-    // Show drop indicator on dragover
+    // Show drop indicator on dragover — container-aware so blocks can be dropped
+    // INTO a column cell (.rte-pro-col), not just reordered among top-level blocks.
     _dragWrap.addEventListener("dragover", e => {
       if (!_dragEl) return; e.preventDefault(); e.dataTransfer.dropEffect = "move";
-      const kids = Array.from(content.children).filter(c => c !== _dropLine && c !== _dragHandle);
+      // Target a column cell under the pointer, else the main content area.
+      const at = document.elementFromPoint(e.clientX, e.clientY);
+      let container = at && at.closest ? at.closest(".rte-pro-col") : null;
+      if (!container || !content.contains(container) || _dragEl.contains(container)) container = content;
+      const kids = Array.from(container.children).filter(c =>
+        c !== _dropLine && c !== _dragHandle && c !== _dragEl && !c.classList.contains("rte-pro-col-handle"));
       let best = null, before = true, bestD = Infinity;
       kids.forEach(k => { const r = k.getBoundingClientRect(), mid = r.top + r.height/2, d = Math.abs(e.clientY - mid);
         if (d < bestD) { bestD = d; best = k; before = e.clientY < mid; } });
-      if (best) { if (before) content.insertBefore(_dropLine, best); else content.insertBefore(_dropLine, best.nextSibling); }
+      if (best) { if (before) container.insertBefore(_dropLine, best); else container.insertBefore(_dropLine, best.nextSibling); }
+      else container.appendChild(_dropLine); // empty column → drop at the end
     });
 
-    // Drop: move element to indicator position
+    // Drop: move element to the indicator position (inside whatever container it's in)
     _dragWrap.addEventListener("drop", e => {
       if (!_dragEl) return; e.preventDefault(); e.stopPropagation();
-      if (_dropLine.parentNode) content.insertBefore(_dragEl, _dropLine);
+      if (_dropLine.parentNode) _dropLine.parentNode.insertBefore(_dragEl, _dropLine);
       _dragDone();
     });
     _dragWrap.addEventListener("dragend", _dragDone);
     function _dragDone() {
       if (_dragEl) _dragEl.classList.remove("rte-dragging");
-      _dragEl = null; _dragTarget = null;
-      _dropLine.remove(); _dragHandle.remove(); updateStatus();
+      _dragEl = null;
+      _dropLine.remove(); _hideHandle(); updateStatus();
     }
 
     // ── Footnotes ──
@@ -976,6 +1011,24 @@
     function insertHero() {
       insertIntoEditor('<div class="rte-pro-hero" style="padding:80px 32px;text-align:center;background:#1e293b;color:#ffffff;margin:8px 0;border-radius:8px"><h1 style="margin:0 0 14px;font-size:2.6em;color:inherit">Your headline</h1><p style="margin:0;font-size:1.25em;opacity:.85;color:inherit">A supporting subtitle for your full-width hero</p></div><p><br></p>');
     }
+    // Toggle full-width (no side margin) on the selected image or current block.
+    // In-editor it fills the content width; on export cleanHTML() breaks it out to
+    // the full viewport (edge-to-edge, no margins).
+    function toggleFullWidth() {
+      let target = resizeImg;
+      if (!target) {
+        const sel = window.getSelection();
+        if (sel.rangeCount && content.contains(sel.anchorNode)) target = getTopLevelBlock(sel.anchorNode, content);
+      }
+      if (!target || target.nodeType !== 1) { showToast("Select an image or place the cursor in a block first"); return; }
+      const on = target.classList.toggle("rte-pro-fullwidth");
+      updateStatus();
+      showToast(on ? "Full-width on" : "Full-width off");
+    }
+    // No-margin: the whole editing surface runs edge-to-edge (drops the content's
+    // horizontal padding) so full-width content fills the editor, not just the export.
+    function setNoMargin(on) { wrap.classList.toggle("rte-pro-no-margin", !!on); }
+    function toggleNoMargin() { const on = wrap.classList.toggle("rte-pro-no-margin"); showToast(on ? "No-margin: on" : "No-margin: off"); return on; }
 
     function insertFootnote() {
       footnoteCounter++; const id = "fn-" + footnoteCounter;
@@ -1243,23 +1296,10 @@
     }
 
     // ── Block drag reordering ──
-    let dragBlock = null;
-    content.addEventListener("mouseover", e => {
-      const block = getTopLevelBlock(e.target, content);
-      if (!block || block.nodeType !== 1 || block.querySelector(".rte-pro-drag-handle")) return;
-      block.style.position = "relative";
-      const handle = el("div", { className:"rte-pro-drag-handle", draggable:"true" }, "\u2807");
-      handle.addEventListener("dragstart", ev => { dragBlock = block; block.classList.add("rte-pro-dragging"); ev.dataTransfer.effectAllowed = "move"; });
-      handle.addEventListener("dragend", () => { if (dragBlock) dragBlock.classList.remove("rte-pro-dragging"); dragBlock = null; });
-      block.appendChild(handle);
-    });
-    content.addEventListener("dragover", e => { if (dragBlock) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; } });
-    content.addEventListener("drop", e => {
-      if (!dragBlock) return; e.preventDefault();
-      const target = getTopLevelBlock(e.target, content);
-      if (target && target !== dragBlock) { const rect = target.getBoundingClientRect(); if (e.clientY < rect.top + rect.height/2) content.insertBefore(dragBlock, target); else content.insertBefore(dragBlock, target.nextSibling); }
-      dragBlock.classList.remove("rte-pro-dragging"); dragBlock = null; updateStatus();
-    });
+    // (Block drag reordering is handled by the \u2500\u2500 Drag & drop \u2500\u2500 system above:
+    // the \u22ee\u22ee handle + drop-line indicator. A second, conflicting implementation
+    // lived here and was removed \u2014 its handle sat at left:-24px and was clipped
+    // invisible by .rte-wrap{overflow:hidden}.)
 
     // Slash/mention keyboard nav
     content.addEventListener("keydown", e => {
@@ -1565,6 +1605,8 @@
         btn("\u{1F50D}","Find & Replace (Ctrl+F)",() => toggleFindBar()),
         btn("&lt;/&gt;","Source View (Ctrl+/)",() => toggleSourceView()),
         btn("\u24C2","Markdown Toggle",() => toggleMarkdown()),
+        btn("\u2194","Full-width block (no margin)",() => toggleFullWidth()),
+        btn("\u21E4\u21E5","Edge-to-edge editor (no margins)",() => toggleNoMargin()),
         btn("\u26F6","Fullscreen (F11)",() => toggleFullscreen())
       ],
       history: [
@@ -1748,7 +1790,7 @@
       clone.querySelectorAll(".rte-pro-ghost, .rte-pro-ghost-hint").forEach(h => h.remove());
       clone.querySelectorAll(".rte-pro-drag-handle, .rte-pro-col-handle").forEach(h => h.remove());
       clone.querySelectorAll("[class]").forEach(el => {
-        const keep = new Set(["rte-pro-cols","rte-pro-cols-2","rte-pro-cols-3","rte-pro-col","rte-pro-page-break","rte-pro-mention","rte-checklist","checked","rte-pro-hero"]);
+        const keep = new Set(["rte-pro-cols","rte-pro-cols-2","rte-pro-cols-3","rte-pro-col","rte-pro-page-break","rte-pro-mention","rte-checklist","checked","rte-pro-hero","rte-pro-fullwidth"]);
         const classes = Array.from(el.classList).filter(c => keep.has(c) || (!c.startsWith("rte-pro-") && c !== "rte-img-resizing" && c !== "active-block"));
         if (!classes.length) el.removeAttribute("class"); else el.className = classes.join(" ");
       });
@@ -1769,6 +1811,14 @@
         el.style.marginLeft = "calc(50% - 50vw)";
         el.style.marginRight = "calc(50% - 50vw)";
         el.style.borderRadius = "0";
+      });
+      clone.querySelectorAll(".rte-pro-fullwidth").forEach(el => {
+        // Full-width, no margin: break out edge-to-edge on the rendered page.
+        el.style.width = "100vw";
+        el.style.maxWidth = "none";
+        el.style.marginLeft = "calc(50% - 50vw)";
+        el.style.marginRight = "calc(50% - 50vw)";
+        el.style.display = "block";
       });
       clone.querySelectorAll(".rte-pro-mention").forEach(el => {
         el.style.cssText = "background:#ede9fe;color:#6366f1;padding:1px 4px;border-radius:3px;font-weight:500";
@@ -1955,9 +2005,9 @@
     });
 
     // ── Drag & Drop media ──
-    content.addEventListener("dragover", e => { if (!dragBlock) e.preventDefault(); });
+    content.addEventListener("dragover", e => { if (!_dragEl) e.preventDefault(); });
     content.addEventListener("drop", e => {
-      if (dragBlock) return; // handled by block drag
+      if (_dragEl) return; // block reordering is handled by the Drag & drop system
       e.preventDefault(); const files = e.dataTransfer.files; if (!files.length) return;
       Array.from(files).forEach(file => { const reader = new FileReader(); reader.onload = () => {
         if (file.type.startsWith("image/")) exec("insertHTML",'<img src="'+reader.result+'" alt="'+file.name+'">');
@@ -2198,6 +2248,9 @@
       insertFootnote: () => insertFootnote(),
       insertTOC: () => insertTOC(),
       insertHero: () => insertHero(),
+      toggleFullWidth: () => toggleFullWidth(),
+      toggleNoMargin: () => toggleNoMargin(),
+      setNoMargin: on => setNoMargin(on),
       saveVersion: label => saveVersion(label),
       getVersions: () => versions.slice(),
       restoreVersion: idx => { if (versions[idx]) { content.innerHTML = versions[idx].html; updateStatus(); } },
