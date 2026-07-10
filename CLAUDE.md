@@ -57,3 +57,7 @@ cd package-<x> && npm publish --access public
   needs collaborative editing.
 - Bump versions above `npm view <name> version`; the workflow no-ops on versions
   already published.
+- The **base** editor (`package/rte.js`) has a Markdown surface as of
+  `rte-rich-text-editor@1.0.31`: `getMarkdown()`, `setMarkdown(md)`, and an
+  `init({ markdown })` option (ported from Pro, no AI). Added for Volt so it can ship
+  the no-key base editor by default for markdown-on-disk content.
