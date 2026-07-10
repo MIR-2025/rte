@@ -572,6 +572,7 @@
       height: null,
       exportCSS: null,
       exportTemplate: null,
+      markdown: null,
     }, options);
 
     const wrap = el("div", { className: "rte-wrap" });
@@ -958,6 +959,43 @@
       return clone.innerHTML;
     }
 
+    // ── Markdown round-trip (ported from RTEPro, sans AI) ──
+    function htmlToMarkdown(html) {
+      let md = html;
+      md = md.replace(/<h1[^>]*>(.*?)<\/h1>/gi, "# $1\n"); md = md.replace(/<h2[^>]*>(.*?)<\/h2>/gi, "## $1\n");
+      md = md.replace(/<h3[^>]*>(.*?)<\/h3>/gi, "### $1\n"); md = md.replace(/<h4[^>]*>(.*?)<\/h4>/gi, "#### $1\n");
+      md = md.replace(/<strong[^>]*>(.*?)<\/strong>/gi, "**$1**"); md = md.replace(/<b[^>]*>(.*?)<\/b>/gi, "**$1**");
+      md = md.replace(/<em[^>]*>(.*?)<\/em>/gi, "*$1*"); md = md.replace(/<i[^>]*>(.*?)<\/i>/gi, "*$1*");
+      md = md.replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, "[$2]($1)");
+      md = md.replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*\/?>/gi, "![$2]($1)");
+      md = md.replace(/<img[^>]*src="([^"]*)"[^>]*\/?>/gi, "![]($1)");
+      md = md.replace(/<li[^>]*>(.*?)<\/li>/gi, "- $1\n"); md = md.replace(/<\/?[ou]l[^>]*>/gi, "\n");
+      md = md.replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gi, "> $1\n");
+      md = md.replace(/<pre[^>]*><code[^>]*>(.*?)<\/code><\/pre>/gi, "```\n$1\n```\n");
+      md = md.replace(/<pre[^>]*>(.*?)<\/pre>/gi, "```\n$1\n```\n");
+      md = md.replace(/<code[^>]*>(.*?)<\/code>/gi, "`$1`"); md = md.replace(/<hr[^>]*\/?>/gi, "\n---\n");
+      md = md.replace(/<br[^>]*\/?>/gi, "\n"); md = md.replace(/<p[^>]*>(.*?)<\/p>/gi, "$1\n\n");
+      md = md.replace(/<[^>]+>/g, ""); md = md.replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&nbsp;/g," ");
+      return md.replace(/\n{3,}/g, "\n\n").trim();
+    }
+    function markdownToHtml(md) {
+      let html = md;
+      html = html.replace(/```([^`]*?)```/gs, "<pre>$1</pre>");
+      html = html.replace(/^#### (.+)$/gm, "<h4>$1</h4>"); html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+      html = html.replace(/^## (.+)$/gm, "<h2>$1</h2>"); html = html.replace(/^# (.+)$/gm, "<h1>$1</h1>");
+      html = html.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>");
+      html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>"); html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+      html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+      html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+      html = html.replace(/^---$/gm, "<hr>"); html = html.replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>");
+      html = html.replace(/^- (.+)$/gm, "<li>$1</li>"); html = html.replace(/(<li>.*<\/li>\n?)+/g, m => "<ul>"+m+"</ul>");
+      html = html.replace(/^(?!<[a-z]).+$/gm, m => m.trim() ? "<p>"+m+"</p>" : "");
+      return html.replace(/<p>\s*<\/p>/g, "");
+    }
+    function getMarkdown() { return htmlToMarkdown(cleanHTML()); }
+    function setMarkdown(md) { content.innerHTML = markdownToHtml(md || ""); updateStatus(); }
+
     // ── Full HTML document wrapper for export/email ────────
     function getFullHTML() {
       if (options.exportTemplate) {
@@ -1093,6 +1131,9 @@
     _dragWrap.append(content);
     wrap.append(_dragWrap, exportBar, statusbar, toast);
     target.appendChild(wrap);
+
+    // Seed initial content from markdown when provided (Volt stores markdown on disk)
+    if (typeof options.markdown === "string" && options.markdown.trim()) content.innerHTML = markdownToHtml(options.markdown);
 
     // ── Status updates ─────────────────────────────────────
     function updateStatus() {
@@ -1570,6 +1611,10 @@
       getHTML: () => cleanHTML(),
       /** Set HTML content */
       setHTML: (html) => { content.innerHTML = html; updateStatus(); },
+      /** Get content as Markdown */
+      getMarkdown: () => getMarkdown(),
+      /** Set content from Markdown */
+      setMarkdown: (md) => setMarkdown(md),
       /** Get plain text */
       getText: () => content.innerText,
       /** Get a standalone HTML document (for saving/emailing) */

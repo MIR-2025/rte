@@ -5,6 +5,8 @@ export interface RTEOptions {
   placeholder?: string;
   /** Minimum height of the editor area (CSS value, e.g. "400px") */
   height?: string;
+  /** Seed the editor's initial content from a Markdown string */
+  markdown?: string;
 }
 
 export interface RTEChangeData {
@@ -27,6 +29,10 @@ export interface RTEInstance {
   getHTML(): string;
   /** Set the editor's HTML content */
   setHTML(html: string): void;
+  /** Serialize the current document to Markdown */
+  getMarkdown(): string;
+  /** Replace the editor's content from a Markdown string */
+  setMarkdown(md: string): void;
   /** Get plain text content */
   getText(): string;
   /** Get a complete standalone HTML document with embedded styles */
