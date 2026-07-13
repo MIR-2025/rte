@@ -182,6 +182,10 @@
 .rte-img-resize-handle.ne { top: -5px; right: -5px; cursor: ne-resize; }
 .rte-img-resize-handle.sw { bottom: -5px; left: -5px; cursor: sw-resize; }
 .rte-img-resize-handle.se { bottom: -5px; right: -5px; cursor: se-resize; }
+.rte-img-align-bar { position: absolute; z-index: 12; display: flex; gap: 2px; padding: 3px; background: #1e293b; border-radius: 7px; box-shadow: 0 3px 12px rgba(0,0,0,.28); pointer-events: auto; }
+.rte-img-align-bar button { width: 27px; height: 24px; border: none; background: transparent; color: #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 13px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+.rte-img-align-bar button:hover { background: #334155; color: #fff; }
+.rte-img-align-bar button.active { background: #3b82f6; color: #fff; }
 .rte-img-resizing { outline: 2px solid #3b82f6; outline-offset: 1px; }
 /* ── RTEPro-specific ── */
 .rte-pro-fullscreen { position: fixed; inset: 0; z-index: 9999; border-radius: 0; max-width: none; }
@@ -2005,16 +2009,27 @@ img.rte-pro-fullwidth { height: auto; }
     });
 
     // ── Drag & Drop media ──
-    content.addEventListener("dragover", e => { if (!_dragEl) e.preventDefault(); });
+    // Only intercept EXTERNAL file drags (from the desktop). Internal drags — a
+    // block via the ⋮⋮ handle, or an image dragged within the text — are left to
+    // their own systems / the browser's native node-move, so you can drag an
+    // image anywhere in the text and drop it inline where the caret lands.
+    const isFileDrag = e => !!(e.dataTransfer && Array.from(e.dataTransfer.types || []).includes("Files"));
+    content.addEventListener("dragover", e => { if (_dragEl) return; if (isFileDrag(e)) e.preventDefault(); });
     content.addEventListener("drop", e => {
       if (_dragEl) return; // block reordering is handled by the Drag & drop system
-      e.preventDefault(); const files = e.dataTransfer.files; if (!files.length) return;
+      const files = e.dataTransfer && e.dataTransfer.files;
+      if (!files || !files.length) return; // internal move (e.g. image) — let the browser place it
+      e.preventDefault();
       Array.from(files).forEach(file => { const reader = new FileReader(); reader.onload = () => {
         if (file.type.startsWith("image/")) exec("insertHTML",'<img src="'+reader.result+'" alt="'+file.name+'">');
         else if (file.type.startsWith("video/")) exec("insertHTML",'<video src="'+reader.result+'" controls></video>');
         else if (file.type.startsWith("audio/")) exec("insertHTML",'<audio src="'+reader.result+'" controls></audio>');
       }; reader.readAsDataURL(file); });
+      setTimeout(() => { if (resizeImg) positionOverlay(); }, 0);
     });
+    // Dragging a selected image would leave a stale overlay behind — drop the
+    // selection when a native image drag begins (re-click to align after moving).
+    content.addEventListener("dragstart", e => { if (e.target.tagName === "IMG") clearImageResize(); });
 
     // ── Paste image ──
     content.addEventListener("paste", e => {
@@ -2023,14 +2038,51 @@ img.rte-pro-fullwidth { height: auto; }
     });
 
     // ── Image Resize ──
-    let resizeOverlay = null, resizeImg = null, resizeDragging = false, resizeStartX = 0, resizeStartWidth = 0;
-    function clearImageResize() { if (resizeOverlay) { resizeOverlay.remove(); resizeOverlay = null; } if (resizeImg) { resizeImg.classList.remove("rte-img-resizing"); resizeImg = null; } resizeDragging = false; }
-    function positionOverlay() { if (!resizeOverlay || !resizeImg) return; const ir = resizeImg.getBoundingClientRect(), wr = wrap.getBoundingClientRect(); resizeOverlay.style.top=(ir.top-wr.top)+"px"; resizeOverlay.style.left=(ir.left-wr.left)+"px"; resizeOverlay.style.width=ir.width+"px"; resizeOverlay.style.height=ir.height+"px"; }
+    let resizeOverlay = null, resizeImg = null, resizeDragging = false, resizeStartX = 0, resizeStartWidth = 0, alignBar = null;
+    function clearImageResize() { if (resizeOverlay) { resizeOverlay.remove(); resizeOverlay = null; } if (alignBar) { alignBar.remove(); alignBar = null; } if (resizeImg) { resizeImg.classList.remove("rte-img-resizing"); resizeImg = null; } resizeDragging = false; }
+    function positionOverlay() {
+      if (!resizeOverlay || !resizeImg) return;
+      const ir = resizeImg.getBoundingClientRect(), wr = wrap.getBoundingClientRect();
+      resizeOverlay.style.top=(ir.top-wr.top)+"px"; resizeOverlay.style.left=(ir.left-wr.left)+"px"; resizeOverlay.style.width=ir.width+"px"; resizeOverlay.style.height=ir.height+"px";
+      if (alignBar) { alignBar.style.top = (ir.top - wr.top - 34) + "px"; alignBar.style.left = (ir.left - wr.left) + "px"; }
+    }
+    // Which alignment the image currently has (for the active button state).
+    function imgAlignMode(img) {
+      const f = img.style.float;
+      if (f === "left") return "left";
+      if (f === "right") return "right";
+      if (img.style.marginLeft === "auto" && img.style.marginRight === "auto") return "center";
+      return "inline";
+    }
+    // Apply float/alignment so text wraps around the image (exported via inline styles).
+    function setImgAlign(mode) {
+      const img = resizeImg; if (!img) return;
+      img.style.float = ""; img.style.margin = ""; img.style.display = "";
+      if (mode === "left") { img.style.float = "left"; img.style.margin = "4px 18px 10px 0"; }
+      else if (mode === "right") { img.style.float = "right"; img.style.margin = "4px 0 10px 18px"; }
+      else if (mode === "center") { img.style.float = "none"; img.style.display = "block"; img.style.margin = "10px auto"; }
+      else { img.style.float = "none"; img.style.display = "block"; img.style.margin = "8px 0"; }
+      if (alignBar) alignBar.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+      updateStatus(); positionOverlay();
+    }
+    function buildAlignBar() {
+      const bar = el("div", { className: "rte-img-align-bar" });
+      [["left","◧","Float left (text wraps right)"],["center","▬","Center (no wrap)"],["right","◨","Float right (text wraps left)"],["inline","⊡","Inline / reset"]].forEach(([mode, icon, tip]) => {
+        const b = el("button", { title: tip, onClick: () => setImgAlign(mode) }, icon);
+        b.dataset.mode = mode;
+        b.addEventListener("mousedown", e => e.preventDefault()); // keep image selected
+        bar.appendChild(b);
+      });
+      return bar;
+    }
     function selectImageForResize(img) {
       clearImageResize(); resizeImg = img; img.classList.add("rte-img-resizing");
       resizeOverlay = document.createElement("div"); resizeOverlay.className = "rte-img-resize-overlay";
       ["nw","ne","sw","se"].forEach(pos => { const h = document.createElement("div"); h.className = "rte-img-resize-handle "+pos; h.addEventListener("mousedown", e => { e.preventDefault(); e.stopPropagation(); resizeDragging = true; resizeStartX = e.clientX; resizeStartWidth = resizeImg.getBoundingClientRect().width; }); resizeOverlay.appendChild(h); });
-      wrap.appendChild(resizeOverlay); positionOverlay();
+      alignBar = buildAlignBar();
+      const cur = imgAlignMode(img);
+      alignBar.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.mode === cur));
+      wrap.appendChild(resizeOverlay); wrap.appendChild(alignBar); positionOverlay();
     }
     content.addEventListener("click", e => {
       if (e.target.tagName === "IMG") { e.preventDefault(); selectImageForResize(e.target); }
