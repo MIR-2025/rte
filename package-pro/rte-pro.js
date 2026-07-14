@@ -466,6 +466,39 @@ img.rte-pro-fullwidth { height: auto; }
   function saveSelection() { const sel = window.getSelection(); if (sel.rangeCount > 0) return sel.getRangeAt(0).cloneRange(); return null; }
   function restoreSelection(range) { if (!range) return; try { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } catch(e) {} }
   function debounce(fn, ms) { let t; return function() { const a = arguments, c = this; clearTimeout(t); t = setTimeout(() => fn.apply(c, a), ms); }; }
+  // ── HTML sanitizer (XSS defense for every untrusted HTML entry point) ──
+  // Blocks javascript:/vbscript:/data:text URLs; data:image/* stays allowed.
+  function isDangerousUrl(url) {
+    const s = String(url == null ? "" : url).replace(/[\x00-\x20]+/g, "").toLowerCase();
+    if (/^(javascript|vbscript):/.test(s)) return true;
+    if (/^data:/.test(s) && !/^data:image\//.test(s)) return true;
+    return false;
+  }
+  const SANITIZE_ALLOWED = new Set("a b blockquote br caption code col colgroup div em figcaption figure h1 h2 h3 h4 h5 h6 hr i img li mark ol p pre s small span strike strong sub sup table tbody td tfoot th thead tr u ul video audio source".split(" "));
+  const SANITIZE_DANGEROUS = new Set("script style iframe object embed form input button textarea select option meta link base noscript template svg math title head html body frame frameset applet param".split(" "));
+  const SANITIZE_URL_ATTRS = new Set(["href", "src", "xlink:href", "action", "formaction", "background", "poster"]);
+  // Allowlist sanitizer: dangerous tags dropped whole, unknown tags unwrapped
+  // (keep their text), event handlers + unsafe URLs/styles stripped from the rest.
+  function sanitizeHTML(html) {
+    const tpl = document.createElement("template");
+    tpl.innerHTML = String(html == null ? "" : html);
+    const els = tpl.content.querySelectorAll("*");
+    for (let i = 0; i < els.length; i++) {
+      const el = els[i];
+      if (!tpl.content.contains(el)) continue; // already removed with an ancestor
+      const tag = el.tagName.toLowerCase();
+      if (SANITIZE_DANGEROUS.has(tag)) { el.remove(); continue; }
+      if (!SANITIZE_ALLOWED.has(tag)) { const p = el.parentNode; while (el.firstChild) p.insertBefore(el.firstChild, el); el.remove(); continue; }
+      const attrs = Array.prototype.slice.call(el.attributes);
+      for (let j = 0; j < attrs.length; j++) {
+        const name = attrs[j].name.toLowerCase(), val = attrs[j].value;
+        if (name.indexOf("on") === 0 || name === "srcdoc") el.removeAttribute(attrs[j].name);
+        else if (SANITIZE_URL_ATTRS.has(name) && isDangerousUrl(val)) el.removeAttribute(attrs[j].name);
+        else if (name === "style" && /(javascript|vbscript|expression)\s*:|url\s*\(\s*['"]?\s*(javascript|vbscript|data:text)/i.test(val)) el.removeAttribute(attrs[j].name);
+      }
+    }
+    return tpl.innerHTML;
+  }
   const BLOCK_TAGS = ["P","H1","H2","H3","H4","H5","H6","DIV","BLOCKQUOTE","PRE","LI","TABLE","UL","OL"];
   function getContainingBlock(node, container) {
     let cur = node;
@@ -504,7 +537,11 @@ img.rte-pro-fullwidth { height: auto; }
       watermark: null, stickyToolbar: true, focusMode: false, maxVersions: 20,
       aiAutocomplete: false,
       noMargin: false,
+      sanitize: true,
     }, options);
+    // Route every untrusted-HTML entry point through this. Secure by default;
+    // set `sanitize: false` only if you sanitize upstream yourself.
+    function safeHTML(html) { return options.sanitize === false ? String(html == null ? "" : html) : sanitizeHTML(html); }
 
     const wrap = el("div", { className: "rte-wrap" + (options.stickyToolbar ? " rte-pro-sticky" : "") + (options.noMargin ? " rte-pro-no-margin" : "") });
     const toolbar = el("div", { className: "rte-toolbar" });
@@ -690,7 +727,7 @@ img.rte-pro-fullwidth { height: auto; }
 
     // ── Link popup wiring ──
     linkPopup.querySelector(".rte-link-cancel").addEventListener("click", () => linkPopup.classList.remove("show"));
-    linkPopup.querySelector(".rte-link-ok").addEventListener("click", () => { const url = linkPopup.querySelector(".rte-link-url").value; const text = linkPopup.querySelector(".rte-link-text").value.trim(); if (url) { restoreSelection(savedRange); if (text) { exec("insertHTML", '<a href="' + url.replace(/"/g, '&quot;') + '">' + text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</a>'); } else { exec("createLink", url); } linkPopup.classList.remove("show"); linkPopup.querySelector(".rte-link-url").value = ""; linkPopup.querySelector(".rte-link-text").value = ""; } });
+    linkPopup.querySelector(".rte-link-ok").addEventListener("click", () => { const url = linkPopup.querySelector(".rte-link-url").value; const text = linkPopup.querySelector(".rte-link-text").value.trim(); if (url) { if (isDangerousUrl(url)) { showToast("⛔ Blocked unsafe link"); return; } restoreSelection(savedRange); if (text) { exec("insertHTML", '<a href="' + url.replace(/"/g, '&quot;') + '">' + text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</a>'); } else { exec("createLink", url); } linkPopup.classList.remove("show"); linkPopup.querySelector(".rte-link-url").value = ""; linkPopup.querySelector(".rte-link-text").value = ""; } });
 
     // ── Format buttons ──
     const boldBtn = fmtBtn("B", "Bold (Ctrl+B)", () => exec("bold"), "fmt-bold"); formatButtons.bold = boldBtn;
@@ -794,7 +831,7 @@ img.rte-pro-fullwidth { height: auto; }
     function toggleSourceView() {
       isSourceView = !isSourceView;
       if (isSourceView) { sourceArea = el("textarea", { className:"rte-pro-source" }); sourceArea.value = formatHTML(content.innerHTML); content.style.display = "none"; content.parentNode.insertBefore(sourceArea, content); }
-      else { if (sourceArea) { content.innerHTML = sourceArea.value; sourceArea.remove(); sourceArea = null; } content.style.display = ""; updateStatus(); }
+      else { if (sourceArea) { content.innerHTML = safeHTML(sourceArea.value); sourceArea.remove(); sourceArea = null; } content.style.display = ""; updateStatus(); }
       showToast(isSourceView ? "Source view" : "Visual view");
     }
 
@@ -854,7 +891,7 @@ img.rte-pro-fullwidth { height: auto; }
     function toggleMarkdown() {
       isMarkdown = !isMarkdown;
       if (isMarkdown) { content.innerText = htmlToMarkdown(content.innerHTML); content.setAttribute("data-md-mode","true"); }
-      else { content.innerHTML = markdownToHtml(content.innerText); content.removeAttribute("data-md-mode"); }
+      else { content.innerHTML = safeHTML(markdownToHtml(content.innerText)); content.removeAttribute("data-md-mode"); }
       showToast(isMarkdown ? "Markdown mode" : "Visual mode");
     }
     function htmlToMarkdown(html) {
@@ -1664,6 +1701,7 @@ img.rte-pro-fullwidth { height: auto; }
     bubbleLinkBtn.style.fontFamily = "inherit";
     bubbleLinkBtn.addEventListener("click", () => {
       const url = prompt("Enter URL:");
+      if (url && isDangerousUrl(url)) { showToast("⛔ Blocked unsafe link"); return; }
       if (url) exec("createLink", url);
     });
     const bubbleHighBtn = document.createElement("button");
@@ -2033,8 +2071,14 @@ img.rte-pro-fullwidth { height: auto; }
 
     // ── Paste image ──
     content.addEventListener("paste", e => {
-      const items = (e.clipboardData || {}).items; if (!items) return;
-      for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) { e.preventDefault(); const file = items[i].getAsFile(); const reader = new FileReader(); reader.onload = () => { document.execCommand("insertHTML", false, '<img src="'+reader.result+'" alt="pasted image">'); updateStatus(); }; reader.readAsDataURL(file); break; } }
+      const cd = e.clipboardData; if (!cd) return;
+      const items = cd.items || [];
+      for (let i = 0; i < items.length; i++) { if (items[i].type.startsWith("image/")) { e.preventDefault(); const file = items[i].getAsFile(); const reader = new FileReader(); reader.onload = () => { document.execCommand("insertHTML", false, '<img src="'+reader.result+'" alt="pasted image">'); updateStatus(); }; reader.readAsDataURL(file); return; } }
+      // Sanitize pasted HTML — the browser would otherwise insert it raw (XSS).
+      if (options.sanitize !== false) {
+        const html = cd.getData && cd.getData("text/html");
+        if (html) { e.preventDefault(); document.execCommand("insertHTML", false, sanitizeHTML(html)); updateStatus(); }
+      }
     });
 
     // ── Image Resize ──
@@ -2278,12 +2322,12 @@ img.rte-pro-fullwidth { height: auto; }
     // ── Public API ──
     const api = {
       getHTML: () => cleanHTML(),
-      setHTML: html => { content.innerHTML = html; updateStatus(); },
+      setHTML: html => { content.innerHTML = safeHTML(html); updateStatus(); },
       getText: () => cleanText(),
       getFullHTML: getFullHTML,
       getJSON: () => ({ html:cleanHTML(), text:cleanText(), wordCount:(cleanText().trim()?cleanText().trim().split(/\s+/).length:0), charCount:cleanText().length, createdAt:new Date().toISOString() }),
       getMarkdown: () => htmlToMarkdown(content.innerHTML),
-      setMarkdown: md => { content.innerHTML = markdownToHtml(md); updateStatus(); },
+      setMarkdown: md => { content.innerHTML = safeHTML(markdownToHtml(md)); updateStatus(); },
       saveHTML: filename => { const b=new Blob([getFullHTML()],{type:"text/html"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||getFilename(".html"); a.click(); URL.revokeObjectURL(a.href); },
       saveText: filename => { const b=new Blob([cleanText()],{type:"text/plain"}); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename||getFilename(".txt"); a.click(); URL.revokeObjectURL(a.href); },
       copyHTML: () => { const h=cleanHTML(),t=cleanText(); if(navigator.clipboard&&navigator.clipboard.write) return navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([t],{type:"text/plain"})})]); return navigator.clipboard.writeText(h); },

@@ -47,7 +47,7 @@ app.post('/donate/webhook', express.raw({ type: 'application/json' }), (req, res
 
 // Parse form bodies
 app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+app.use(express.json({ limit: '256kb' }));
 
 // SMTP transporter
 const transporter = createTransport({
@@ -77,10 +77,51 @@ app.use((req, res, next) => {
 app.get('/api/ai', (req, res) => res.status(404).render('404', { page: '404' }));
 
 // AI proxy endpoint (keeps API key server-side, multi-provider)
+// ── /api/ai abuse gate ──────────────────────────────────────────────
+// The proxy spends our API keys, so it is NOT an open relay:
+//  1) same-origin only (blocks other sites / naive scripts calling it),
+//  2) per-IP rate limit (blocks floods),
+//  3) output-token cap (bounds the cost of any single request).
+const AI_WINDOW_MS = 60 * 1000;
+const AI_MAX_PER_WINDOW = 30;
+const AI_MAX_TOKENS = 4096;
+const aiHits = new Map();
+function aiSameOrigin(req) {
+  const allow = process.env.AI_ALLOWED_ORIGIN; // optional explicit override
+  const origin = req.get('origin');
+  if (!origin) return false; // browsers send Origin on same-origin POST; require it
+  try {
+    const u = new URL(origin);
+    if (allow) return origin === allow;
+    return u.host === req.get('host');
+  } catch { return false; }
+}
+function aiRateLimited(ip) {
+  const now = Date.now();
+  const arr = (aiHits.get(ip) || []).filter(t => now - t < AI_WINDOW_MS);
+  arr.push(now);
+  aiHits.set(ip, arr);
+  if (aiHits.size > 5000) { for (const [k, v] of aiHits) if (!v.some(t => now - t < AI_WINDOW_MS)) aiHits.delete(k); }
+  return arr.length > AI_MAX_PER_WINDOW;
+}
+function capTokens(body) {
+  if (typeof body.max_tokens === 'number') body.max_tokens = Math.min(body.max_tokens, AI_MAX_TOKENS);
+  if (body.generationConfig && typeof body.generationConfig.maxOutputTokens === 'number') {
+    body.generationConfig.maxOutputTokens = Math.min(body.generationConfig.maxOutputTokens, AI_MAX_TOKENS);
+  }
+}
+app.use('/api/ai', (req, res, next) => {
+  if (req.method !== 'POST') return next();
+  if (!aiSameOrigin(req)) return res.status(403).json({ error: 'Forbidden' });
+  if (aiRateLimited(req.ip)) return res.status(429).json({ error: 'Rate limit exceeded' });
+  next();
+});
+
 app.post('/api/ai', async (req, res) => {
   const body = { ...req.body };
   const provider = body._provider || 'anthropic';
   delete body._provider;
+  capTokens(body);
   const isStream = !!body.stream;
 
   let url, headers;
