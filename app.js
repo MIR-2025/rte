@@ -78,14 +78,22 @@ app.get('/api/ai', (req, res) => res.status(404).render('404', { page: '404' }))
 
 // AI proxy endpoint (keeps API key server-side, multi-provider)
 // ── /api/ai abuse gate ──────────────────────────────────────────────
-// The proxy spends our API keys, so it is NOT an open relay:
+// This proxy is an anonymous public demo that spends OUR API key, so it is
+// bounded on every axis:
 //  1) same-origin only (blocks other sites / naive scripts calling it),
 //  2) per-IP rate limit (blocks floods),
-//  3) output-token cap (bounds the cost of any single request).
+//  3) per-IP + GLOBAL daily caps (bounds total spend no matter how many IPs),
+//  4) output-token cap (bounds the cost of any single request).
+// The daily caps are the real cost ceiling — same-origin/per-IP limits alone
+// don't stop viral traffic or an IP-rotating abuser from running up the bill.
 const AI_WINDOW_MS = 60 * 1000;
-const AI_MAX_PER_WINDOW = 30;
-const AI_MAX_TOKENS = 4096;
+const AI_MAX_PER_WINDOW = 30;                                           // per-IP per-minute
+const AI_MAX_TOKENS = 4096;                                            // per request
+const AI_DAY_IP_MAX = Number(process.env.AI_DAILY_IP_MAX || 30);       // per-IP per-day
+const AI_DAY_GLOBAL_MAX = Number(process.env.AI_DAILY_GLOBAL_MAX || 300); // all IPs per-day
 const aiHits = new Map();
+let aiDay = '', aiDayGlobal = 0;
+const aiDayByIp = new Map();
 function aiSameOrigin(req) {
   const allow = process.env.AI_ALLOWED_ORIGIN; // optional explicit override
   const origin = req.get('origin');
@@ -104,6 +112,17 @@ function aiRateLimited(ip) {
   if (aiHits.size > 5000) { for (const [k, v] of aiHits) if (!v.some(t => now - t < AI_WINDOW_MS)) aiHits.delete(k); }
   return arr.length > AI_MAX_PER_WINDOW;
 }
+// Returns 'ok' | 'ip' | 'global'. Counters reset at UTC midnight.
+function aiDailyStatus(ip) {
+  const day = new Date().toISOString().slice(0, 10);
+  if (day !== aiDay) { aiDay = day; aiDayGlobal = 0; aiDayByIp.clear(); }
+  aiDayGlobal++;
+  const ipCount = (aiDayByIp.get(ip) || 0) + 1;
+  aiDayByIp.set(ip, ipCount);
+  if (aiDayGlobal > AI_DAY_GLOBAL_MAX) return 'global';
+  if (ipCount > AI_DAY_IP_MAX) return 'ip';
+  return 'ok';
+}
 function capTokens(body) {
   if (typeof body.max_tokens === 'number') body.max_tokens = Math.min(body.max_tokens, AI_MAX_TOKENS);
   if (body.generationConfig && typeof body.generationConfig.maxOutputTokens === 'number') {
@@ -113,7 +132,10 @@ function capTokens(body) {
 app.use('/api/ai', (req, res, next) => {
   if (req.method !== 'POST') return next();
   if (!aiSameOrigin(req)) return res.status(403).json({ error: 'Forbidden' });
-  if (aiRateLimited(req.ip)) return res.status(429).json({ error: 'Rate limit exceeded' });
+  if (aiRateLimited(req.ip)) return res.status(429).json({ error: 'Rate limit exceeded — slow down.' });
+  const day = aiDailyStatus(req.ip);
+  if (day === 'global') return res.status(429).json({ error: "The live demo's AI budget for today is used up. Try again tomorrow, or plug in your own API key." });
+  if (day === 'ip') return res.status(429).json({ error: "You've hit today's demo AI limit. Try again tomorrow, or use your own API key." });
   next();
 });
 
