@@ -64,6 +64,40 @@ const editor = RTEPro.init('#editor', {
 
 Your proxy endpoint receives the JSON body from the editor with a `_provider` field indicating which provider to route to. Set the corresponding API key server-side (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY`).
 
+### Secure your proxy — it spends your API key
+
+`aiProxy` keeps the key off the client, but the **proxy endpoint itself is now the
+thing that spends your money**. Treat it as protected infrastructure, not an open
+relay — otherwise anyone who finds the URL (or any other site) can run up your bill.
+At minimum, gate it with:
+
+- **Same-origin only.** Require the `Origin` header to match your host and reject the rest (blocks other sites and naive scripts). If it's a logged-in app, require auth instead/as well.
+- **Rate limit per IP.** A simple per-IP/minute cap stops floods.
+- **A global daily budget cap.** Per-IP limits don't bound *total* spend — viral traffic or an IP-rotating abuser can still add up. A hard daily ceiling (per-IP **and** global) across all callers is the real cost bound; return a friendly "limit reached" when hit.
+- **Cap output tokens.** Clamp `max_tokens` (and Gemini's `maxOutputTokens`) server-side so a single request can't request a huge, expensive completion. Don't forward the client's raw `model`/token counts unchecked.
+- **Cap request body size** (e.g. 256 KB) so the input can't be abused either.
+
+Example gate (Express):
+
+```js
+const AI_MAX_TOKENS = 4096, AI_DAY_GLOBAL_MAX = 300, AI_DAY_IP_MAX = 30;
+let day = '', dayGlobal = 0; const dayByIp = new Map(), hits = new Map();
+app.use('/api/ai', express.json({ limit: '256kb' }), (req, res, next) => {
+  const origin = req.get('origin');
+  try { if (!origin || new URL(origin).host !== req.get('host')) return res.status(403).json({ error: 'Forbidden' }); }
+  catch { return res.status(403).json({ error: 'Forbidden' }); }
+  const now = Date.now(); const recent = (hits.get(req.ip) || []).filter(t => now - t < 60000);
+  recent.push(now); hits.set(req.ip, recent);
+  if (recent.length > 30) return res.status(429).json({ error: 'Slow down' });
+  const d = new Date().toISOString().slice(0, 10);
+  if (d !== day) { day = d; dayGlobal = 0; dayByIp.clear(); }
+  dayGlobal++; const ipc = (dayByIp.get(req.ip) || 0) + 1; dayByIp.set(req.ip, ipc);
+  if (dayGlobal > AI_DAY_GLOBAL_MAX || ipc > AI_DAY_IP_MAX) return res.status(429).json({ error: 'Daily AI limit reached' });
+  if (typeof req.body.max_tokens === 'number') req.body.max_tokens = Math.min(req.body.max_tokens, AI_MAX_TOKENS);
+  next();
+});
+```
+
 **Direct API key (only for local dev / internal tools)**
 
 ```js
