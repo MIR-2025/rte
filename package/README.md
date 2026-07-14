@@ -1,5 +1,9 @@
 # RTE — Rich Text Editor
 
+[![npm version](https://img.shields.io/npm/v/rte-rich-text-editor.svg)](https://www.npmjs.com/package/rte-rich-text-editor) [![downloads](https://img.shields.io/npm/dm/rte-rich-text-editor.svg)](https://www.npmjs.com/package/rte-rich-text-editor) ![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen) ![license MIT](https://img.shields.io/npm/l/rte-rich-text-editor.svg)
+
+**▶ [Try it live](https://rte.whitneys.co)**
+
 A powerful, standalone rich text editor you can embed into any website. **One script tag. Zero dependencies.**
 
 ![RTE Rich Text Editor](https://rte.whitneys.co/rte.png)

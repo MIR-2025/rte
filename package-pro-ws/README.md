@@ -1,5 +1,9 @@
 # RTEPro + WebSocket Bundle
 
+[![npm version](https://img.shields.io/npm/v/rte-rich-text-editor-pro-ws.svg)](https://www.npmjs.com/package/rte-rich-text-editor-pro-ws) [![downloads](https://img.shields.io/npm/dm/rte-rich-text-editor-pro-ws.svg)](https://www.npmjs.com/package/rte-rich-text-editor-pro-ws) ![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen) ![license MIT](https://img.shields.io/npm/l/rte-rich-text-editor-pro-ws.svg)
+
+**▶ [Try it live](https://rte.whitneys.co)**
+
 RTEPro full-featured WYSIWYG editor + WebSocket connector in a single file. AI integration, real-time collaboration, auto-save. Zero dependencies.
 
 ![RTEPro Editor](https://raw.githubusercontent.com/MIR-2025/rte/main/package-pro/rte-pro-1.png)

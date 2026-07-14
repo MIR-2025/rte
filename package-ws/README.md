@@ -1,5 +1,9 @@
 # RTE-WS — WebSocket Connector for RTE Rich Text Editor
 
+[![npm version](https://img.shields.io/npm/v/rte-rich-text-editor-ws.svg)](https://www.npmjs.com/package/rte-rich-text-editor-ws) [![downloads](https://img.shields.io/npm/dm/rte-rich-text-editor-ws.svg)](https://www.npmjs.com/package/rte-rich-text-editor-ws) ![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen) ![license MIT](https://img.shields.io/npm/l/rte-rich-text-editor-ws.svg)
+
+**[Docs & demo](https://rte.whitneys.co/websocket)**
+
 Add real-time auto-save and multi-user collaboration to [RTE](https://www.npmjs.com/package/rte-rich-text-editor) with a single script tag. **Zero dependencies.**
 
 ![RTE Rich Text Editor](https://rte.whitneys.co/rte.png)

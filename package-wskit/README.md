@@ -1,5 +1,9 @@
 # WSKit — Universal WebSocket Client
 
+[![npm version](https://img.shields.io/npm/v/wskit-client.svg)](https://www.npmjs.com/package/wskit-client) [![downloads](https://img.shields.io/npm/dm/wskit-client.svg)](https://www.npmjs.com/package/wskit-client) ![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen) ![license MIT](https://img.shields.io/npm/l/wskit-client.svg)
+
+**[Docs](https://rte.whitneys.co/wskit)**
+
 A standalone, universal WebSocket client that works with any backend. **One script tag. Zero dependencies.**
 
 ## Install

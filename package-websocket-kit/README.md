@@ -1,5 +1,9 @@
 # websocket-toolkit — Universal WebSocket Client
 
+[![npm version](https://img.shields.io/npm/v/websocket-toolkit.svg)](https://www.npmjs.com/package/websocket-toolkit) [![downloads](https://img.shields.io/npm/dm/websocket-toolkit.svg)](https://www.npmjs.com/package/websocket-toolkit) ![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen) ![license MIT](https://img.shields.io/npm/l/websocket-toolkit.svg)
+
+**[Docs](https://rte.whitneys.co/wskit)**
+
 A standalone, universal WebSocket client that works with any backend. **One script tag. Zero dependencies.**
 
 > Also published as [`wskit-client`](https://www.npmjs.com/package/wskit-client).
