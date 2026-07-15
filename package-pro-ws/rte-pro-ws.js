@@ -530,7 +530,7 @@ img.rte-pro-fullwidth { height: auto; }
     options = Object.assign({
       placeholder: "Start typing something amazing\u2026",
       height: null, exportCSS: null, exportTemplate: null,
-      apiKey: null, aiProxy: null, aiModel: "claude-sonnet-4-5-20250929", aiProvider: "anthropic",
+      apiKey: null, aiProxy: null, aiModel: "claude-haiku-4-5", aiProvider: "anthropic",
       toolbar: null, autosave: false, autosaveKey: "rte-pro-autosave",
       wordGoal: 0, charGoal: 0, spellcheck: true, direction: "ltr",
       mentions: [], hashtagUrl: null, printMargins: null,

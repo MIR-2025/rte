@@ -154,7 +154,7 @@ RTEPro.init('#editor', {
 | `apiKey` | string | `null` | API key (direct, **not recommended for production**) |
 | `aiProxy` | string | `null` | Server proxy URL for AI requests (recommended) |
 | `aiProvider` | string | `'anthropic'` | AI provider: `'anthropic'`, `'openai'`, or `'gemini'` |
-| `aiModel` | string | `'claude-sonnet-4-5-20250929'` | AI model (provider-specific) |
+| `aiModel` | string | `'claude-haiku-4-5'` | AI model (provider-specific) |
 | `toolbar` | string[] | `null` | Toolbar groups to show (null = all) |
 | `autosave` | boolean/number | `false` | Auto-save interval (true = 30s, or ms) |
 | `wordGoal` | number | `0` | Word count goal |

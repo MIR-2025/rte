@@ -25,8 +25,10 @@ matrixes over all 7 packages, and **only publishes a package whose version is
 not yet on npm** (it checks `npm view <name>@<version>` first), provenance-signed.
 
 **To release a package:**
-1. Bump `version` in `package-<x>/package.json`.
-2. Commit + push to `main`.
+1. If you changed the package's main file, `cp` it to its **root mirror** (see Notes) --
+   the live demos serve the root copy, not the package copy.
+2. Bump `version` in `package-<x>/package.json`.
+3. Commit + push to `main`.
 
 That's it — the workflow publishes just the bumped package(s) and skips the rest.
 
@@ -51,6 +53,26 @@ cd package-<x> && npm publish --access public
 
 ## Notes
 
+- **Every package main file is mirrored in the repo root -- keep the two in sync.**
+  `app.js:197` does `app.use(express.static(__dirname))`, so the **root** copies are what
+  the marketing site's live demos load (`/rte.js` on `index`/`examples`, `/rte-pro.js` on
+  `pro`), while the `package-*/` copies are what npm ships. All six are byte-identical
+  mirrors today:
+
+  | root (served to the live demos) | package copy (published to npm) |
+  | --- | --- |
+  | `rte.js` | `package/rte.js` |
+  | `rte-bundle.js` | `package-bundle/rte-bundle.js` |
+  | `rte-pro.js` | `package-pro/rte-pro.js` |
+  | `rte-pro-ws.js` | `package-pro-ws/rte-pro-ws.js` |
+  | `rte-ws.js` | `package-ws/rte-ws.js` |
+  | `wskit.js` | `package-wskit/wskit.js` |
+
+  Edit a `package-*/` main file and you **must** `cp` it to its root mirror, or npm and
+  rte.whitneys.co silently drift -- the demo keeps running the old build with no error.
+  Verify with `diff -q package-pro/rte-pro.js rte-pro.js` before committing.
+  (`.env` and `.git/` are NOT exposed by the static mount -- `serve-static` defaults to
+  `dotfiles: 'ignore'`; verified by probe, both 404.)
 - `package-pro` (`rte-rich-text-editor-pro`) is the build the Volt editor add-on
   (`volt-addon-editor`, in the `volt` repo) depends on — the **non-ws** one
   (single-admin editor, no collab server). Switch Volt to `-pro-ws` only if it
