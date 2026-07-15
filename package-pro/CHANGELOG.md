@@ -2,6 +2,11 @@
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
 
+## [1.0.32] - 2026-07-14
+- Changed the default `aiModel` from `claude-sonnet-4-5-20250929` (legacy) to `claude-haiku-4-5`
+- Consumers that allowlist models on their AI proxy must allowlist the default their pinned
+  version sends: `<= 1.0.31` sends `claude-sonnet-4-5-20250929`, `>= 1.0.32` sends `claude-haiku-4-5`
+
 ## [1.0.21] - 2026-02-25
 - Added interactive checklists: `/checklist` slash command, toolbar button, click-to-toggle, Enter key handling
 - Added floating/bubble toolbar on text selection (Bold, Italic, Underline, Link, Highlight)
