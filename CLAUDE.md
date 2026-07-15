@@ -24,13 +24,18 @@ no `NPM_TOKEN` secret. It runs on **push to `main`** (and `workflow_dispatch`),
 matrixes over all 7 packages, and **only publishes a package whose version is
 not yet on npm** (it checks `npm view <name>@<version>` first), provenance-signed.
 
-**To release a package:**
-1. If you changed the package's main file, `cp` it to its **root mirror** (see Notes) --
+**The full release runbook is `DEPLOY.md` -- follow it, don't improvise from this section.**
+The short version:
+1. Update the changelogs (`DEPLOY.md` step 1) -- **before** bumping, not after.
+2. If you changed the package's main file, `cp` it to its **root mirror** (see Notes) --
    the live demos serve the root copy, not the package copy.
-2. Bump `version` in `package-<x>/package.json`.
-3. Commit + push to `main`.
+3. Bump `version` in `package-<x>/package.json`.
+4. Commit + push to `main` -- the workflow publishes just the bumped package(s).
+5. **`rsync` to production (`DEPLOY.md` step 5) if you want it live on rte.whitneys.co.**
 
-That's it — the workflow publishes just the bumped package(s) and skips the rest.
+⚠️ **The push publishes to npm; it does NOT deploy the website.** They are two separate
+pipelines -- npm ships on push, the site ships only on the manual rsync. A change that
+should be live on the demos *and* on npm needs both.
 
 ### One-time per package: configure the trusted publisher
 
