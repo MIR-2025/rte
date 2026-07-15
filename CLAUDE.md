@@ -24,18 +24,28 @@ no `NPM_TOKEN` secret. It runs on **push to `main`** (and `workflow_dispatch`),
 matrixes over all 7 packages, and **only publishes a package whose version is
 not yet on npm** (it checks `npm view <name>@<version>` first), provenance-signed.
 
-**The full release runbook is `DEPLOY.md` -- follow it, don't improvise from this section.**
-The short version:
-1. Update the changelogs (`DEPLOY.md` step 1) -- **before** bumping, not after.
+**To release a package:**
+1. Update the changelogs -- **before** bumping, not after. `CHANGELOG.md` (root, one
+   section per package) + `package-<x>/CHANGELOG.md`. Format: `## [x.y.z] - YYYY-MM-DD`.
+   (Known debt: these stop at pro `1.0.21` / pro-ws `1.0.16`; `1.0.22`-`1.0.31` were
+   never backfilled, so don't read them as a complete history.)
 2. If you changed the package's main file, `cp` it to its **root mirror** (see Notes) --
    the live demos serve the root copy, not the package copy.
 3. Bump `version` in `package-<x>/package.json`.
-4. Commit + push to `main` -- the workflow publishes just the bumped package(s).
-5. **`rsync` to production (`DEPLOY.md` step 5) if you want it live on rte.whitneys.co.**
+4. Commit + push to `main` -- the workflow publishes just the bumped package(s) and
+   skips the rest. Workflow-green is not proof; confirm with
+   `npm view <name> version --prefer-online`.
+5. **`rsync` to production** if it should be live on rte.whitneys.co (see `DEPLOY.md`).
 
 ⚠️ **The push publishes to npm; it does NOT deploy the website.** They are two separate
-pipelines -- npm ships on push, the site ships only on the manual rsync. A change that
-should be live on the demos *and* on npm needs both.
+pipelines -- npm ships on push, the site ships only on a **manual rsync**. A change that
+should be live on the demos *and* on npm needs both. (This bit a prior session: the
+steps here used to end at 4 with "That's it", so the site silently stayed stale.)
+
+> `DEPLOY.md` holds the rsync/production specifics. It is **gitignored and local-only**
+> (removed from the repo in `1cf5b35` -- it names the prod host), so it is NOT in a fresh
+> clone. Everything above is the committed, self-sufficient version; if you don't have
+> `DEPLOY.md`, step 5's target lives on Richard's box, not in git.
 
 ### One-time per package: configure the trusted publisher
 
