@@ -1001,6 +1001,10 @@
     // ── Markdown round-trip (ported from RTEPro, sans AI) ──
     function htmlToMarkdown(html) {
       let md = html;
+      // Code blocks first, matched across newlines ([\s\S] not .) so multi-line <pre>
+      // is captured; the old (.*?) missed it and left code as bare indented text.
+      md = md.replace(/<pre[^>]*><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi, "```\n$1\n```\n");
+      md = md.replace(/<pre[^>]*>([\s\S]*?)<\/pre>/gi, "```\n$1\n```\n");
       md = md.replace(/<h1[^>]*>(.*?)<\/h1>/gi, "# $1\n"); md = md.replace(/<h2[^>]*>(.*?)<\/h2>/gi, "## $1\n");
       md = md.replace(/<h3[^>]*>(.*?)<\/h3>/gi, "### $1\n"); md = md.replace(/<h4[^>]*>(.*?)<\/h4>/gi, "#### $1\n");
       md = md.replace(/<strong[^>]*>(.*?)<\/strong>/gi, "**$1**"); md = md.replace(/<b[^>]*>(.*?)<\/b>/gi, "**$1**");
@@ -1010,11 +1014,16 @@
       md = md.replace(/<img[^>]*src="([^"]*)"[^>]*\/?>/gi, "![]($1)");
       md = md.replace(/<li[^>]*>(.*?)<\/li>/gi, "- $1\n"); md = md.replace(/<\/?[ou]l[^>]*>/gi, "\n");
       md = md.replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gi, "> $1\n");
-      md = md.replace(/<pre[^>]*><code[^>]*>(.*?)<\/code><\/pre>/gi, "```\n$1\n```\n");
-      md = md.replace(/<pre[^>]*>(.*?)<\/pre>/gi, "```\n$1\n```\n");
       md = md.replace(/<code[^>]*>(.*?)<\/code>/gi, "`$1`"); md = md.replace(/<hr[^>]*\/?>/gi, "\n---\n");
       md = md.replace(/<br[^>]*\/?>/gi, "\n"); md = md.replace(/<p[^>]*>(.*?)<\/p>/gi, "$1\n\n");
       md = md.replace(/<[^>]+>/g, ""); md = md.replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&nbsp;/g," ");
+      // De-indent HTML container nesting (<div>/<section>) so CommonMark does not treat
+      // indented lines as code blocks -- but never inside a fenced block.
+      let inFence = false;
+      md = md.split("\n").map(function (line) {
+        if (/^\s*```/.test(line)) { inFence = !inFence; return line.replace(/^[ \t]+/, ""); }
+        return inFence ? line : line.replace(/^[ \t]+/, "");
+      }).join("\n");
       return md.replace(/\n{3,}/g, "\n\n").trim();
     }
     function markdownToHtml(md) {

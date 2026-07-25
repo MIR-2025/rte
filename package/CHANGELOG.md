@@ -2,6 +2,10 @@
 
 All notable changes to `rte-rich-text-editor` will be documented in this file.
 
+## [1.0.34] - 2026-07-16
+- Fixed `getMarkdown()` carrying HTML container nesting (`<div>`/`<section>` depth) into leading whitespace, which made block content (headings, paragraphs, links) render as indented code blocks in CommonMark. Block lines are now de-indented; whitespace inside fenced code blocks is preserved.
+- Multi-line `<pre>`/`<pre><code>` blocks are now captured (previously left unfenced and mangled).
+
 ## [1.0.26] - 2026-02-18
 - Added "Link Text" field to Insert Link popup — set custom anchor text or leave blank to wrap selection
 
