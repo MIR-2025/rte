@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor",
-  "version": "1.0.34",
+  "version": "1.0.35",
   "description": "WYSIWYG rich-text editor in one script tag. Zero dependencies, no framework, no jQuery. Tables, images, links, HTML and Markdown export.",
   "main": "rte.js",
   "module": "rte.esm.js",

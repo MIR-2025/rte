@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor-bundle",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "WYSIWYG editor plus real-time WebSocket collaboration in a single file. Zero dependencies, no framework. Auto-save, live sync, HTML and Markdown.",
   "main": "rte-bundle.js",
   "module": "rte-bundle.js",

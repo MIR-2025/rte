@@ -2,6 +2,10 @@
 
 All notable changes to `rte-rich-text-editor-pro-ws` will be documented in this file.
 
+## [1.0.29] - 2026-07-16
+- The Link button now wraps a selected image in an anchor: when an image is selected in the editor frame, clicking Insert Link wraps it in `<a href>` (or updates the href if it is already linked) instead of doing nothing. The image is wrapped via DOM APIs (no HTML-string injection).
+- Linked images serialize to `[![alt](src)](href)` and round-trip through `getMarkdown()` / `setMarkdown()`.
+
 ## [1.0.28] - 2026-07-16
 - Fixed `getMarkdown()` carrying HTML container nesting (`<div>`/`<section>` depth) into leading whitespace, which made block content (headings, paragraphs, links) render as indented code blocks in CommonMark. Block lines are now de-indented; whitespace inside fenced code blocks is preserved.
 - Multi-line `<pre>`/`<pre><code>` blocks are now captured (previously left unfenced and mangled).

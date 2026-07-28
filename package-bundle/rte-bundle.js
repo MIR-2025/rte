@@ -885,6 +885,17 @@
       const text = linkPopup.querySelector(".rte-link-text").value.trim();
       if (url && isDangerousUrl(url)) { showToast("⛔ Blocked unsafe link"); return; }
       if (url) {
+        if (resizeImg) {
+          const wrapA = resizeImg.closest("a");
+          if (wrapA) { wrapA.setAttribute("href", url); }
+          else { const a = document.createElement("a"); a.setAttribute("href", url); resizeImg.parentNode.insertBefore(a, resizeImg); a.appendChild(resizeImg); }
+          content.dispatchEvent(new Event("input", { bubbles: true }));
+          positionOverlay();
+          linkPopup.classList.remove("show");
+          linkPopup.querySelector(".rte-link-url").value = "";
+          linkPopup.querySelector(".rte-link-text").value = "";
+          return;
+        }
         restoreSelection(savedRange);
         if (text) {
           const a = '<a href="' + url.replace(/"/g, "&quot;") + '">' + text.replace(/</g, "&lt;").replace(/>/g, "&gt;") + '</a>';
