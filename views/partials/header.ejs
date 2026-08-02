@@ -13,14 +13,19 @@
   <meta property="og:site_name" content="RTE — Rich Text Editor">
   <meta property="og:title" content="<%= fullTitle %>">
   <meta property="og:description" content="<%= ogDesc %>">
-  <meta property="og:image" content="https://rte.whitneys.co/rte-pro.png">
+  <meta property="og:image" content="https://rte.whitneys.co/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="RTE — a zero-dependency rich text editor you embed with one script tag">
   <meta property="og:url" content="https://rte.whitneys.co">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="<%= fullTitle %>">
   <meta name="twitter:description" content="<%= ogDesc %>">
-  <meta name="twitter:image" content="https://rte.whitneys.co/rte-pro.png">
+  <meta name="twitter:image" content="https://rte.whitneys.co/og-image.png">
+  <meta name="twitter:image:alt" content="RTE — a zero-dependency rich text editor you embed with one script tag">
 
   <!-- JSON-LD -->
   <script type="application/ld+json">
@@ -32,7 +37,7 @@
     "operatingSystem": "Any",
     "description": "<%- ogDesc.replace(/"/g, '\\"') %>",
     "url": "https://rte.whitneys.co",
-    "image": "https://rte.whitneys.co/rte-pro.png",
+    "image": "https://rte.whitneys.co/og-image.png",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
     "author": { "@type": "Organization", "name": "phpMyDEV, LLC" }
   }
