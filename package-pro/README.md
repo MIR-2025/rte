@@ -68,6 +68,25 @@ const editor = RTEPro.init('#editor', {
 
 Your proxy endpoint receives the JSON body from the editor with a `_provider` field indicating which provider to route to. Set the corresponding API key server-side (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY`).
 
+### Simple endpoint mode (`aiEndpoint`)
+
+If you'd rather own the whole model call server-side, use `aiEndpoint` instead of
+`aiProxy`. The editor sends one high-level request and expects a simple response —
+no provider-shaped body:
+
+```js
+const editor = RTEPro.init('#editor', { aiEndpoint: '/api/ai/write' });
+```
+
+- **Request:** `POST <aiEndpoint>` with `credentials: 'same-origin'` (sends the session cookie) and body `{ "prompt": "<action + document text>" }`.
+- **Response:** `{ "ok": true, "text": "<generated text>" }`, or `{ "ok": false, "error": "<message>" }` to surface an error (e.g. an entitlement/paywall). Non-streaming.
+
+Your server owns the model, the system prompt, auth/entitlement, and rate limits;
+the key never reaches the browser. The editor sanitizes the returned `text` before
+it is previewed or inserted (allowlist — no `<script>`, no `on*` handlers, no
+`javascript:` URLs), so untrusted model output can't inject script. If you also
+store the content and render it elsewhere, sanitize on that path too.
+
 ### Secure your proxy — it spends your API key
 
 `aiProxy` keeps the key off the client, but the **proxy endpoint itself is now the
@@ -152,7 +171,8 @@ RTEPro.init('#editor', {
 | `placeholder` | string | `''` | Placeholder text |
 | `height` | string | `'300px'` | Editor height |
 | `apiKey` | string | `null` | API key (direct, **not recommended for production**) |
-| `aiProxy` | string | `null` | Server proxy URL for AI requests (recommended) |
+| `aiProxy` | string | `null` | Server proxy URL for provider-shaped AI requests (recommended) |
+| `aiEndpoint` | string | `null` | Simple server endpoint: `POST { prompt }` → `{ ok, text }` (cookie-authed, non-streaming) |
 | `aiProvider` | string | `'anthropic'` | AI provider: `'anthropic'`, `'openai'`, or `'gemini'` |
 | `aiModel` | string | `'claude-haiku-4-5'` | AI model (provider-specific) |
 | `toolbar` | string[] | `null` | Toolbar groups to show (null = all) |

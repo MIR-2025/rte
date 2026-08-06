@@ -10,6 +10,9 @@ interface RTEProOptions {
   exportCSS?: string;
   exportTemplate?: string;
   apiKey?: string | null;
+  aiProxy?: string | null;
+  aiEndpoint?: string | null;
+  aiProvider?: "anthropic" | "openai" | "gemini";
   aiModel?: string;
   toolbar?: string[] | null;
   autosave?: boolean | number;

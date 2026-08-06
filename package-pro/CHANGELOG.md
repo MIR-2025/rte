@@ -2,6 +2,9 @@
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
 
+## [1.0.36] - 2026-08-05
+- Added the `aiEndpoint` option: a simple higher-level AI integration where the editor `POST`s `{ prompt }` (with `credentials: 'same-origin'`, so the session cookie is sent) to your endpoint and reads `{ ok, text }`. Non-streaming; the server owns the model, system prompt, auth/entitlement, and rate limits, and the API key never touches the browser. Returned `text` is sanitized before preview/insert (same allowlist as paste). Complements the existing provider-shaped `aiProxy`; off by default.
+
 ## [1.0.35] - 2026-08-05
 - Security: sanitize AI-assistant output before it is previewed or inserted. AI-generated HTML now passes through the same allowlist sanitizer as pasted content (drops `<script>`, `on*` handlers, `javascript:` URLs), closing a prompt-injection -> XSS path where a crafted model response (e.g. `<img onerror>`) executed on preview render or on insert.
 - Hardened the AI system prompt and delimited the document region so instructions embedded in document text are treated as data, not commands (defense in depth).
