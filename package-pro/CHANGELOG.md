@@ -2,6 +2,10 @@
 
 All notable changes to `rte-rich-text-editor-pro` will be documented in this file.
 
+## [1.0.35] - 2026-08-05
+- Security: sanitize AI-assistant output before it is previewed or inserted. AI-generated HTML now passes through the same allowlist sanitizer as pasted content (drops `<script>`, `on*` handlers, `javascript:` URLs), closing a prompt-injection -> XSS path where a crafted model response (e.g. `<img onerror>`) executed on preview render or on insert.
+- Hardened the AI system prompt and delimited the document region so instructions embedded in document text are treated as data, not commands (defense in depth).
+
 ## [1.0.34] - 2026-07-16
 - The Link button now wraps a selected image in an anchor: when an image is selected in the editor frame, clicking Insert Link wraps it in `<a href>` (or updates the href if it is already linked) instead of doing nothing. The image is wrapped via DOM APIs (no HTML-string injection).
 - Linked images serialize to `[![alt](src)](href)` and round-trip through `getMarkdown()` / `setMarkdown()`.
