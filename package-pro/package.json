@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor-pro",
-  "version": "1.0.36",
+  "version": "1.0.37",
   "description": "AI-powered WYSIWYG editor in one script tag. Claude, GPT and Gemini, slash commands, @mentions, tables, find and replace, Markdown. Zero dependencies.",
   "main": "rte-pro.js",
   "browser": "rte-pro.js",

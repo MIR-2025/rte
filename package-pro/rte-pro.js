@@ -565,6 +565,28 @@ img.rte-pro-fullwidth { height: auto; }
     function updateActiveStates() {
       const cmds = { bold:"bold", italic:"italic", underline:"underline", strikeThrough:"strike", superscript:"sup", subscript:"sub" };
       Object.entries(cmds).forEach(([cmd, key]) => { if (formatButtons[key]) formatButtons[key].classList.toggle("active", document.queryCommandState(cmd)); });
+      // Reflect the block + font at the cursor in the toolbar dropdowns, so picking a value
+      // always fires change (no stale-value double-select). Guarded: the selects are created
+      // after this function, so an early call must not throw.
+      try {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount && content.contains(sel.anchorNode)) {
+          let node = sel.anchorNode; if (node.nodeType === 3) node = node.parentElement;
+          if (node) {
+            const fam = (getComputedStyle(node).fontFamily || "").split(",")[0].replace(/['"]/g, "").trim().toLowerCase();
+            let fv = "";
+            for (const opt of fontSelect.options) {
+              const ov = (opt.value || "").split(",")[0].replace(/['"]/g, "").trim().toLowerCase();
+              if (ov && ov === fam) { fv = opt.value; break; }
+            }
+            fontSelect.value = fv;
+            let blk = node;
+            while (blk && blk !== content && !/^(P|H1|H2|H3|H4|H5|H6|DIV|BLOCKQUOTE|PRE|LI)$/.test(blk.tagName)) blk = blk.parentElement;
+            const tag = (blk && blk !== content) ? blk.tagName.toLowerCase() : "";
+            for (const opt of headingSelect.options) { if (opt.value === tag) { headingSelect.value = tag; break; } }
+          }
+        }
+      } catch (e) {}
     }
 
     // ── Selects ──
