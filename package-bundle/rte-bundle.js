@@ -34,7 +34,7 @@
   border: 1px solid var(--rte-border);
   border-radius: var(--rte-radius);
   box-shadow: var(--rte-shadow);
-  overflow: hidden;
+  overflow: clip;
   background: var(--rte-bg);
   position: relative;
   max-width: 100%;

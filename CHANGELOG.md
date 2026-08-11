@@ -5,6 +5,7 @@ All notable changes will be documented in this file.
 ## rte-rich-text-editor-pro
 
 #### [1.0.37] - 2026-08-05
+- Toolbar is now genuinely sticky while scrolling a long document. `.rte-wrap { overflow: hidden }` (there to clip the rounded corners) was silently trapping the toolbar's `position: sticky`, so it scrolled off-screen; changed to `overflow: clip` (clips identically but doesn't create a scroll container). The toolbar now pins to the top as `stickyToolbar` (default on) intends.
 - Toolbar font and block dropdowns now track the cursor — they reflect the font and block where the caret sits, updated on every cursor move. Changing a heading's font is now a single selection instead of the pick-a-different-font-then-reselect workaround a stale dropdown value forced.
 
 #### [1.0.36] - 2026-08-05
@@ -110,6 +111,7 @@ All notable changes will be documented in this file.
 ## rte-rich-text-editor-pro-ws
 
 #### [1.0.32] - 2026-08-05
+- Toolbar is now genuinely sticky while scrolling a long document. `.rte-wrap { overflow: hidden }` (there to clip the rounded corners) was silently trapping the toolbar's `position: sticky`, so it scrolled off-screen; changed to `overflow: clip` (clips identically but doesn't create a scroll container). The toolbar now pins to the top as `stickyToolbar` (default on) intends.
 - Toolbar font and block dropdowns now track the cursor — they reflect the font and block where the caret sits, updated on every cursor move. Changing a heading's font is now a single selection instead of the pick-a-different-font-then-reselect workaround a stale dropdown value forced.
 
 #### [1.0.31] - 2026-08-05
@@ -175,6 +177,7 @@ All notable changes will be documented in this file.
 ## rte-rich-text-editor
 
 ### [1.0.37] - 2026-08-05
+- Toolbar is now genuinely sticky while scrolling a long document. `.rte-wrap { overflow: hidden }` (there to clip the rounded corners) was silently trapping the toolbar's `position: sticky`, so it scrolled off-screen; changed to `overflow: clip` (clips identically but doesn't create a scroll container). The toolbar now pins to the top as `stickyToolbar` (default on) intends.
 - Toolbar font and block dropdowns now track the cursor — they reflect the font and block where the caret sits, updated on every cursor move. Changing a heading's font is now a single selection instead of the pick-a-different-font-then-reselect workaround a stale dropdown value forced.
 
 ### [1.0.36] - 2026-08-05
@@ -293,6 +296,7 @@ All notable changes will be documented in this file.
 ## rte-rich-text-editor-bundle
 
 #### [1.0.28] - 2026-08-05
+- Toolbar is now genuinely sticky while scrolling a long document. `.rte-wrap { overflow: hidden }` (there to clip the rounded corners) was silently trapping the toolbar's `position: sticky`, so it scrolled off-screen; changed to `overflow: clip` (clips identically but doesn't create a scroll container). The toolbar now pins to the top as `stickyToolbar` (default on) intends.
 - Toolbar font and block dropdowns now track the cursor — they reflect the font and block where the caret sits, updated on every cursor move. Changing a heading's font is now a single selection instead of the pick-a-different-font-then-reselect workaround a stale dropdown value forced.
 
 #### [1.0.27] - 2026-08-05

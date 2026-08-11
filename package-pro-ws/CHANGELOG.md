@@ -2,6 +2,10 @@
 
 All notable changes to `rte-rich-text-editor-pro-ws` will be documented in this file.
 
+## [1.0.32] - 2026-08-05
+- Toolbar is now genuinely sticky while scrolling a long document. `.rte-wrap { overflow: hidden }` (there to clip the rounded corners) was silently trapping the toolbar's `position: sticky`, so it scrolled off-screen; changed to `overflow: clip` (clips identically but doesn't create a scroll container). The toolbar now pins to the top as `stickyToolbar` (default on) intends.
+- Toolbar font and block dropdowns now track the cursor — they reflect the font and block where the caret sits, updated on every cursor move. Changing a heading's font is now a single selection instead of the pick-a-different-font-then-reselect workaround a stale dropdown value forced.
+
 ## [1.0.31] - 2026-08-05
 - Paste sanitizer now preserves the HTML sectioning tags — `section`, `article`, `header`, `footer`, `main`, `nav`, `aside` — instead of unwrapping them, so pasted document structure survives instead of being flattened.
 - Added the `aiEndpoint` option: a simple higher-level AI integration where the editor `POST`s `{ prompt }` (with `credentials: 'same-origin'`, so the session cookie is sent) to your endpoint and reads `{ ok, text }`. Non-streaming; the server owns the model, system prompt, auth/entitlement, and rate limits, and the API key never touches the browser. Returned `text` is sanitized before preview/insert (same allowlist as paste). Complements the existing provider-shaped `aiProxy`; off by default.
