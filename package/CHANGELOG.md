@@ -2,6 +2,9 @@
 
 All notable changes to `rte-rich-text-editor` will be documented in this file.
 
+## [1.0.36] - 2026-08-05
+- Paste sanitizer now preserves the HTML sectioning tags — `section`, `article`, `header`, `footer`, `main`, `nav`, `aside` — instead of unwrapping them, so pasted document structure survives instead of being flattened.
+
 ## [1.0.35] - 2026-07-16
 - The Link button now wraps a selected image in an anchor: when an image is selected in the editor frame, clicking Insert Link wraps it in `<a href>` (or updates the href if it is already linked) instead of doing nothing. The image is wrapped via DOM APIs (no HTML-string injection).
 - Linked images serialize to `[![alt](src)](href)` and round-trip through `getMarkdown()` / `setMarkdown()`.

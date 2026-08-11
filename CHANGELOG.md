@@ -5,6 +5,7 @@ All notable changes will be documented in this file.
 ## rte-rich-text-editor-pro
 
 #### [1.0.36] - 2026-08-05
+- Paste sanitizer now preserves the HTML sectioning tags — `section`, `article`, `header`, `footer`, `main`, `nav`, `aside` — instead of unwrapping them, so pasted document structure survives instead of being flattened.
 - Added the `aiEndpoint` option: a simple higher-level AI integration where the editor `POST`s `{ prompt }` (with `credentials: 'same-origin'`, so the session cookie is sent) to your endpoint and reads `{ ok, text }`. Non-streaming; the server owns the model, system prompt, auth/entitlement, and rate limits, and the API key never touches the browser. Returned `text` is sanitized before preview/insert (same allowlist as paste). Complements the existing provider-shaped `aiProxy`; off by default.
 
 #### [1.0.35] - 2026-08-05
@@ -106,6 +107,7 @@ All notable changes will be documented in this file.
 ## rte-rich-text-editor-pro-ws
 
 #### [1.0.31] - 2026-08-05
+- Paste sanitizer now preserves the HTML sectioning tags — `section`, `article`, `header`, `footer`, `main`, `nav`, `aside` — instead of unwrapping them, so pasted document structure survives instead of being flattened.
 - Added the `aiEndpoint` option: a simple higher-level AI integration where the editor `POST`s `{ prompt }` (with `credentials: 'same-origin'`, so the session cookie is sent) to your endpoint and reads `{ ok, text }`. Non-streaming; the server owns the model, system prompt, auth/entitlement, and rate limits, and the API key never touches the browser. Returned `text` is sanitized before preview/insert (same allowlist as paste). Complements the existing provider-shaped `aiProxy`; off by default.
 
 #### [1.0.30] - 2026-08-05
@@ -165,6 +167,9 @@ All notable changes will be documented in this file.
 - Initial release — RTEPro editor + WebSocket connector bundled in a single file
 
 ## rte-rich-text-editor
+
+### [1.0.36] - 2026-08-05
+- Paste sanitizer now preserves the HTML sectioning tags — `section`, `article`, `header`, `footer`, `main`, `nav`, `aside` — instead of unwrapping them, so pasted document structure survives instead of being flattened.
 
 ### [1.0.35] - 2026-07-16
 - The Link button now wraps a selected image in an anchor: when an image is selected in the editor frame, clicking Insert Link wraps it in `<a href>` (or updates the href if it is already linked) instead of doing nothing. The image is wrapped via DOM APIs (no HTML-string injection).
@@ -277,6 +282,9 @@ All notable changes will be documented in this file.
 - TypeScript declarations included
 
 ## rte-rich-text-editor-bundle
+
+#### [1.0.27] - 2026-08-05
+- Paste sanitizer now preserves the HTML sectioning tags — `section`, `article`, `header`, `footer`, `main`, `nav`, `aside` — instead of unwrapping them, so pasted document structure survives instead of being flattened.
 
 #### [1.0.26] - 2026-07-16
 - The Link button now wraps a selected image in an anchor: when an image is selected in the editor frame, clicking Insert Link wraps it in `<a href>` (or updates the href if it is already linked) instead of doing nothing. The image is wrapped via DOM APIs (no HTML-string injection).

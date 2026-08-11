@@ -3,6 +3,7 @@
 All notable changes to `rte-rich-text-editor-pro-ws` will be documented in this file.
 
 ## [1.0.31] - 2026-08-05
+- Paste sanitizer now preserves the HTML sectioning tags — `section`, `article`, `header`, `footer`, `main`, `nav`, `aside` — instead of unwrapping them, so pasted document structure survives instead of being flattened.
 - Added the `aiEndpoint` option: a simple higher-level AI integration where the editor `POST`s `{ prompt }` (with `credentials: 'same-origin'`, so the session cookie is sent) to your endpoint and reads `{ ok, text }`. Non-streaming; the server owns the model, system prompt, auth/entitlement, and rate limits, and the API key never touches the browser. Returned `text` is sanitized before preview/insert (same allowlist as paste). Complements the existing provider-shaped `aiProxy`; off by default.
 
 ## [1.0.30] - 2026-08-05

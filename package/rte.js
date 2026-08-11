@@ -570,7 +570,7 @@
     if (/^data:/.test(s) && !/^data:image\//.test(s)) return true;
     return false;
   }
-  const SANITIZE_ALLOWED = new Set("a b blockquote br caption code col colgroup div em figcaption figure h1 h2 h3 h4 h5 h6 hr i img li mark ol p pre s small span strike strong sub sup table tbody td tfoot th thead tr u ul video audio source".split(" "));
+  const SANITIZE_ALLOWED = new Set("a b blockquote br caption code col colgroup div section article aside header footer main nav em figcaption figure h1 h2 h3 h4 h5 h6 hr i img li mark ol p pre s small span strike strong sub sup table tbody td tfoot th thead tr u ul video audio source".split(" "));
   const SANITIZE_DANGEROUS = new Set("script style iframe object embed form input button textarea select option meta link base noscript template svg math title head html body frame frameset applet param".split(" "));
   const SANITIZE_URL_ATTRS = new Set(["href", "src", "xlink:href", "action", "formaction", "background", "poster"]);
   // Allowlist sanitizer: dangerous tags dropped whole, unknown tags unwrapped
