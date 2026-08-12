@@ -1,6 +1,6 @@
 {
   "name": "rte-rich-text-editor-pro-ws",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "description": "AI WYSIWYG editor plus real-time collaboration in a single file. Claude, GPT and Gemini, live sync, auto-save, slash commands, mentions. Zero dependencies.",
   "main": "rte-pro-ws.js",
   "browser": "rte-pro-ws.js",

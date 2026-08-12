@@ -1307,7 +1307,26 @@ img.rte-pro-fullwidth { height: auto; }
         if (i > 0) { const handle = document.createElement("div"); handle.className = "rte-pro-col-handle"; handle.contentEditable = "false"; grid.appendChild(handle); }
         const col = document.createElement("div"); col.className = "rte-pro-col"; col.contentEditable = "true"; col.innerHTML = "<p><br></p>"; grid.appendChild(col);
       }
-      exec("insertHTML", grid.outerHTML + "<p><br></p>");
+      // Insert the grid as a top-level block sibling via DOM. execCommand insertHTML
+      // drops it INSIDE the current block when that block is an empty or fully-selected
+      // heading, so the columns (and their content) inherit heading styling. DOM
+      // insertion guarantees the grid is never nested inside a heading.
+      const top = getTopLevelBlock(anchor, content);
+      const tail = document.createElement("p"); tail.innerHTML = "<br>";
+      if (top && top.parentNode === content) {
+        const empty = !top.textContent.trim() && !top.querySelector("img,table,hr");
+        content.insertBefore(grid, empty ? top : top.nextSibling);
+        content.insertBefore(tail, grid.nextSibling);
+        if (empty) top.remove();
+      } else {
+        content.appendChild(grid);
+        content.appendChild(tail);
+      }
+      const firstCol = grid.querySelector(".rte-pro-col");
+      if (firstCol) { const rng = document.createRange(); rng.selectNodeContents(firstCol); rng.collapse(true); const s2 = window.getSelection(); s2.removeAllRanges(); s2.addRange(rng); }
+      content.focus();
+      content.dispatchEvent(new Event("input", { bubbles: true }));
+      updateStatus();
     }
     function executeSlashCommand(item, textNode, slashIdx, cursorOffset) {
       textNode.textContent = textNode.textContent.substring(0, slashIdx) + textNode.textContent.substring(cursorOffset);
