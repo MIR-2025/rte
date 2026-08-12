@@ -2,6 +2,9 @@
 
 All notable changes to `rte-rich-text-editor-pro-ws` will be documented in this file.
 
+## [1.0.34] - 2026-08-12
+- Added a native color picker to the color popups (text color, highlight, block background, editor background). Alongside the preset swatches and the hex/name field, you can now pick any color visually — the picker syncs the hex field as you drag and applies on commit.
+
 ## [1.0.33] - 2026-08-11
 - Fixed the column feature (2/3-column layout) nesting the column grid inside a heading: inserting columns with the caret in an empty heading — or with a heading's text fully selected — put the `.rte-pro-cols` grid *inside* the `<h1>`, so the columns and their content rendered as heading text. Columns now insert as a top-level block via DOM (not `execCommand insertHTML`), never nested in a heading — an empty heading is replaced, a non-empty block keeps its content with the columns added after.
 

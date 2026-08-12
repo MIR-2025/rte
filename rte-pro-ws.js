@@ -621,8 +621,11 @@ img.rte-pro-fullwidth { height: auto; }
       });
       popup.appendChild(grid);
       const customRow = el("div", { style:{ marginTop:"8px", display:"flex", gap:"6px", alignItems:"center" } });
+      const picker = el("input", { type:"color", value:"#000000", title:"Pick any color", style:{ width:"34px", height:"30px", padding:"0", border:"1px solid var(--rte-border)", borderRadius:"4px", cursor:"pointer", flex:"0 0 auto" } });
       const ci = el("input", { type:"text", placeholder:"#hex or color name", style:{ flex:"1" } });
-      customRow.append(ci, el("button", { className:"rte-popup-btn primary", onClick:() => { if (ci.value) { onPick(ci.value); popup.classList.remove("show"); } } }, "Apply"));
+      picker.addEventListener("input", () => { ci.value = picker.value; });
+      picker.addEventListener("change", () => { onPick(picker.value); popup.classList.remove("show"); });
+      customRow.append(picker, ci, el("button", { className:"rte-popup-btn primary", onClick:() => { if (ci.value) { onPick(ci.value); popup.classList.remove("show"); } } }, "Apply"));
       popup.appendChild(customRow);
       return popup;
     }

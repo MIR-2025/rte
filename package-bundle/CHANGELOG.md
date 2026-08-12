@@ -2,6 +2,9 @@
 
 All notable changes to `rte-rich-text-editor-bundle` will be documented in this file.
 
+## [1.0.29] - 2026-08-12
+- Added a native color picker to the color popups (text color, highlight, block background, editor background). Alongside the preset swatches and the hex/name field, you can now pick any color visually — the picker syncs the hex field as you drag and applies on commit.
+
 ## [1.0.28] - 2026-08-05
 - Toolbar is now genuinely sticky while scrolling a long document. `.rte-wrap { overflow: hidden }` (there to clip the rounded corners) was silently trapping the toolbar's `position: sticky`, so it scrolled off-screen; changed to `overflow: clip` (clips identically but doesn't create a scroll container). The toolbar now pins to the top as `stickyToolbar` (default on) intends.
 - Toolbar font and block dropdowns now track the cursor — they reflect the font and block where the caret sits, updated on every cursor move. Changing a heading's font is now a single selection instead of the pick-a-different-font-then-reselect workaround a stale dropdown value forced.

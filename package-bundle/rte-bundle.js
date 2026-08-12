@@ -735,11 +735,14 @@
       popup.appendChild(grid);
 
       const customRow = el("div", { style: { marginTop: "8px", display: "flex", gap: "6px", alignItems: "center" } });
+      const picker = el("input", { type: "color", value: "#000000", title: "Pick any color", style: { width: "34px", height: "30px", padding: "0", border: "1px solid var(--rte-border)", borderRadius: "4px", cursor: "pointer", flex: "0 0 auto" } });
       const customInput = el("input", { type: "text", placeholder: "#hex or color name", style: { flex: "1" } });
+      picker.addEventListener("input", () => { customInput.value = picker.value; });
+      picker.addEventListener("change", () => { onPick(picker.value); popup.classList.remove("show"); });
       const customBtn = el("button", { className: "rte-popup-btn primary", title: "Apply custom color", onClick: () => {
         if (customInput.value) { onPick(customInput.value); popup.classList.remove("show"); }
       }}, "Apply");
-      customRow.append(customInput, customBtn);
+      customRow.append(picker, customInput, customBtn);
       popup.appendChild(customRow);
 
       return popup;

@@ -4,6 +4,9 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-pro
 
+#### [1.0.39] - 2026-08-12
+- Added a native color picker to the color popups (text color, highlight, block background, editor background). Alongside the preset swatches and the hex/name field, you can now pick any color visually — the picker syncs the hex field as you drag and applies on commit.
+
 #### [1.0.38] - 2026-08-11
 - Fixed the column feature (2/3-column layout) nesting the column grid inside a heading: inserting columns with the caret in an empty heading — or with a heading's text fully selected — put the `.rte-pro-cols` grid *inside* the `<h1>`, so the columns and their content rendered as heading text. Columns now insert as a top-level block via DOM (not `execCommand insertHTML`), never nested in a heading — an empty heading is replaced, a non-empty block keeps its content with the columns added after.
 
@@ -113,6 +116,9 @@ All notable changes will be documented in this file.
 
 ## rte-rich-text-editor-pro-ws
 
+#### [1.0.34] - 2026-08-12
+- Added a native color picker to the color popups (text color, highlight, block background, editor background). Alongside the preset swatches and the hex/name field, you can now pick any color visually — the picker syncs the hex field as you drag and applies on commit.
+
 #### [1.0.33] - 2026-08-11
 - Fixed the column feature (2/3-column layout) nesting the column grid inside a heading: inserting columns with the caret in an empty heading — or with a heading's text fully selected — put the `.rte-pro-cols` grid *inside* the `<h1>`, so the columns and their content rendered as heading text. Columns now insert as a top-level block via DOM (not `execCommand insertHTML`), never nested in a heading — an empty heading is replaced, a non-empty block keeps its content with the columns added after.
 
@@ -181,6 +187,9 @@ All notable changes will be documented in this file.
 - Initial release — RTEPro editor + WebSocket connector bundled in a single file
 
 ## rte-rich-text-editor
+
+### [1.0.38] - 2026-08-12
+- Added a native color picker to the color popups (text color, highlight, block background, editor background). Alongside the preset swatches and the hex/name field, you can now pick any color visually — the picker syncs the hex field as you drag and applies on commit.
 
 ### [1.0.37] - 2026-08-05
 - Toolbar is now genuinely sticky while scrolling a long document. `.rte-wrap { overflow: hidden }` (there to clip the rounded corners) was silently trapping the toolbar's `position: sticky`, so it scrolled off-screen; changed to `overflow: clip` (clips identically but doesn't create a scroll container). The toolbar now pins to the top as `stickyToolbar` (default on) intends.
@@ -300,6 +309,9 @@ All notable changes will be documented in this file.
 - TypeScript declarations included
 
 ## rte-rich-text-editor-bundle
+
+#### [1.0.29] - 2026-08-12
+- Added a native color picker to the color popups (text color, highlight, block background, editor background). Alongside the preset swatches and the hex/name field, you can now pick any color visually — the picker syncs the hex field as you drag and applies on commit.
 
 #### [1.0.28] - 2026-08-05
 - Toolbar is now genuinely sticky while scrolling a long document. `.rte-wrap { overflow: hidden }` (there to clip the rounded corners) was silently trapping the toolbar's `position: sticky`, so it scrolled off-screen; changed to `overflow: clip` (clips identically but doesn't create a scroll container). The toolbar now pins to the top as `stickyToolbar` (default on) intends.
