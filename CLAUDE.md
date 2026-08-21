@@ -29,8 +29,8 @@ not yet on npm** (it checks `npm view <name>@<version>` first), provenance-signe
    section per package) + `package-<x>/CHANGELOG.md`. Format: `## [x.y.z] - YYYY-MM-DD`.
    (Known debt: these stop at pro `1.0.21` / pro-ws `1.0.16`; `1.0.22`-`1.0.31` were
    never backfilled, so don't read them as a complete history.)
-2. If you changed the package's main file, `cp` it to its **root mirror** (see Notes) --
-   the live demos serve the root copy, not the package copy.
+2. If you changed the package's main file, `cp` it to its **`public/` mirror** (see Notes) --
+   the live demos serve the `public/` copy, not the package copy.
 3. Bump `version` in `package-<x>/package.json`.
 4. Commit + push to `main` -- the workflow publishes just the bumped package(s) and
    skips the rest. Workflow-green is not proof; confirm with
@@ -68,26 +68,30 @@ cd package-<x> && npm publish --access public
 
 ## Notes
 
-- **Every package main file is mirrored in the repo root -- keep the two in sync.**
-  `app.js:197` does `app.use(express.static(__dirname))`, so the **root** copies are what
-  the marketing site's live demos load (`/rte.js` on `index`/`examples`, `/rte-pro.js` on
-  `pro`), while the `package-*/` copies are what npm ships. All six are byte-identical
-  mirrors today:
+- **Every package main file is mirrored in `public/` -- keep the two in sync.**
+  `app.js` does `app.use(express.static(join(__dirname, 'public')))`, so the **`public/`**
+  copies are what the marketing site's live demos load (`/rte.js` on `index`/`examples`,
+  `/rte-pro.js` on `pro`), while the `package-*/` copies are what npm ships. All six are
+  byte-identical mirrors today:
 
-  | root (served to the live demos) | package copy (published to npm) |
+  | public/ copy (served to the live demos) | package copy (published to npm) |
   | --- | --- |
-  | `rte.js` | `package/rte.js` |
-  | `rte-bundle.js` | `package-bundle/rte-bundle.js` |
-  | `rte-pro.js` | `package-pro/rte-pro.js` |
-  | `rte-pro-ws.js` | `package-pro-ws/rte-pro-ws.js` |
-  | `rte-ws.js` | `package-ws/rte-ws.js` |
-  | `wskit.js` | `package-wskit/wskit.js` |
+  | `public/rte.js` | `package/rte.js` |
+  | `public/rte-bundle.js` | `package-bundle/rte-bundle.js` |
+  | `public/rte-pro.js` | `package-pro/rte-pro.js` |
+  | `public/rte-pro-ws.js` | `package-pro-ws/rte-pro-ws.js` |
+  | `public/rte-ws.js` | `package-ws/rte-ws.js` |
+  | `public/wskit.js` | `package-wskit/wskit.js` |
 
-  Edit a `package-*/` main file and you **must** `cp` it to its root mirror, or npm and
+  Edit a `package-*/` main file and you **must** `cp` it to its `public/` mirror, or npm and
   rte.whitneys.co silently drift -- the demo keeps running the old build with no error.
-  Verify with `diff -q package-pro/rte-pro.js rte-pro.js` before committing.
-  (`.env` and `.git/` are NOT exposed by the static mount -- `serve-static` defaults to
-  `dotfiles: 'ignore'`; verified by probe, both 404.)
+  Verify with `diff -q package-pro/rte-pro.js public/rte-pro.js` before committing.
+  (**Only `public/` is web-exposed.** The static mount serves `public/`, so the repo root,
+  `app.js`, `views/`, `node_modules/`, `package-*/`, and every `.md` are NOT served -- they
+  404. `.env`/`.git/` were never served either. Before 2026-08-20 the mount was
+  `express.static(__dirname)`, which DID publish the whole tree -- if you see that again,
+  it's a regression. Confirmed by probe 2026-08-20: `/app.js`, `/CLAUDE.md`, `/node_modules/*`
+  all 404; `/rte-pro.js`, `/hero.png` serve from `public/`.)
 - `package-pro` (`rte-rich-text-editor-pro`) is the build the Volt editor add-on
   (`volt-addon-editor`, in the `volt` repo) depends on — the **non-ws** one
   (single-admin editor, no collab server). Switch Volt to `-pro-ws` only if it

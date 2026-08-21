@@ -23,7 +23,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const PORT = 26216;
+const PORT = process.env.PORT || 26216;
 
 // Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -200,8 +200,10 @@ app.post('/api/ai', async (req, res) => {
 // static so the path wins (and static never gets a shot at matching it).
 if (pixboard.enabled) app.use('/' + pixboard.pathPrefix, pixboard.proxyRouter());
 
-// Static files — serves rte.js from project root
-app.use(express.static(__dirname));
+// Static files — ONLY the public/ dir is web-exposed (never the repo root, which
+// would publish app.js, views/, node_modules/, package-*/, *.md, etc.). Anything
+// the site serves lives in public/; everything else 404s by default.
+app.use(express.static(join(__dirname, 'public')));
 
 // Count one ad impression per real HTML page view (after static, so served
 // assets never reach it).

@@ -56,6 +56,6 @@
 /* Invisible bridge spanning the tile->card gap so the pointer can cross. */
 .rte-bridge { position: fixed; z-index: 1049; pointer-events: auto; background: transparent; }
 
-/* Only show where there's margin room beside the centered content. */
-@media (max-width: 1199px) { .rte-rail { display: none; } }
+/* Hide only on narrow (phone) viewports; show down to the 700px breakpoint. */
+@media (max-width: 699px) { .rte-rail { display: none; } }
 @media (prefers-reduced-motion: reduce) { .rte-tile, .rte-card { transition: none; } }
