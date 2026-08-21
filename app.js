@@ -1,3 +1,4 @@
+import 'dotenv/config'; // must load .env BEFORE any module reads process.env (e.g. lib/pixboard.js)
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -5,6 +6,7 @@ import { createTransport } from 'nodemailer';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+import * as pixboard from './lib/pixboard.js';
 
 dotenv.config();
 
@@ -17,7 +19,7 @@ morgan.token('date', () => new Date().toLocaleString('en-US', { timeZone: 'Ameri
 app.use(morgan(':remote-addr [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer"'));
 
 app.use((req, res, next) => {
-  if (req.path.startsWith('/.git') || req.path.startsWith('/.env')) return res.status(404).end();
+  if (req.path.startsWith('/.git') || req.path.startsWith('/.env') || req.path.startsWith('/lib')) return res.status(404).end();
   next();
 });
 
@@ -70,6 +72,7 @@ app.use((req, res, next) => {
   res.locals.siteTagline = 'Rich Text Editor';
   res.locals.stripeEnabled = !!process.env.STRIPE_PUBLISHABLE_KEY;
   res.locals.v = process.env.npm_package_version || Date.now();
+  res.locals.rail = pixboard.getRail(); // null when disabled; the partials no-op
   next();
 });
 
@@ -193,8 +196,16 @@ app.post('/api/ai', async (req, res) => {
   }
 });
 
+// Pixboard ad rail: proxy assets + rail css/js under the opaque path, before
+// static so the path wins (and static never gets a shot at matching it).
+if (pixboard.enabled) app.use('/' + pixboard.pathPrefix, pixboard.proxyRouter());
+
 // Static files — serves rte.js from project root
 app.use(express.static(__dirname));
+
+// Count one ad impression per real HTML page view (after static, so served
+// assets never reach it).
+app.use(pixboard.pageviewCounter());
 
 // Routes
 app.get('/', (req, res) => {
@@ -317,6 +328,8 @@ app.post('/donate/create-session', async (req, res) => {
 app.use((req, res) => {
   res.status(404).render('404', { page: '404' });
 });
+
+pixboard.start();
 
 app.listen(PORT, () => {
   console.log(`RTE docs running at http://localhost:${PORT}`);
