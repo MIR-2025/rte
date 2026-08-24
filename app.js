@@ -1,4 +1,4 @@
-import 'dotenv/config'; // must load .env BEFORE any module reads process.env (e.g. lib/pixboard.js)
+import 'dotenv/config'; // must load .env BEFORE anything reads process.env (Stripe, SMTP, Pixboard)
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -6,12 +6,17 @@ import { createTransport } from 'nodemailer';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
-import * as pixboard from './lib/pixboard.js';
+import { pixboardRail, railSnippet } from 'pixboard-rail';
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Pixboard first-party ad rail (SDK). Enabled only when all three env vars are set;
+// RAIL_SNIPPET is the per-publisher <script> + <px-…> markup dropped into the footer.
+const PIXBOARD_ENABLED = Boolean(process.env.PIXBOARD_PUB && process.env.PIXBOARD_KEY && process.env.PIXBOARD_PATH);
+const RAIL_SNIPPET = PIXBOARD_ENABLED ? railSnippet(process.env.PIXBOARD_PATH, { breakpoint: 700 }) : null;
 
 const app = express();
 app.set('trust proxy', true);
@@ -72,7 +77,7 @@ app.use((req, res, next) => {
   res.locals.siteTagline = 'Rich Text Editor';
   res.locals.stripeEnabled = !!process.env.STRIPE_PUBLISHABLE_KEY;
   res.locals.v = process.env.npm_package_version || Date.now();
-  res.locals.rail = pixboard.getRail(); // null when disabled; the partials no-op
+  res.locals.railSnippet = RAIL_SNIPPET; // the SDK's <script>+<px-…> markup, or null when disabled
   next();
 });
 
@@ -196,18 +201,15 @@ app.post('/api/ai', async (req, res) => {
   }
 });
 
-// Pixboard ad rail: proxy assets + rail css/js under the opaque path, before
-// static so the path wins (and static never gets a shot at matching it).
-if (pixboard.enabled) app.use('/' + pixboard.pathPrefix, pixboard.proxyRouter());
+// Pixboard first-party ad rail (SDK): mounts the feed + asset/click/video proxy +
+// forgery-resistant look metering + client script under the opaque path. Before static
+// so the path wins; the middleware passes through (next()) for any non-rail path.
+if (PIXBOARD_ENABLED) app.use(pixboardRail({ pub: process.env.PIXBOARD_PUB, key: process.env.PIXBOARD_KEY, path: process.env.PIXBOARD_PATH }));
 
 // Static files — ONLY the public/ dir is web-exposed (never the repo root, which
 // would publish app.js, views/, node_modules/, package-*/, *.md, etc.). Anything
 // the site serves lives in public/; everything else 404s by default.
 app.use(express.static(join(__dirname, 'public')));
-
-// Count one ad impression per real HTML page view (after static, so served
-// assets never reach it).
-app.use(pixboard.pageviewCounter());
 
 // Routes
 app.get('/', (req, res) => {
@@ -330,8 +332,6 @@ app.post('/donate/create-session', async (req, res) => {
 app.use((req, res) => {
   res.status(404).render('404', { page: '404' });
 });
-
-pixboard.start();
 
 app.listen(PORT, () => {
   console.log(`RTE docs running at http://localhost:${PORT}`);
