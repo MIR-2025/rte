@@ -17,6 +17,9 @@ const __dirname = dirname(__filename);
 // RAIL_SNIPPET is the per-publisher <script> + <px-…> markup dropped into the footer.
 const PIXBOARD_ENABLED = Boolean(process.env.PIXBOARD_PUB && process.env.PIXBOARD_KEY && process.env.PIXBOARD_PATH);
 const RAIL_SNIPPET = PIXBOARD_ENABLED ? railSnippet(process.env.PIXBOARD_PATH, { breakpoint: 700 }) : null;
+// The SDK renders its <px-…> element in normal flow and leaves docking to the publisher.
+// RAIL_TAG is that per-publisher tag (px- + sanitized path); the header CSS fixes it top-left.
+const RAIL_TAG = PIXBOARD_ENABLED ? 'px-' + String(process.env.PIXBOARD_PATH).toLowerCase().replace(/[^a-z0-9]/g, '') : null;
 
 const app = express();
 app.set('trust proxy', true);
@@ -78,6 +81,7 @@ app.use((req, res, next) => {
   res.locals.stripeEnabled = !!process.env.STRIPE_PUBLISHABLE_KEY;
   res.locals.v = process.env.npm_package_version || Date.now();
   res.locals.railSnippet = RAIL_SNIPPET; // the SDK's <script>+<px-…> markup, or null when disabled
+  res.locals.railTag = RAIL_TAG;         // the element tag, for the header's fixed-dock CSS
   next();
 });
 

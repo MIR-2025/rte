@@ -124,6 +124,13 @@
     /* Scrollspy offset */
     [id] { scroll-margin-top: 80px; }
   </style>
+  <% if (typeof railTag !== 'undefined' && railTag) { %>
+  <style>
+    /* Dock the Pixboard rail fixed at the top-left. The SDK renders the element in normal
+       flow (it sits in the footer by default); the publisher positions it. */
+    <%= railTag %> { position: fixed; top: 72px; left: 8px; z-index: 1030; }
+  </style>
+  <% } %>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg bg-white sticky-top">
